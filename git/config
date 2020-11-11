@@ -7,7 +7,5 @@
 [core]
     editor = nvim
 	excludesfile = /home/tsujp/.config/git/gitignore_global
-[pgp]
-	program = /bin/gpg2
 [gpg]
 	program = /bin/gpg2

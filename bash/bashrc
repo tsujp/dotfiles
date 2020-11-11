@@ -423,7 +423,7 @@ __git_prompt ()
   if [ -z "$gitstring" ]; then
     printf -v PS1 -- "$printf_format" "$PS1_PREFIX $PS1_SUFFIX"
   else
-    printf -v PS1 -- "$printf_format" "$PS1_PREFIX $gitstring $PS1_SUFFIX"
+    printf -v PS1 -- "$printf_format" "$PS1_PREFIX$gitstring $PS1_SUFFIX"
   fi
 }
 

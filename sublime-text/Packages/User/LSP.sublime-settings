@@ -1,0 +1,73 @@
+{
+  "auto_show_diagnostics_panel_level": 3,
+  "clients": {
+    "bashls": {
+      "enabled": false
+    },
+    "c-ls": {
+      "enabled": true,
+      "command": [
+        "clangd"
+      ],
+      "languageId": "c",
+      "scopes": [
+        "source.c"
+      ]
+    },
+    "js-ls": {
+      "enabled": false,
+      "command": [
+        "typescript-language-server",
+        "--stdio"
+      ],
+      "languageId": "javascript",
+      "scopes": [
+        "source.js"
+      ],
+      "syntaxes": [
+        "Packages/Babel/JavaScript (Babel).sublime-syntax",
+      ]
+    },
+    "ts-ls": {
+      "enabled": true,
+      "command": [
+        "typescript-language-server",
+        "--stdio"
+      ],
+      "languageId": [
+        "typescript",
+        "typescriptreact"
+      ],
+      "scopes": [
+        "source.ts",
+        "source.tsx"
+      ],
+      "syntaxes": [
+        "Packages/User/JS Custom/Syntaxes/TypeScript (JSX).sublime-syntax",
+        "Packages/User/JS Custom/Syntaxes/TypeScript.sublime-syntax"
+      ]
+    },
+    "vscode-css": {
+      "enabled": true
+    },
+    "py-ls": {
+      "enabled": true,
+      "command": [
+        "pyls"
+      ],
+      "languageId": "python",
+      "scopes": [
+        "source.python"
+      ],
+      "syntaxes": [
+        "Packages/Python/Python.sublime-syntax"
+      ]
+    },
+  },
+  "log_debug": true,
+  "log_server": true,
+  "only_show_lsp_completions": true,
+  "show_diagnostics_count_in_view_status": true,
+  "show_references_in_quick_panel": false,
+  "show_view_status": true
+}

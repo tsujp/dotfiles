@@ -1,0 +1,9 @@
+{
+  // empty string, or one of "region.redish", "region.orangish", "region.yellowish", "region.greenish", "region.bluish", "region.purplish", "region.pinkish"
+    "error_color": "region.yellowish",
+    "error_icon": "bookmark",
+    "typescript_auto_format": false,
+    "enable_typescript_language_service": false,
+    "enable_language_service_for_javascript": false,
+    "enable_inline_error_tips": false
+}

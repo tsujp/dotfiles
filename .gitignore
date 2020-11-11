@@ -1,0 +1,142 @@
+__pycache__
+.SublimeREPLHistory
+todo.md
+TabsExtra/version.json
+Projects/
+**.log
+**/.DS_Store
+**.sublime-workspace
+.SublimeREPLHistory
+
+# discord
+# TODO abstract TOKEN so config file can be included
+# TODO which one am I using again?
+/6cord/
+/cordless/
+/discord/
+
+# xournal
+/com.github.xournalpp.xournalpp/
+
+# X
+/xorg/
+
+# sublime text
+# see: https://packagecontrol.io/docs/syncing
+sublime-text/*
+!sublime-text/Packages/
+sublime-text/Packages/*
+!sublime-text/Packages/User/
+Theme - Monokai Pro.sublime-settings
+
+# sublime-merge
+sublime-merge/Cache/
+sublime-merge/Local/
+
+# zoom
+# TODO why does zoom make a folder of that name, sigh
+/Unknown\ Organization/
+zoomus.conf
+
+# virtualbox
+/VirtualBox/
+
+# electron
+/Electron/
+
+# chromium, chrome, google chrome
+/chromium/
+/google-chrome/
+
+# keybase
+/Keybase/
+/keybase/
+
+# figma
+/figma-linux/
+
+# fnm
+/fnm/
+
+# pulseaudio
+/pulse/
+
+# fontforge
+/fontforge/
+
+# google cloud
+/gcloud/
+
+# gimp
+/GIMP/
+
+# gnupg
+/gnupg/
+
+# inkscape
+/inkscape/
+
+# insomnia
+# TODO keep settings though
+/Insomnia/
+
+# insync
+# TODO keep settings though
+/Insync/
+
+# ledger
+/Ledger\ Live/
+
+# libvirt
+# TODO once working setup add
+/libvirt/
+
+# lutris
+/lutris/
+
+# nautilus
+/nautilus/
+
+# ncspot
+# TODO abstract auth to keybase then include
+/ncspot/
+
+# nextjs
+/nextjs-nodejs/
+
+# notion.so
+/Notion/
+
+# obs
+/obs-studio/
+
+# weechat
+# TODO once secrets are set up add this back
+/weechat/
+
+# wireshark
+/wireshark/
+
+# slack
+/Slack/
+
+# aseprite
+/aseprite/
+
+# ibus
+/ibus/
+
+# TODO
+/configstore/
+/menus/
+/dconf/
+/prompt/
+/protonfixes/
+/pulse/
+/Signal/
+/WSSiP/
+QtProject.conf
+user-dirs.dirs
+user-dirs.locale
+pavucontrol.ini
+/__helpers/

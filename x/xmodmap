@@ -1,0 +1,29 @@
+! clear all mods first
+clear Mod1
+clear Mod2
+clear Mod3
+clear Mod4
+clear Mod5
+
+! then set them up how we would like
+add Mod1 = Alt_R
+add Mod2 = Num_Lock
+add Mod3 = Alt_L
+add Mod4 = Super_L
+
+! clear control so we can use the right one for nabi
+clear control
+
+! restore left control, and set up nabi
+add control = Control_L
+keycode 105 = Hangul
+
+! just in-case, old xmodmap was
+! shift       Shift_L (0x32),  Shift_R (0x3e)
+! lock        Caps_Lock (0x42)
+! control     Control_L (0x25),  Control_R (0x69)
+! mod1        Alt_L (0x40),  Alt_R (0x6c),  Meta_L (0xcd)
+! mod2        Num_Lock (0x4d)
+! mod3
+! mod4        Super_L (0x85),  Super_R (0x86),  Super_L (0xce),  Hyper_L (0xcf)
+! mod5        ISO_Level3_Shift (0x5c),  Mode_switch (0xcb)

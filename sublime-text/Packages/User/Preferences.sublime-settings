@@ -1,0 +1,78 @@
+{
+	"added_words":
+	[
+		"hasura",
+		"admin",
+		"dedup"
+	],
+	"always_show_minimap_viewport": true,
+	"animation_enabled": false,
+	"bold_folder_labels": true,
+	"color_scheme": "Monokai Pro (Filter Ristretto).sublime-color-scheme",
+	// "detect_indentation": false,
+  "detect_indentation": true,
+	"draw_white_space": "all",
+	"enable_tab_scrolling": false,
+	"folder_exclude_patterns":
+	[
+		".svn",
+		".git",
+		".hg",
+		"CVS",
+		"node_modules",
+		"build"
+	],
+  "font_face": "Cozette",
+	"font_options":
+	[
+		"no_liga",
+		"no_clig",
+		"no_calt",
+		"subpixel_antialias"
+	],
+	"font_size": 10,
+	"highlight_line": true,
+	"ignored_packages":
+	[
+		"Babel",
+		"Six",
+		"Vintage",
+		"Vintageous",
+	],
+	"indent_guide_options":
+	[
+		"draw_normal",
+		"draw_active"
+	],
+	"line_padding_bottom": 1,
+	"line_padding_top": 1,
+	"monokai_pro_minimal": true,
+	"monokai_pro_open_folders": true,
+	"monokai_pro_style_title_bar": true,
+	"neovintageous_build_version": 11100,
+	"overlay_scroll_bars": "enabled",
+	"show_encoding": true,
+	"tab_size": 2,
+	"theme": "Monokai Pro (Filter Ristretto).sublime-theme",
+	"translate_tabs_to_spaces": true,
+	"tree_animation_enabled": false,
+	"vintageous_use_ctrl_keys": null,
+	"vintageous_use_super_keys": null,
+	"vintageous_enable_sneak": false,
+  "relative_line_numbers": true,
+  "hide_pointer_while_typing": true,
+  "trim_trailing_white_space_on_save": true,
+  "draw_unicode_white_space": "all",
+  "highlight_modified_tabs": true,
+  "caret_style": "phase",
+  "caret_extra_top": 2,
+  "caret_extra_bottom": 2,
+  "caret_extra_width": 2,
+  "hardware_acceleration": "opengl",
+  "word_wrap": true,
+  "wrap_width": 80,
+  "rulers": [
+  	80,
+  	100
+	],
+}

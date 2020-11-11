@@ -1,0 +1,3 @@
+[submodule "meta-config/sontek"]
+	path = meta-config/sontek
+	url = git@github.com:tsujp/sontek.git

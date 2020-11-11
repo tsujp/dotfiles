@@ -1,0 +1,6 @@
+# SYMLINK THIS TO `~/.bash_profile` OR `~/.bashrc` depending on the system
+
+# LOAD CUSTOM PROFILE, IF IT EXISTS
+if [ -f ~/.config/bash/bashrc ]; then
+  source ~/.config/bash/bashrc
+fi

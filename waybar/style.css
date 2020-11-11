@@ -1,0 +1,65 @@
+* {
+  border: none;
+  border-radius: 0px;
+  font-family: Cozette, monospace;
+  color: white;
+  min-height: 22px;
+}
+
+/* no button shadows on hover, please */
+#workspaces button:hover {
+  box-shadow: inherit;
+  text-shadow: inherit;
+}
+
+window#waybar.background.top {
+  background: rgba(44, 37, 37, 0.75);
+  /*background: #2c2525;*/
+  /*opacity: 0.85;*/
+}
+
+/*window#waybar.background.bottom.DP-3 {
+  background: transparent;
+}*/
+
+#workspaces button {
+  padding: 1px 7px 0px 8px;
+  opacity: 0.5;
+  background: transparent;
+}
+
+/* no button shadows on hover, please */
+#workspaces button:hover {
+  box-shadow: inherit;
+  text-shadow: inherit;
+}
+
+#workspaces button.focused {
+  opacity: 1;
+  background: #635657;
+}
+
+#workspaces button.urgent {
+  color: red;
+}
+
+/* for top bar DP-3 */
+#clock,
+#battery,
+#temperature,
+#backlight,
+#pulseaudio,
+#custom-media,
+#tray,
+#mpd,
+#window,
+window#waybar.top #network {
+  padding: 1px 15px 0px 15px;
+  opacity: 0.95;
+}
+
+#mode {
+  color: #f07178;
+  opacity: 1;
+  box-shadow: 5px 5px 5px 5px orange;
+}

@@ -1,0 +1,28 @@
+{
+  "configurations": {
+    "React": {
+      "file_extensions": [ "js", "jsx" ],
+      "flow_types": false,
+      "jsx": true,
+    },
+    "TypeScript (JSX)": {
+      "file_extensions": [ "tsx" ],
+      "scope": "source.tsx",
+      "typescript": true,
+      "flow_types": false,
+      "jsx": true,
+      "string_object_keys": true,
+      "custom_templates": {
+        "styled_components": true,
+        "clear_all_scopes": true,
+      },
+    },
+    "TypeScript": {
+      "scope": "source.ts",
+      "file_extensions": [ "ts" ],
+      "typescript": {
+        "old_style_assertions": true,
+      },
+    },
+  },
+}

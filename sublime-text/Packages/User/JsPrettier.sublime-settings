@@ -1,0 +1,4 @@
+{
+  "auto_format_on_save": true,
+  "prettier_cli_path": "$FNM_MULTISHELL_PATH/bin/prettierx"
+}

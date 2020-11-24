@@ -7,22 +7,22 @@ unalias -a
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * ENV VARS
-XDG_CONFIG_HOME="$HOME/.config"
-#export XDG_SESSION_TYPE='wayland'
-EDITOR=nvim
-GPG_TTY="$(tty)" # set gpg tty to current tty
-PINEENTRY_USER_DATA='USE_CURSES=1'
-WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"
-# MOZ_ENABLE_WAYLAND=1
-# QT_QPA_PLATFORM='wayland-egl'
-# ELM_DISPLAY='wl'
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_SESSION_TYPE='wayland'
+export EDITOR=nvim
+export GPG_TTY="$(tty)" # set gpg tty to current tty
+export PINEENTRY_USER_DATA='USE_CURSES=1'
+export WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"
+export MOZ_ENABLE_WAYLAND=1
+export QT_QPA_PLATFORM='wayland-egl'
+export ELM_DISPLAY='wl'
 
 # xdg gnupg
 if command -v find &> /dev/null; then
   find "$XDG_CONFIG_HOME"/gnupg -type f -exec chmod 600 {} \;
   find "$XDG_CONFIG_HOME"/gnupg -type d -exec chmod 700 {} \;
 fi
-GNUPGHOME="$XDG_CONFIG_HOME/gnupg"
+export GNUPGHOME="$XDG_CONFIG_HOME/gnupg"
 
 # xdg fnm; path has to be set here to load fnm in for dependent shell scripts
 FNM_DIR="$XDG_CONFIG_HOME/fnm/"
@@ -43,8 +43,8 @@ git config --global gpg.program $(which gpg2)
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * PATHS
-NVM_DIR="$XDG_CONFIG_HOME/nvm"
-PATH="$HOME/.local/bin:$XDG_CONFIG_HOME/__helpers:$PATH"
+export NVM_DIR="$XDG_CONFIG_HOME/nvm"
+export PATH="$HOME/.local/bin:$XDG_CONFIG_HOME/__helpers:$PATH"
 # KUBECONFIG="\
 # /add/another/route/note/the/trailing/colon/is/important:\
 # $HOME/.kube/config"
@@ -159,10 +159,10 @@ alias ee='exit'
 alias c='clear'
 alias rm='rm -i'
 alias r='source $HOME/.bashrc'
-alias ebc="subl $XDG_CONFIG_HOME/bash/bashrc"
-alias ekc="subl $XDG_CONFIG_HOME/kitty/kitty.conf"
-alias exdg="subl $XDG_CONFIG_HOME"
-alias esshc='subl ~/.ssh/config'
+alias ebc="nvim $XDG_CONFIG_HOME/bash/bashrc"
+alias etec="nvim $XDG_CONFIG_HOME/foot/foot.ini"
+alias exdg="nvim $XDG_CONFIG_HOME"
+alias esshc='nvim ~/.ssh/config'
 alias ll='ls -lFhN --color --group-directories-first'
 alias l='ls -FhN --color --group-directories-first'
 # alias ls="gls -FhN --color $@"

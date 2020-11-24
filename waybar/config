@@ -3,6 +3,9 @@
     "layer": "top",
     "output": "DP-2",
     "position": "top",
+    "modules-center": [
+      "river/tags"
+    ],
     "modules-right": ["pulseaudio", "network#macro", "clock"],
     "clock": {
       "format": "{:%a,%e %b %-I:%M %Z}",

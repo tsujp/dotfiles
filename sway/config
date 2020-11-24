@@ -14,7 +14,8 @@
 set $mod Control
 set $ralt Mod1
 set $lalt Mod3
-set $lsup Mod4
+set $lsup Meta_L
+set $rshift Shift_R
 
 ###################
 #### VARIABLES ####
@@ -26,7 +27,6 @@ set $ws3 "3"
 set $ws4 "4"
 set $ws5 "5"
 set $ws6 "6"
-set $ws7 "7"
 
 set $mon1 DP-2
 
@@ -112,7 +112,6 @@ seat * hide_cursor 5000
 exec redshift
 
 #################
-#### GENERAL ####
 #################
 
 # disallow X clients under wayland
@@ -172,20 +171,24 @@ bar {
 ######################
 
 # throw to workspace A
+assign [app_id="firefox"] $ws1
 
 # throw to workspace B
 
 # throw to workspace C
-assign [class="IRC"] $ws1
-assign [class="Discord"] $ws1
-assign [class="Spotify"] $ws1
-assign [class="Keybase"] $ws1
+# assign [class="IRC"] $ws1
+# assign [class="Discord"] $ws1
+# assign [class="Spotify"] $ws1
+# assign [class="Keybase"] $ws1
 
 # throw to workspace D
-assign [class="insync.py"] $ws3
+# assign [class="insync.py"] $ws3
 
 # i3 dont manage
-for_window [title="^MetaMask Notification$"] floating enable
+# for_window [title="^MetaMask Notification$"] floating enable
+
+# firefox ws1 sizing
+for_window [app_id="firefox"] resize set width 50 ppt
 
 #################################
 #### WORKSPACES & NAVIGATION ####
@@ -238,24 +241,21 @@ bindsym $mod+m move scratchpad
 bindsym $mod+Shift+m scratchpad show
 
 # specific workspace bindings
+# specific workspace bindings
 workspace $ws1 output $mon1
 workspace $ws2 output $mon1
-workspace $ws3 output $mon2
-workspace $ws4 output $mon2
-workspace $ws5 output $mon2
-workspace $ws6 output $mon2
-workspace $ws7 output $mon2
+workspace $ws3 output $mon1
+workspace $ws4 output $mon1
+workspace $ws5 output $mon1
+workspace $ws6 output $mon1
 
 # switch to workspaces
-bindsym $mod+$lsup+z workspace prev
-bindsym $mod+$lsup+c workspace next
-bindsym $mod+$lsup+1 workspace number $ws1
-bindsym $mod+$lsup+2 workspace number $ws2
+bindsym $rshift+1 workspace number $ws1
+bindsym $rshift+2 workspace number $ws2
 bindsym $mod+$lsup+3 workspace number $ws3
 bindsym $mod+$lsup+4 workspace number $ws4
 bindsym $mod+$lsup+5 workspace number $ws5
 bindsym $mod+$lsup+6 workspace number $ws6
-bindsym $mod+$lsup+7 workspace number $ws7
 
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace number $ws1
@@ -264,7 +264,6 @@ bindsym $mod+Shift+3 move container to workspace number $ws3
 bindsym $mod+Shift+4 move container to workspace number $ws4
 bindsym $mod+Shift+5 move container to workspace number $ws5
 bindsym $mod+Shift+6 move container to workspace number $ws6
-bindsym $mod+Shift+7 move container to workspace number $ws7
 
 # resize window (you can also use the mouse for that)
 bindsym $mod+r mode "resize"

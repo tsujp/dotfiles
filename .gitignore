@@ -33,6 +33,9 @@ Theme - Monokai Pro.sublime-settings
 sublime-merge/Cache/
 sublime-merge/Local/
 
+# nodejs
+node_modules/
+
 # zoom
 # TODO why does zoom make a folder of that name, sigh
 /Unknown\ Organization/

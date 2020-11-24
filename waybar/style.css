@@ -14,32 +14,26 @@
 
 window#waybar.background.top {
   background: rgba(44, 37, 37, 0.75);
-  /*background: #2c2525;*/
-  /*opacity: 0.85;*/
 }
 
-/*window#waybar.background.bottom.DP-3 {
-  background: transparent;
-}*/
-
-#workspaces button {
+#tags button {
   padding: 1px 7px 0px 8px;
   opacity: 0.5;
   background: transparent;
 }
 
 /* no button shadows on hover, please */
-#workspaces button:hover {
+#tags button:hover {
   box-shadow: inherit;
   text-shadow: inherit;
 }
 
-#workspaces button.focused {
+#tags button.focused {
   opacity: 1;
   background: #635657;
 }
 
-#workspaces button.urgent {
+#tags button.urgent {
   color: red;
 }
 

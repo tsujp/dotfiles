@@ -7,6 +7,9 @@
       "river/tags"
     ],
     "modules-right": ["pulseaudio", "network#macro", "clock"],
+    "river/tags": {
+      "num-tags": 6
+    },
     "clock": {
       "format": "{:%a,%e %b %-I:%M %Z}",
       "interval": 1,

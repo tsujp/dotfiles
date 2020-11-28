@@ -94,8 +94,8 @@ fi
 
 # chruby
 if [ -n "$BASH_VERSION" ]; then
-  source /usr/share/chruby/chruby.sh
-  source /usr/share/chruby/auto.sh
+  source /usr/local/share/chruby/chruby.sh
+  source /usr/local/share/chruby/auto.sh
 fi
 
 # fnm completion
@@ -154,7 +154,7 @@ fi
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * ALIASES
-alias cd=__cdenv
+# alias cd=__cdenv
 alias ee='exit'
 alias c='clear'
 alias rm='rm -i'

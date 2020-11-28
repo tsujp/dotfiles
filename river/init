@@ -12,8 +12,7 @@
 
 riverctl spawn waybar
 riverctl spawn foot --server
-# swaybg -i /home/tsujp/.config/wallpapers/flower-10-5120x2880.png &
-
+riverctl spawn redshift
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # VARS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -30,10 +29,6 @@ riverctl layout rivertile left
 # app-ids of views which should float
 riverctl float-filter-add "float"
 riverctl float-filter-add "popup"
-# riverctl float-filter-add "wofi"
-
-# Set app-ids of views which should use client side decorations
-# riverctl csd-filter-add "wofi"
 
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -44,7 +39,19 @@ riverctl set-repeat 72 300
 
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# APPEARANCE - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+riverctl background-color '#635657'
+riverctl border-width 1
+riverctl border-color-focused '#D2BDF7'
+riverctl border-color-unfocused '#6B617D'
+
+
+#  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # VIEWS & MAPS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# launcher
+riverctl map normal "$mod" R spawn "$XDG_CONFIG_HOME/fuzzel/launch.sh"
 
 # close the focused view
 riverctl map normal "$mod" Q close
@@ -72,7 +79,8 @@ riverctl map normal "$mod" Comma focus-output previous
 # mod+Left-Mouse-Button to move views
 riverctl map-pointer normal "$mod" BTN_LEFT move-view
 
-# riverctl map normal "$mod" R spawn "$XDG_CONFIG_HOME/river/wofi.sh"
+# lock screen
+riverctl map normal "$mod"+Shift X spawn waylock
 
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -181,3 +189,5 @@ riverctl map normal "$mod"+Shift 0 set-view-tags "$all_tags_mask"
 
 # # Mod+F11 to return to normal mode
 # riverctl map passthrough $mod F11 enter-mode normal
+
+

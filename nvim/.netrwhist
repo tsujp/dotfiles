@@ -1,5 +1,6 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =1
+let g:netrw_dirhistcnt =2
+let g:netrw_dirhist_2='/home/tsujp/work/topic'
 let g:netrw_dirhist_1='/home/tsujp/work/higher'
 let g:netrw_dirhist_0='/home/tsujp/.config'
 let g:netrw_dirhist_9='/home/tsujp/.config/nvim'
@@ -9,4 +10,3 @@ let g:netrw_dirhist_6='/home/tsujp/.config'
 let g:netrw_dirhist_5='/home/tsujp/.config/nvim'
 let g:netrw_dirhist_4='/home/tsujp/.config'
 let g:netrw_dirhist_3='/home/tsujp'
-let g:netrw_dirhist_2='/home/tsujp/.config'

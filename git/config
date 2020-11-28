@@ -6,8 +6,10 @@
     gpgsign = true
 [core]
     editor = nvim
-    excludesfile = /home/tsujp/.config/git/gitignore_global
+	excludesfile = /home/tsujp/.config/git/gitignore_global
 [gpg]
-    program = /bin/gpg2
+	program = /bin/gpg2
 [init]
     defaultBranch = master
+[pull]
+	rebase = false

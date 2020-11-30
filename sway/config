@@ -31,11 +31,13 @@ set $ws6 "6"
 set $mon1 DP-2
 
 # terminal
-set $term alacritty
+set $term foot
 
 ########################
 #### LAYOUT & STYLE ####
 ########################
+
+seat seat0 xcursor_theme "Adwaita" 48
 
 # import gtk, icon, and cursor themes
 exec_always import-gsettings \
@@ -147,7 +149,8 @@ bindsym --release $mod+Shift+$lalt+q exec scrot -s $HOME/gdrive/home/screenshots
 
 # rofi
 # using a zero-width-space to have an empty prompt
-bindsym $mod+space exec "wofi --show drun --lines 10 --width 650 --prompt ​"
+# bindsym $mod+space exec "wofi --show drun --lines 10 --width 650 --prompt ​"
+bindsym $mod+space exec "fuzzel"
 
 ###################
 #### AUTOSTART ####

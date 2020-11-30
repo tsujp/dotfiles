@@ -24,7 +24,8 @@ mod="Control"
 # LAYOUT - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # set the layout on startup
-riverctl layout rivertile left
+# riverctl layout rivertile left
+riverctl layout "$XDG_CONFIG_HOME"/river/layout
 
 # app-ids of views which should float
 riverctl float-filter-add "float"
@@ -45,7 +46,7 @@ riverctl background-color '#635657'
 riverctl border-width 1
 riverctl border-color-focused '#D2BDF7'
 riverctl border-color-unfocused '#6B617D'
-
+riverctl xcursor-theme retrosmart-xcursor-black-shadow/
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # VIEWS & MAPS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -62,6 +63,9 @@ riverctl map normal "$mod"+Shift Return spawn foot
 
 # exit river
 riverctl map normal "$mod"+Shift E exit
+
+# zoom current view
+riverctl map normal "$mod" Return zoom
 
 # mod+J and Mod+K to focus the next/previous view in the layout stack
 riverctl map normal "$mod" J focus-view next
@@ -128,13 +132,13 @@ riverctl map normal "$mod"+Shift 0 set-view-tags "$all_tags_mask"
 # riverctl map normal "$mod" Return zoom
 
 # # decrease/increase the width of the master column by 5%
-# riverctl map normal "$mod" H mod-master-factor -0.05
-# riverctl map normal "$mod" L mod-master-factor +0.05
+riverctl map normal "$mod" H mod-master-factor -0.05
+riverctl map normal "$mod" L mod-master-factor +0.05
 
 # # Mod+Shift+H and Mod+Shift+L to increment/decrement the number of
-# # master views in the layout
-# riverctl map normal $mod+Shift H mod-master-count +1
-# riverctl map normal $mod+Shift L mod-master-count -1
+# master views in the layout
+riverctl map normal "$mod"+Shift H mod-master-count +1
+riverctl map normal "$mod"+Shift L mod-master-count -1
 
 # # Mod + Left Mouse Button to move views
 # riverctl map-pointer normal $mod BTN_LEFT move-view

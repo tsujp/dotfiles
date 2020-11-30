@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# SYMLINK TO `$HOME/.bashrc`
+
 # reset all aliases so we can just reload this instead of relogging
 unalias -a
 
@@ -10,6 +12,8 @@ unalias -a
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_SESSION_TYPE='wayland'
 export EDITOR=nvim
+export VISUAL=nvim
+export TERMINAL=foot
 export GPG_TTY="$(tty)" # set gpg tty to current tty
 export PINEENTRY_USER_DATA='USE_CURSES=1'
 export WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"
@@ -32,6 +36,11 @@ eval "$(fnm env --use-on-cd)"
 # git; limited environment variables in git config so this is done here
 git config --global core.excludesfile "$XDG_CONFIG_HOME/git/gitignore_global"
 git config --global gpg.program $(which gpg2)
+
+
+# pre-interactive bash sets
+# https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
+set -o noclobber
 
 
 
@@ -154,6 +163,8 @@ fi
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * ALIASES
+alias sudo='sudo ' # NB: https://www.gnu.org/software/bash/manual/bash.html#Aliases
+alias mv='mv --no-clobber' # do not overwrite existing files
 # alias cd=__cdenv
 alias ee='exit'
 alias c='clear'
@@ -176,6 +187,7 @@ alias dps=''
 alias gb='git branch'
 alias ga='git add'
 alias glo='git log --pretty=online --abbrev-commit'
+alias gpg='gpg2'
 
 
 
@@ -342,6 +354,9 @@ if command -v pstree &> /dev/null; then
   for (( i = 0; i < depth; i++ )); do
     shell_depth+="$shell_prompt_decoration"
   done
+else
+  # pstree not found, so output a single shell_prompt_decoration
+  shell_depth="$shell_prompt_decoration"
 fi
 
 PROMPT_COMMAND="__git_prompt;"
@@ -436,3 +451,7 @@ __git_prompt ()
 # eval "$(pyenv virtualenv-init -)"
 
 # TODO unsets wanted here? could be good prac to do so
+
+# fnm
+export PATH=/home/tsujp/.fnm:$PATH
+eval "`fnm env`"

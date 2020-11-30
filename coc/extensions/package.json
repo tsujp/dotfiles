@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "coc-tsserver": ">=1.6.0"
+    "coc-tsserver": ">=1.6.1"
   }
 }

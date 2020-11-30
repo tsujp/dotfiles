@@ -1,48 +1,28 @@
 "
-"  ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗
-"  ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║
-"  ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║
-"  ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
-"  ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
-"  ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
+"       ::::    ::: :::::::::: ::::::::  :::     ::: :::::::::::   :::   ::: 
+"      :+:+:   :+: :+:       :+:    :+: :+:     :+:     :+:      :+:+: :+:+: 
+"     :+:+:+  +:+ +:+       +:+    +:+ +:+     +:+     +:+     +:+ +:+:+ +:+ 
+"    +#+ +:+ +#+ +#++:++#  +#+    +:+ +#+     +:+     +#+     +#+  +:+  +#+  
+"   +#+  +#+#+# +#+       +#+    +#+  +#+   +#+      +#+     +#+       +#+   
+"  #+#   #+#+# #+#       #+#    #+#   #+#+#+#       #+#     #+#       #+#    
+" ###    #### ########## ########      ###     ########### ###       ###    
 "
-" NB: it may work with vim or it may not; absolutely no checks have been done
-"     to verify it works as I only use neovim
 
 " don't bother being compatible with vi, only vim stuff pl0x
 setglobal nocompatible
 
-" plugins
-call plug#begin('~/.vim/plugged')
+" plug plugins
+source $XDG_CONFIG_HOME/nvim/plugins.vim
 
-" js/ts/jsx/tsx ecosystem
-Plug 'pangloss/vim-javascript'
-Plug 'leafgarland/typescript-vim'
-Plug 'maxmellon/vim-jsx-pretty'
-Plug 'peitalin/vim-jsx-typescript'
+" theme configuration
+source $XDG_CONFIG_HOME/nvim/theme/seoul256.vim
 
-" split-view directory tree (using default netrw)
-Plug 'tpope/vim-vinegar'
-
-" utility
-Plug 'tpope/vim-commentary'
-Plug 'machakann/vim-highlightedyank'
+" plugin configuration
+source $XDG_CONFIG_HOME/nvim/plug-config/start.vim
+source $XDG_CONFIG_HOME/nvim/plug-config/indent-guides.vim
+source $XDG_CONFIG_HOME/nvim/plug-config/rainbow_parentheses.vim
 
 
-
-Plug 'tpope/vim-abolish'
-Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-surround'
-Plug 'justinmk/vim-sneak'
-
-" coc: lsp
-Plug 'neoclide/coc.nvim', { 'branch': 'release' }
-let g:coc_global_extensions = [
-  \ 'coc-tsserver'
-  \ ]
-
-call plug#end()
 
 " whitespace
 set tabstop=2

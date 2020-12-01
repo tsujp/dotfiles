@@ -46,7 +46,7 @@ riverctl background-color '#635657'
 riverctl border-width 1
 riverctl border-color-focused '#D2BDF7'
 riverctl border-color-unfocused '#6B617D'
-riverctl xcursor-theme retrosmart-xcursor-black-shadow/
+# riverctl xcursor-theme retrosmart-xcursor-black-shadow/
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # VIEWS & MAPS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

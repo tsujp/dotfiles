@@ -8,6 +8,11 @@ Projects/
 **.sublime-workspace
 .SublimeREPLHistory
 
+# ctags
+/tags
+/tags.lock
+/tags.temp
+
 # discord
 # TODO abstract TOKEN so config file can be included
 # TODO which one am I using again?

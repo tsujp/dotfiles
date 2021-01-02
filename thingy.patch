@@ -1,0 +1,496 @@
+commit c82391efaf2e4c9970c194c1fd15f69915b10a35
+Author: Jordan Ellis Coppard <jc+git@wz.ht>
+Date:   Sat Jan 2 14:43:20 2021 +0800
+
+    add wip emacs config
+
+diff --git a/.gitignore b/.gitignore
+index 6fdd139..deeb2b5 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -8,6 +8,17 @@ Projects/
+ **.sublime-workspace
+ .SublimeREPLHistory
+ 
++# emacs
++/emacs/*
++!/emacs/early-init.el
++!/emacs/init.el
++!/emacs/lisp/
++!/emacs/lisp/*
++!/emacs/lisp/*.el
++!/emacs/snippets
++!/emacs/custom.el
++!/emacs/themes
++
+ # ctags
+ /tags
+ /tags.lock
+diff --git a/bash/bashrc b/bash/bashrc
+index 32d0f41..e0ced32 100644
+--- a/bash/bashrc
++++ b/bash/bashrc
+@@ -451,7 +451,3 @@ __git_prompt ()
+ # eval "$(pyenv virtualenv-init -)"
+ 
+ # TODO unsets wanted here? could be good prac to do so
+-
+-# fnm
+-export PATH=/home/tsujp/.fnm:$PATH
+-eval "`fnm env`"
+diff --git a/emacs/early-init.el b/emacs/early-init.el
+new file mode 100644
+index 0000000..a51f8e9
+--- /dev/null
++++ b/emacs/early-init.el
+@@ -0,0 +1,15 @@
++;;; early-init.el
++
++;;; Commentary:
++
++;; Emacs 27+ loads this file before (normally) calling
++;; `package-initialize`.  We use this file to suppress that automatic
++;; behaviour so that startup is consistent across Emacs versions.
++
++;;; Code:
++(setq package-enable-at-startup nil)
++
++;; So we can detect this having been loaded
++(provide 'early-init)
++
++;;; early-init.el ends here
+diff --git a/emacs/init.el b/emacs/init.el
+new file mode 100644
+index 0000000..69dec4b
+--- /dev/null
++++ b/emacs/init.el
+@@ -0,0 +1,91 @@
++;;
++;;       ::::::::::   :::   :::       :::      ::::::::   ::::::::
++;;      :+:         :+:+: :+:+:    :+: :+:   :+:    :+: :+:    :+:
++;;     +:+        +:+ +:+:+ +:+  +:+   +:+  +:+        +:+
++;;    +#++:++#   +#+  +:+  +#+ +#++:++#++: +#+        +#++:++#++
++;;   +#+        +#+       +#+ +#+     +#+ +#+               +#+
++;;  #+#        #+#       #+# #+#     #+# #+#    #+# #+#    #+#
++;; ########## ###       ### ###     ###  ########   ########
++;;
++
++
++;; config largely taken/inspired/built-upon from:
++;;   * https://github.com/purcell/emacs.d
++;;   * https://github.com/aaronbieber/dotfiles
++
++
++;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++;; PATHS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++
++(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
++;; (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
++
++
++;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++;; GENERAL - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++
++;; utf8 encoding
++(setq-default buffer-file-coding-system 'utf-8-unix)
++(set-default-coding-systems 'utf-8-unix)
++(setq locale-coding-system 'utf-8-unix)
++(prefer-coding-system 'utf-8-unix)
++
++;; relative line numbers
++(global-display-line-numbers-mode)
++(setq display-line-numbers-type 'relative)
++
++;; show matching parenthesis immediately
++(show-paren-mode 1)
++(setq show-paren-delay 0)
++
++;; TODO: check this one; shows logical-line indicators
++(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
++(setq-default left-fringe-width nil)
++
++;; show trailing whitespace
++(setq-default indicate-empty-lines t)
++(whitespace-mode 'trailing)
++
++;; never indent with tabs (by default) we will respect .editorconfig though
++(setq-default indent-tabs-mode nil)
++
++;; no welcome screen message
++(setq inhibit-splash-screen t
++      inhibit-startup-message t
++      inhibit-startup-echo-area-message t)
++
++
++;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++;; PACKAGES  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++
++(require 'init-utils)
++(require 'init-elpa)      ;; helpers to install packages; calls (package-initialize)
++
++;; use-package
++(unless (package-installed-p 'use-package)
++   (package-refresh-contents)
++   (package-install 'use-package))
++(eval-when-compile
++  (require 'use-package))
++
++;; lisp/* packages
++(require 'init-no-littering)
++(require-package 'diminish)
++(maybe-require-package 'scratch)
++(require 'init-evil)
++(provide 'init)
++
++;; is this needed?
++(custom-set-variables
++ ;; custom-set-variables was added by Custom.
++ ;; If you edit it by hand, you could mess it up, so be careful.
++ ;; Your init file should contain only one such instance.
++ ;; If there is more than one, they won't work right.
++ '(package-selected-packages
++   '(scratch diminish gnu-elpa-keyring-update fullframe seq use-package)))
++(custom-set-faces
++ ;; custom-set-faces was added by Custom.
++ ;; If you edit it by hand, you could mess it up, so be careful.
++ ;; Your init file should contain only one such instance.
++ ;; If there is more than one, they won't work right.
++ )
+diff --git a/emacs/lisp/init-company.el b/emacs/lisp/init-company.el
+new file mode 100644
+index 0000000..b36d1d5
+--- /dev/null
++++ b/emacs/lisp/init-company.el
+@@ -0,0 +1,42 @@
++;;; init-company.el --- Completion with company -*- lexical-binding: t -*-
++;;; Commentary:
++;;; Code:
++;; WAITING: haskell-mode sets tags-table-list globally, breaks tags-completion-at-point-function
++;; TODO Default sort order should place [a-z] before punctuation
++(setq tab-always-indent 'complete)
++(add-to-list 'completion-styles 'initials t)
++(when (maybe-require-package 'company)
++  (add-hook 'after-init-hook 'global-company-mode)
++  (with-eval-after-load 'company
++                          (dolist (backend '(company-eclim company-semantic))
++                                (delq backend company-backends))
++                            (diminish 'company-mode)
++                              (define-key company-mode-map (kbd "M-/") 'company-complete)
++                                (define-key company-mode-map [remap completion-at-point] 'company-complete)
++                                  (define-key company-mode-map [remap indent-for-tab-command] 'company-indent-or-complete-common)
++                                    (define-key company-active-map (kbd "M-/") 'company-other-backend)
++                                      (define-key company-active-map (kbd "C-n") 'company-select-next)
++                                        (define-key company-active-map (kbd "C-p") 'company-select-previous)
++                                          (define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
++                                            (define-key company-active-map (kbd "M-.") 'company-show-location)
++                                              (setq-default company-dabbrev-other-buffers 'all
++                                                                            company-tooltip-align-annotations t))
++  (global-set-key (kbd "M-C-/") 'company-complete)
++  (when (maybe-require-package 'company-quickhelp)
++      (add-hook 'after-init-hook 'company-quickhelp-mode)))
++;; Suspend page-break-lines-mode while company menu is active
++;; (see https://github.com/company-mode/company-mode/issues/416)
++(with-eval-after-load 'company
++                      (with-eval-after-load 'page-break-lines
++                                              (defvar-local sanityinc/page-break-lines-on-p nil)
++                                                 (defun sanityinc/page-break-lines-disable (&rest ignore)
++                                                       (when (setq sanityinc/page-break-lines-on-p (bound-and-true-p page-break-lines-mode))
++                                                               (page-break-lines-mode -1)))
++                                                    (defun sanityinc/page-break-lines-maybe-reenable (&rest ignore)
++                                                          (when sanityinc/page-break-lines-on-p
++                                                                  (page-break-lines-mode 1)))
++                                                       (add-hook 'company-completion-started-hook 'sanityinc/page-break-lines-disable)
++                                                         (add-hook 'company-after-completion-hook 'sanityinc/page-break-lines-maybe-reenable)))
++
++(provide 'init-company)
++;;; init-company.el ends here
+diff --git a/emacs/lisp/init-elpa.el b/emacs/lisp/init-elpa.el
+new file mode 100644
+index 0000000..a610288
+--- /dev/null
++++ b/emacs/lisp/init-elpa.el
+@@ -0,0 +1,93 @@
++;;; init-elpa.el --- Settings and helpers for package.el -*- lexical-binding: t -*-
++;;; Commentary:
++;;; Code:
++(require 'package)
++(require 'cl-lib)
++
++;;; Install into separate package dirs for each Emacs version, to prevent bytecode incompatibility
++(setq package-user-dir
++          (expand-file-name (format "elpa-%s.%s" emacs-major-version emacs-minor-version)
++                                                  user-emacs-directory))
++
++;;; Standard package repositories
++(add-to-list 'package-archives '( "melpa" . "https://melpa.org/packages/") t)
++;; Official MELPA Mirror, in case necessary.
++;;(add-to-list 'package-archives (cons "melpa-mirror" (concat proto "://www.mirrorservice.org/sites/melpa.org/packages/")) t)
++
++;; Work-around for https://debbugs.gnu.org/cgi/bugreport.cgi?bug=34341
++(when (and (version< emacs-version "26.3") (boundp 'libgnutls-version) (>= libgnutls-version 30604))
++  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
++
++;;; On-demand installation of packages
++(defun require-package (package &optional min-version no-refresh)
++  "Install given PACKAGE, optionally requiring MIN-VERSION.
++  If NO-REFRESH is non-nil, the available package lists will not be
++  re-downloaded in order to locate PACKAGE."
++  (or (package-installed-p package min-version)
++          (let* ((known (cdr (assoc package package-archive-contents)))
++                            (versions (mapcar #'package-desc-version known)))
++                  (if (cl-some (lambda (v) (version-list-<= min-version v)) versions)
++                              (package-install package)
++                                      (if no-refresh
++                                                    (error "No version of %s >= %S is available" package min-version)
++                                                              (package-refresh-contents)
++                                                                        (require-package package min-version t))))))
++(defun maybe-require-package (package &optional min-version no-refresh)
++  "Try to install PACKAGE, and return non-nil if successful.
++  In the event of failure, return nil and print a warning message.
++  Optionally require MIN-VERSION.  If NO-REFRESH is non-nil, the
++  available package lists will not be re-downloaded in order to
++  locate PACKAGE."
++  (condition-case err
++                      (require-package package min-version no-refresh)
++                        (error
++                             (message "Couldn't install optional package `%s': %S" package err)
++                                nil)))
++
++;;; Fire up package.el
++(setq package-enable-at-startup nil)
++(package-initialize)
++
++;; package.el updates the saved version of package-selected-packages correctly only
++;; after custom-file has been loaded, which is a bug. We work around this by adding
++;; the required packages to package-selected-packages after startup is complete.
++(defvar sanityinc/required-packages nil)
++(defun sanityinc/note-selected-package (oldfun package &rest args)
++  "If OLDFUN reports PACKAGE was successfully installed, note that fact.
++  The package name is noted by adding it to
++  `sanityinc/required-packages'.  This function is used as an
++  advice for `require-package', to which ARGS are passed."
++  (let ((available (apply oldfun package args)))
++      (prog1
++              available
++                  (when available
++                          (add-to-list 'sanityinc/required-packages package)))))
++(advice-add 'require-package :around 'sanityinc/note-selected-package)
++(when (fboundp 'package--save-selected-packages)
++  (require-package 'seq)
++  (add-hook 'after-init-hook
++                      (lambda ()
++                                    (package--save-selected-packages
++                                                   (seq-uniq (append sanityinc/required-packages package-selected-packages))))))
++
++(require-package 'fullframe)
++(fullframe list-packages quit-window)
++
++(let ((package-check-signature nil))
++  (require-package 'gnu-elpa-keyring-update))
++
++(defun sanityinc/set-tabulated-list-column-width (col-name width)
++  "Set any column with name COL-NAME to the given WIDTH."
++  (when (> width (length col-name))
++      (cl-loop for column across tabulated-list-format
++                          when (string= col-name (car column))
++                                     do (setf (elt column 1) width))))
++(defun sanityinc/maybe-widen-package-menu-columns ()
++  "Widen some columns of the package menu table to avoid truncation."
++  (when (boundp 'tabulated-list-format)
++      (sanityinc/set-tabulated-list-column-width "Version" 13)
++        (let ((longest-archive-name (apply 'max (mapcar 'length (mapcar 'car package-archives)))))
++              (sanityinc/set-tabulated-list-column-width "Archive" longest-archive-name))))
++(add-hook 'package-menu-mode-hook 'sanityinc/maybe-widen-package-menu-columns)
++(provide 'init-elpa)
++;;; init-elpa.el ends here
+diff --git a/emacs/lisp/init-evil.el b/emacs/lisp/init-evil.el
+new file mode 100644
+index 0000000..a850768
+--- /dev/null
++++ b/emacs/lisp/init-evil.el
+@@ -0,0 +1,37 @@
++;;; init-evil.el -- My evil mode configuration.
++;;; Commentary:
++;;; Code:
++
++(defun config-evil-leader ()
++  "Configure evil leader mode."
++  (evil-leader/set-leader ","))
++
++(use-package evil
++  :ensure t
++  :config
++  (evil-mode 1)
++
++  (use-package evil-goggles
++    :ensure t
++    :config
++    (evil-goggles-mode))
++
++  (use-package evil-leader
++    :ensure t
++    :config
++    (global-evil-leader-mode)
++    (config-evil-leader))
++
++  (use-package evil-snipe
++    :ensure t
++    :config
++    (evil-snipe-mode))
++
++  (use-package evil-surround
++    :ensure t
++    :config
++    (global-evil-surround-mode 1))
++)
++
++(provide 'init-evil)
++;;; init-evil.el ends here
+diff --git a/emacs/lisp/init-evil.el~ b/emacs/lisp/init-evil.el~
+new file mode 100644
+index 0000000..a850768
+--- /dev/null
++++ b/emacs/lisp/init-evil.el~
+@@ -0,0 +1,37 @@
++;;; init-evil.el -- My evil mode configuration.
++;;; Commentary:
++;;; Code:
++
++(defun config-evil-leader ()
++  "Configure evil leader mode."
++  (evil-leader/set-leader ","))
++
++(use-package evil
++  :ensure t
++  :config
++  (evil-mode 1)
++
++  (use-package evil-goggles
++    :ensure t
++    :config
++    (evil-goggles-mode))
++
++  (use-package evil-leader
++    :ensure t
++    :config
++    (global-evil-leader-mode)
++    (config-evil-leader))
++
++  (use-package evil-snipe
++    :ensure t
++    :config
++    (evil-snipe-mode))
++
++  (use-package evil-surround
++    :ensure t
++    :config
++    (global-evil-surround-mode 1))
++)
++
++(provide 'init-evil)
++;;; init-evil.el ends here
+diff --git a/emacs/lisp/init-no-littering.el b/emacs/lisp/init-no-littering.el
+new file mode 100644
+index 0000000..e5a1534
+--- /dev/null
++++ b/emacs/lisp/init-no-littering.el
+@@ -0,0 +1,9 @@
++;; no-littering
++(unless (package-installed-p 'no-littering)
++   (package-refresh-contents)
++   (package-install 'no-littering)
++)
++(setq auto-save-file-name-transforms
++  `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))
++)
++(provide 'init-no-littering)
+diff --git a/emacs/lisp/init-utils.el b/emacs/lisp/init-utils.el
+new file mode 100644
+index 0000000..2537810
+--- /dev/null
++++ b/emacs/lisp/init-utils.el
+@@ -0,0 +1,70 @@
++;;; init-utils.el --- Elisp helper functions and commands -*- lexical-binding: t -*-
++;;; Commentary:
++;;; Code:
++(define-obsolete-function-alias 'after-load 'with-eval-after-load "")
++;;----------------------------------------------------------------------------
++;; Handier way to add modes to auto-mode-alist
++;;----------------------------------------------------------------------------
++(defun add-auto-mode (mode &rest patterns)
++  "Add entries to `auto-mode-alist' to use `MODE' for all given file `PATTERNS'."
++  (dolist (pattern patterns)
++      (add-to-list 'auto-mode-alist (cons pattern mode))))
++;; Like diminish, but for major modes
++(defun sanityinc/set-major-mode-name (name)
++  "Override the major mode NAME in this buffer."
++  (setq-local mode-name name))
++(defun sanityinc/major-mode-lighter (mode name)
++  (add-hook (derived-mode-hook-name mode)
++                      (apply-partially 'sanityinc/set-major-mode-name name)))
++;;----------------------------------------------------------------------------
++;; String utilities missing from core emacs
++;;----------------------------------------------------------------------------
++(defun sanityinc/string-all-matches (regex str &optional group)
++  "Find all matches for `REGEX' within `STR', returning the full match string or group `GROUP'."
++  (let ((result nil)
++              (pos 0)
++                    (group (or group 0)))
++      (while (string-match regex str pos)
++                 (push (match-string group str) result)
++                     (setq pos (match-end group)))
++        result))
++;;----------------------------------------------------------------------------
++;; Delete the current file
++;;----------------------------------------------------------------------------
++(defun delete-this-file ()
++  "Delete the current file, and kill the buffer."
++  (interactive)
++  (unless (buffer-file-name)
++      (error "No file is currently being edited"))
++  (when (yes-or-no-p (format "Really delete '%s'?"
++                                                        (file-name-nondirectory buffer-file-name)))
++      (delete-file (buffer-file-name))
++        (kill-this-buffer)))
++;;----------------------------------------------------------------------------
++;; Rename the current file
++;;----------------------------------------------------------------------------
++(defun rename-this-file-and-buffer (new-name)
++  "Renames both current buffer and file it's visiting to NEW-NAME."
++  (interactive "sNew name: ")
++  (let ((name (buffer-name))
++              (filename (buffer-file-name)))
++      (unless filename
++            (error "Buffer '%s' is not visiting a file!" name))
++        (progn
++              (when (file-exists-p filename)
++                      (rename-file filename new-name 1))
++                  (set-visited-file-name new-name)
++                      (rename-buffer new-name))))
++;;----------------------------------------------------------------------------
++;; Browse current HTML file
++;;----------------------------------------------------------------------------
++(defun browse-current-file ()
++  "Open the current file as a URL using `browse-url'."
++  (interactive)
++  (let ((file-name (buffer-file-name)))
++      (if (and (fboundp 'tramp-tramp-file-p)
++                          (tramp-tramp-file-p file-name))
++              (error "Cannot open tramp file")
++                  (browse-url (concat "file://" file-name)))))
++(provide 'init-utils)
++;;; init-utils.el ends here
+diff --git a/git/config b/git/config
+index 44af8e4..90d0078 100644
+--- a/git/config
++++ b/git/config
+@@ -8,7 +8,7 @@
+     editor = nvim
+ 	excludesfile = /home/tsujp/.config/git/gitignore_global
+ [gpg]
+-	program = /bin/gpg2
++	program = /usr/sbin/gpg2
+ [init]
+     defaultBranch = master
+ [pull]
+

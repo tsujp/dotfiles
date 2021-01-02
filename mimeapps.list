@@ -28,3 +28,4 @@ application/xhtml+xml=userapp-Firefox-6MOGT0.desktop;
 application/x-extension-xhtml=userapp-Firefox-6MOGT0.desktop;
 application/x-extension-xht=userapp-Firefox-6MOGT0.desktop;
 video/mp4=firefox.desktop;
+text/plain=nvim.desktop;firefox.desktop;

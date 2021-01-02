@@ -451,7 +451,3 @@ __git_prompt ()
 # eval "$(pyenv virtualenv-init -)"
 
 # TODO unsets wanted here? could be good prac to do so
-
-# fnm
-export PATH=/home/tsujp/.fnm:$PATH
-eval "`fnm env`"

@@ -8,6 +8,17 @@ Projects/
 **.sublime-workspace
 .SublimeREPLHistory
 
+# emacs
+/emacs/*
+!/emacs/early-init.el
+!/emacs/init.el
+!/emacs/lisp/
+!/emacs/lisp/*
+!/emacs/lisp/*.el
+!/emacs/snippets
+!/emacs/custom.el
+!/emacs/themes
+
 # ctags
 /tags
 /tags.lock

@@ -8,6 +8,14 @@
 #define MIN(a, b) ( a < b ? a : b )
 #define MAX(a, b) ( a > b ? a : b )
 
+// TODO smart layout
+//
+// if Firefox is open: - no gaps
+//                     - all Firefox instances on top of each other on the left side
+//                     - all other windows in stack on right side
+//                       (basically ignore index)
+// if vim / emacs is open: - no gaps
+
 int main (int argc, char *argv[])
 {
 	if ( argc != 6 )
@@ -21,6 +29,9 @@ int main (int argc, char *argv[])
 	const float master_factor = atof(argv[3]);
 	const int   width         = atoi(argv[4]);
 	const int   height        = atoi(argv[5]);
+
+	const float secondary_area_size = 0.5;
+	const float stack_area_size     = 0.5;
 
 	const int x = 0, y = 0;
 
@@ -58,7 +69,7 @@ int main (int argc, char *argv[])
 			view_x      = x + master_size;
 			view_width  = stack_size;
 			view_y      = 0;
-			view_height = left_over == 0 ? height : 0.7 * height;
+			view_height = left_over == 0 ? height : secondary_area_size * height;
 		}
 		else /* Stack area. */
 		{
@@ -66,15 +77,15 @@ int main (int argc, char *argv[])
 			{
 				view_x = x + master_size;
 				view_width  = stack_size;
-				view_height = 0.3 * height;
-				view_y      = 0.7 * height;
+				view_height = stack_area_size * height;
+				view_y      = secondary_area_size * height;
 			}
 			else
 			{
 				view_x = x + master_size + (0.1 * stack_size / (left_over - 1)) * (i - master_amount - 1);
 				view_width  = stack_size * 0.9;
-				view_height = 0.3 * height * 0.9;
-				view_y      = 0.7 * height + (0.1 * (0.3 * height) / (left_over - 1)) * (i - master_amount - 1);
+				view_height = stack_area_size * height * 0.9;
+				view_y      = secondary_area_size * height + (0.1 * (stack_area_size * height) / (left_over - 1)) * (i - master_amount - 1);
 			}
 		}
 

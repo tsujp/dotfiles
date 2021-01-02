@@ -15,7 +15,7 @@ source $XDG_CONFIG_HOME/nvim/config.vim
 source $XDG_CONFIG_HOME/nvim/plugs.vim
 
 " theme configuration
-source $XDG_CONFIG_HOME/nvim/themes/seoul256.vim
+
 
 " plugin configuration
 source $XDG_CONFIG_HOME/nvim/plug-configs/start.vim

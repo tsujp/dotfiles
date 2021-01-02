@@ -8,7 +8,7 @@
     editor = nvim
 	excludesfile = /home/tsujp/.config/git/gitignore_global
 [gpg]
-	program = /usr/sbin/gpg2
+	program = /bin/gpg2
 [init]
     defaultBranch = master
 [pull]

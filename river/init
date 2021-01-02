@@ -132,8 +132,8 @@ riverctl map normal "$mod"+Shift 0 set-view-tags "$all_tags_mask"
 # riverctl map normal "$mod" Return zoom
 
 # # decrease/increase the width of the master column by 5%
-riverctl map normal "$mod" H mod-master-factor -0.05
-riverctl map normal "$mod" L mod-master-factor +0.05
+# riverctl map normal "$mod" H mod-master-factor -0.05
+# riverctl map normal "$mod" L mod-master-factor +0.05
 
 # # Mod+Shift+H and Mod+Shift+L to increment/decrement the number of
 # master views in the layout

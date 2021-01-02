@@ -68,6 +68,11 @@
 (eval-when-compile
   (require 'use-package))
 
+(use-package monokai-pro-theme
+  :ensure t
+  :config
+  (load-theme 'monokai-pro t))
+
 ;; lisp/* packages
 (require 'init-no-littering)
 (require-package 'diminish)

@@ -2,8 +2,7 @@
 call plug#begin('~/.vim/plugged')
 
   " theme
-  " Plug 'morhetz/gruvbox'
-  Plug 'junegunn/seoul256.vim'
+  Plug 'phanviet/vim-monokai-pro'
 
   " js/ts/jsx/tsx ecosystem
   Plug 'pangloss/vim-javascript'

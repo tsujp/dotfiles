@@ -22,7 +22,16 @@
 
 
 ;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;; GENERAL - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;; GENERAL (short default-feature configuration) - - - - - - - - - - - - - - -
+
+;; font
+;; (set-face-attribute 'default nil :font "Source Code Pro-10.5")
+(set-face-attribute 'default nil :font "CozetteTest")
+
+;; by default any runtime customisations or generated elisp will be put into
+;; init.el, we can change that to a custom file `custom.el` to keep our init
+;; clean
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 
 ;; utf8 encoding
 (setq-default buffer-file-coding-system 'utf-8-unix)
@@ -34,19 +43,23 @@
 (global-display-line-numbers-mode)
 (setq display-line-numbers-type 'relative)
 
+;; hilight current line
+(global-hl-line-mode)
+
 ;; show matching parenthesis immediately
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
 ;; TODO: check this one; shows logical-line indicators
-(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
-(setq-default left-fringe-width nil)
+;; (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+;; (setq-default left-fringe-width nil)
 
 ;; show trailing whitespace
-(setq-default indicate-empty-lines t)
-(whitespace-mode 'trailing)
+;; (setq-default indicate-empty-lines t)
+;; (whitespace-mode 'trailing)
 
-;; never indent with tabs (by default) we will respect .editorconfig though
+;; never indent with tabs (by default) we will (later) respect
+;; editorconfig though
 (setq-default indent-tabs-mode nil)
 
 ;; no welcome screen message
@@ -54,43 +67,55 @@
       inhibit-startup-message t
       inhibit-startup-echo-area-message t)
 
+;; hide scroll, menu, and tool bars
+(scroll-bar-mode -1)
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+
+;; replace having to type `yes` with `y` and `no` with `n`
+(fset 'yes-or-no-p 'y-or-n-p)
+
+
+;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;; DEFAULT FEATURES (long default-feature configuration) - - - - - - - - - - -
+
+;; TODO: modeline
+;; (require 'init-default-modeline)
+
 
 ;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;; PACKAGES  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;; helpers / core
 (require 'init-utils)
-(require 'init-elpa)      ;; helpers to install packages; calls (package-initialize)
+(require 'init-site-lisp) ;; must come before elpa
+(require 'init-elpa)      ;; help install packages; calls (package-initialize)
 
-;; use-package
+;; use-package package
 (unless (package-installed-p 'use-package)
    (package-refresh-contents)
    (package-install 'use-package))
 (eval-when-compile
   (require 'use-package))
 
-(use-package monokai-pro-theme
-  :ensure t
+;; until it gets merged use PR themes
+(use-package doom-themes
+  :load-path "site-lisp/emacs-doom-themes"
   :config
-  (load-theme 'monokai-pro t))
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-monokai-ristretto t)
+  (set-face-background 'hl-line "#332C2C"))
 
-;; lisp/* packages
+;; modeline (this also includes the required all-the-icons)
+(require 'init-doom-modeline)
+
+;; additional
 (require 'init-no-littering)
 (require-package 'diminish)
 (maybe-require-package 'scratch)
 (require 'init-evil)
+(require 'init-rainbow-delimiters)
+(require 'init-which-key)
 (provide 'init)
-
-;; is this needed?
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(scratch diminish gnu-elpa-keyring-update fullframe seq use-package)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

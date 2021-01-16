@@ -1,4 +1,4 @@
-;;; init-evil.el -- My evil mode configuration.
+;;; init-evil.el -- evil mode and associated configuration
 ;;; Commentary:
 ;;; Code:
 
@@ -10,6 +10,13 @@
   :ensure t
   :config
   (evil-mode 1)
+  (setq blink-cursor-mode 0
+        evil-normal-state-cursor '(box "#BFB3B5")
+        evil-insert-state-cursor '((bar . 2) "#F9CC7C")
+        evil-visual-state-cursor '(hollow "#85DACC")
+        evil-motion-state-cursor '(box "red") ;; TODO
+        evil-replace-state-cursor '(box "red") ;; TODO
+        evil-operator-state-cursor '(box "red")) ;; TODO
 
   (use-package evil-goggles
     :ensure t

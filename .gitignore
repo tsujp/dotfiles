@@ -15,6 +15,9 @@ Projects/
 !/emacs/lisp/
 !/emacs/lisp/*
 !/emacs/lisp/*.el
+!/emacs/site-lisp/
+!/emacs/site-lisp/*
+!/emacs/site-lisp/*.el
 !/emacs/snippets
 !/emacs/custom.el
 !/emacs/themes

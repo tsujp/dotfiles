@@ -1,15 +1,16 @@
 #
-#   ██╗██████╗        ██████╗  █████╗ ██████╗ ███████╗
-#   ██║╚════██╗      ██╔════╝ ██╔══██╗██╔══██╗██╔════╝
-#   ██║ █████╔╝█████╗██║  ███╗███████║██████╔╝███████╗
-#   ██║ ╚═══██╗╚════╝██║   ██║██╔══██║██╔═══╝ ╚════██║
-#   ██║██████╔╝      ╚██████╔╝██║  ██║██║     ███████║
-#   ╚═╝╚═════╝        ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚══════╝
+#       ::::::::  :::       :::     :::   :::   ::: 
+#     :+:    :+: :+:       :+:   :+: :+: :+:   :+:  
+#    +:+        +:+       +:+  +:+   +:+ +:+ +:+    
+#   +#++:++#++ +#+  +:+  +#+ +#++:++#++: +#++:      
+#         +#+ +#+ +#+#+ +#+ +#+     +#+  +#+        
+# #+#    #+#  #+#+# #+#+#  #+#     #+#  #+#         
+# ########    ###   ###   ###     ###  ###          
 #
 
-##################
-#### MOD KEYS ####
-##################
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## MOD KEYS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 set $mod Control
 set $ralt Mod1
@@ -17,10 +18,11 @@ set $lalt Mod3
 set $lsup Meta_L
 set $rshift Shift_R
 
-###################
-#### VARIABLES ####
-###################
 
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## VARIABLES - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# workspaces
 set $ws1 "1"
 set $ws2 "2"
 set $ws3 "3"
@@ -28,18 +30,18 @@ set $ws4 "4"
 set $ws5 "5"
 set $ws6 "6"
 
+# monitor
 set $mon1 DP-2
 
-# terminal
-set $term foot
 
-########################
-#### LAYOUT & STYLE ####
-########################
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## LAYOUT AND STYLE  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-seat seat0 xcursor_theme "Adwaita" 48
+# TODO: use that X cursor theme I found and downloaded
+seat seat0 xcursor_theme "Adwaita" 12
 
 # import gtk, icon, and cursor themes
+# TODO: do I want this?
 exec_always import-gsettings \
   gtk-theme:gtk-theme-name \
   icon-theme:gtk-icon-theme-name \
@@ -51,10 +53,11 @@ gaps outer 5
 gaps top 10
 gaps bottom 0
 
-# borders
+# borders dimensions
 for_window [class="^.*"] border pixel 1
 default_border pixel 1
 
+# border colours
 set $borderFocused #D2BDF7
 set $borderUnfocused #6B617D
 
@@ -66,6 +69,7 @@ client.focused_inactive  $borderUnfocused  $borderUnfocused  $borderUnfocused  $
 # focus
 focus_follows_mouse no
 
+# TODO: this
             # Use pactl to adjust volume in PulseAudio.
             # set $refresh_i3status killall -SIGUSR1 i3status
             # bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
@@ -73,25 +77,30 @@ focus_follows_mouse no
             # bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
             # bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
 
-##################
-##### INPUTS #####
-##################
 
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## INPUTS / LIBINPUT - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# mouse sensitivity change
 input type:pointer {
   natural_scroll enabled
   accel_profile flat
   pointer_accel -0.1
 }
 
+# key repeat, delay, and numlock enable
 input type:keyboard {
   repeat_delay 300
   repeat_rate 72
   xkb_numlock enabled
 }
 
-#################
-#### OUTPUTS ####
-#################
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## OUTPUTS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# allow/disallow X clients under wayland
+# xwayland disable
 
 # lock screen after 300s; turn off screen after another 300s
 exec swayidle -w \
@@ -110,14 +119,37 @@ exec swaymsg focus output $mon1
 # hide mouse after T period of inactivity
 seat * hide_cursor 5000
 
-# redshift
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## AUTOSTART / NON-SPECIFIC  - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# redshift #TODO: swap for that ligher one by Kenny. L
 exec redshift
 
-#################
-#################
+# run foot in server mode, see `man 1 foot` for advantages
+exec foot --server
 
-# disallow X clients under wayland
-# xwayland disable
+# keybase
+# TODO: stop the GUI showing up
+exec --no-startup-id run_keybase
+
+# notifications
+# TODO: use mako
+# exec --no-startup-id dunst
+
+# waybar
+bar {
+  swaybar_command waybar
+}
+
+# weechat (irc, 2 es), ncspot (spotify), 6cord (discord)
+# exec --no-startup-id $term --title "IRC (weechat)" --exec weechat
+# exec --no-startup-id $term --title "Spotify (ncspot)" --exec ncspot
+# exec --no-startup-id $term --title "Discord (6cord)" --exec 6cord
+
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## KEY BINDINGS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # reload sway config
 bindsym $ralt+Shift+r reload
@@ -129,45 +161,22 @@ bindsym $mod+Shift+q kill
 bindsym $mod+Shift+x exec swaylock -f -c 000000
 
 # exit sway (log out of wayland session)
-bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
-
-##################
-#### TERMINAL ####
-##################
+# TODO: colours
+# TODO: what it says with no
+# TODO: why can't I click yes?
+bindsym $mod+Shift+e exec swaynag -t warning -m 'Really log out?' -b 'Yarp' 'swaymsg exit'
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id $term
-bindsym A+Return exec kitty
-
-###############
-#### UTILS ####
-###############
+bindsym $ralt+Return exec --no-startup-id footclient
 
 # screenshots
-bindsym $mod+Shift+$lalt+s exec scrot $HOME/gdrive/home/screenshots/%Y-%m-%d-%T-screenshot.png
-bindsym --release $mod+Shift+$lalt+q exec scrot -s $HOME/gdrive/home/screenshots/%Y-%m-%d-%T-screenshot.png
+# TODO: directories for this
+# bindsym $mod+Shift+$lalt+s exec scrot $HOME/gdrive/home/screenshots/%Y-%m-%d-%T-screenshot.png
+# bindsym --release $mod+Shift+$lalt+q exec scrot -s $HOME/gdrive/home/screenshots/%Y-%m-%d-%T-screenshot.png
 
-# rofi
-# using a zero-width-space to have an empty prompt
-# bindsym $mod+space exec "wofi --show drun --lines 10 --width 650 --prompt ​"
-bindsym $mod+space exec "fuzzel"
+# application launcher
+bindsym Escape+r exec "fuzzel"
 
-###################
-#### AUTOSTART ####
-###################
-
-exec --no-startup-id run_keybase                # keybase with GUI
-exec --no-startup-id dunst                      # notifications
-exec --no-startup-id albert                     # launcher
-# exec_always --no-startup-id $HOME/.config/polybar/launch.sh
-bar {
-  swaybar_command waybar
-}
-
-# weechat (irc, 2 es), ncspot (spotify), 6cord (discord)
-# exec --no-startup-id $term --title "IRC (weechat)" --exec weechat
-# exec --no-startup-id $term --title "Spotify (ncspot)" --exec ncspot
-# exec --no-startup-id $term --title "Discord (6cord)" --exec 6cord
 
 ######################
 #### APPLICATIONS ####

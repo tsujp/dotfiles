@@ -160,11 +160,8 @@ bindsym $mod+Shift+q kill
 # lock screen
 bindsym $mod+Shift+x exec swaylock -f -c 000000
 
-# exit sway (log out of wayland session)
-# TODO: colours
-# TODO: what it says with no
-# TODO: why can't I click yes?
-bindsym $mod+Shift+e exec swaynag -t warning -m 'Really log out?' -b 'Yarp' 'swaymsg exit'
+# wlogout menu
+bindsym $mod+Shift+e exec wlogout
 
 # start a terminal
 bindsym $ralt+Return exec --no-startup-id footclient

@@ -11,10 +11,11 @@ unalias -a
 # * * * * * * * * * ENV VARS
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_SESSION_TYPE='wayland'
-export EDITOR=nvim
-export VISUAL=nvim
-export TERMINAL=foot
-export GPG_TTY="$(tty)" # set gpg tty to current tty
+export ALTERNATE_EDITOR=""
+export EDITOR='emacsclient -ca ""'
+export VISUAL='emacs client -ca ""'
+export TERMINAL=footclient
+export GPG_TTY="$(tty)"
 export PINEENTRY_USER_DATA='USE_CURSES=1'
 export WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"
 export MOZ_ENABLE_WAYLAND=1

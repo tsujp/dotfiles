@@ -26,7 +26,7 @@
 
 ;; font
 ;; (set-face-attribute 'default nil :font "Source Code Pro-10.5")
-(set-face-attribute 'default nil :font "CozetteTest")
+(set-face-attribute 'default nil :font "Cozette")
 
 ;; by default any runtime customisations or generated elisp will be put into
 ;; init.el, we can change that to a custom file `custom.el` to keep our init
@@ -109,7 +109,6 @@
   (set-face-background 'hl-line "#332C2C"))
 
 ;; modeline (this also includes the required all-the-icons)
-(require 'init-doom-modeline)
 
 ;; additional
 (require 'init-no-littering)
@@ -118,4 +117,5 @@
 (require 'init-evil)
 (require 'init-rainbow-delimiters)
 (require 'init-which-key)
+(require 'init-doom-modeline)
 (provide 'init)

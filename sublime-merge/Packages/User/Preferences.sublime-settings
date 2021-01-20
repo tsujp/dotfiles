@@ -1,9 +1,0 @@
-{
-	"hardware_acceleration": "opengl",
-	"translate_tabs_to_spaces": true,
-	"trim_trailing_white_space_on_save": true,
-	"font_face": "Cozette",
-	"tab_size": 2,
-	"theme": "Merge Dark.sublime-theme",
-	"side_bar_layout": "locations_as_column",
-}

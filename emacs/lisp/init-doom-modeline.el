@@ -3,10 +3,11 @@
 ;;; Code:
 
 ;; required for doom-modeline
-(use-package all-the-icons)
+(use-package all-the-icons
+  :straight t)
 
 (use-package doom-modeline
-  :ensure t
+  :straight t
   :init (doom-modeline-mode 1))
 
 (provide 'init-doom-modeline)

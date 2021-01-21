@@ -1,3 +1,6 @@
+;;; init.el --- full emacs configuration -*- lexical-binding: t -*-
+;;; Commentary:
+
 ;;
 ;;       ::::::::::   :::   :::       :::      ::::::::   ::::::::
 ;;      :+:         :+:+: :+:+:    :+: :+:   :+:    :+: :+:    :+:
@@ -8,11 +11,11 @@
 ;; ########## ###       ### ###     ###  ########   ########
 ;;
 
-
 ;; config largely taken/inspired/built-upon from:
 ;;   * https://github.com/purcell/emacs.d
 ;;   * https://github.com/aaronbieber/dotfiles
 
+;;; Code:
 
 ;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;; PATHS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -25,12 +28,11 @@
 ;; GENERAL (short default-feature configuration) - - - - - - - - - - - - - - -
 
 ;; font
-;; (set-face-attribute 'default nil :font "Source Code Pro-10.5")
-(set-face-attribute 'default nil :font "Cozette")
+(add-to-list 'default-frame-alist '(font . "Cozette"))
+(set-face-attribute 'default t :font "Cozette")
 
 ;; by default any runtime customisations or generated elisp will be put into
-;; init.el, we can change that to a custom file `custom.el` to keep our init
-;; clean
+;; init.el, we can change that to `custom.el` to keep our init clean
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 
 ;; utf8 encoding
@@ -46,7 +48,7 @@
 ;; hilight current line
 (global-hl-line-mode)
 
-;; show matching parenthesis immediately
+;; show matching parenthesis without delay
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
@@ -58,8 +60,8 @@
 ;; (setq-default indicate-empty-lines t)
 ;; (whitespace-mode 'trailing)
 
-;; never indent with tabs (by default) we will (later) respect
-;; editorconfig though
+;; never indent with tabs (by default) we will (later, and where appropriate)
+;; respect editorconfig though
 (setq-default indent-tabs-mode nil)
 
 ;; no welcome screen message
@@ -79,24 +81,18 @@
 ;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;; DEFAULT FEATURES (long default-feature configuration) - - - - - - - - - - -
 
-;; TODO: modeline
-;; (require 'init-default-modeline)
-
 
 ;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;; PACKAGES  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ;; helpers / core
-(require 'init-utils)
-(require 'init-site-lisp) ;; must come before elpa
-(require 'init-elpa)      ;; help install packages; calls (package-initialize)
+(require 'init-straight)    ; straight.el (must be first)
+(require 'init-use-package) ; use-package
 
-;; use-package package
-(unless (package-installed-p 'use-package)
-   (package-refresh-contents)
-   (package-install 'use-package))
-(eval-when-compile
-  (require 'use-package))
+;; TODO: delete/refactor these 3 below
+;; (require 'init-utils)
+;; (require 'init-site-lisp) ;; must come before elpa
+;; (require 'init-elpa)      ;; help install packages; calls (package-initialize)
 
 ;; until it gets merged use PR themes
 (use-package doom-themes
@@ -111,11 +107,20 @@
 ;; modeline (this also includes the required all-the-icons)
 
 ;; additional
-(require 'init-no-littering)
-(require-package 'diminish)
-(maybe-require-package 'scratch)
+;;(require 'init-no-littering)
+;;(require-package 'diminish)
+;;(maybe-require-package 'scratch)
 (require 'init-evil)
-(require 'init-rainbow-delimiters)
-(require 'init-which-key)
-(require 'init-doom-modeline)
+;;(require 'init-rainbow-delimiters)
+;;(require 'init-which-key)
+;;(require 'init-doom-modeline)
+
 (provide 'init)
+
+;; Local Variables:
+;; coding: utf-8
+;; no-byte-compile: t
+;; End:
+;;; init.el ends here
+
+(set-face-attribute 'default nil :font "Cozette")

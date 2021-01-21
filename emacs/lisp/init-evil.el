@@ -7,7 +7,7 @@
   (evil-leader/set-leader ","))
 
 (use-package evil
-  :ensure t
+  :straight t
   :config
   (evil-mode 1)
   (setq blink-cursor-mode 0
@@ -19,23 +19,23 @@
         evil-operator-state-cursor '(box "red")) ;; TODO
 
   (use-package evil-goggles
-    :ensure t
+    :straight t
     :config
     (evil-goggles-mode))
 
   (use-package evil-leader
-    :ensure t
+    :straight t
     :config
     (global-evil-leader-mode)
     (config-evil-leader))
 
   (use-package evil-snipe
-    :ensure t
+    :straight t
     :config
     (evil-snipe-mode))
 
   (use-package evil-surround
-    :ensure t
+    :straight t
     :config
     (global-evil-surround-mode 1))
 )

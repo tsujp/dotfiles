@@ -55,6 +55,8 @@ set -o noclobber
 # * * * * * * * * * PATHS
 export NVM_DIR="$XDG_CONFIG_HOME/nvm"
 export PATH="$HOME/.local/bin:$XDG_CONFIG_HOME/__helpers:$PATH"
+export PATH=/opt/local/bin:/opt/local/sbin:$PATH
+
 # KUBECONFIG="\
 # /add/another/route/note/the/trailing/colon/is/important:\
 # $HOME/.kube/config"
@@ -159,7 +161,6 @@ if [ -f /keybase/private/tsujp/env/dotfiles-kbfs/project-defs.bash ]; then
     [[ " ${!__pds[@]} " =~ " $PWD " ]] && __set_envs "${__envs[${__pds[$PWD]}]}"
   }
 fi
-
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

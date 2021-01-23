@@ -27,10 +27,26 @@
 ;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;; GENERAL (short default-feature configuration) - - - - - - - - - - - - - - -
 
-;; font
-(add-to-list 'default-frame-alist '(font . "Cozette"))
-(set-face-attribute 'default t :font "Cozette")
+;; TODO: window position in non-WM environments (macOS)
+;; frame size and position
+(if (eq system-type 'darwin)
+    (if (display-graphic-p)
+        (progn
+          (setq default-frame-alist
+                '(
+                  (width . 150)
+                  (height . 80))))))
 
+;; font
+(if (eq system-type 'darwin)
+    (progn
+      (add-to-list 'default-frame-alist '(font . "Menlo-13"))
+      (set-face-attribute 'default t :font "Menlo-13"))
+    (progn
+      (add-to-list 'default-frame-alist '(font . "Cozette"))
+      (set-face-attribute 'default t :font "Cozette")))
+
+    
 ;; by default any runtime customisations or generated elisp will be put into
 ;; init.el, we can change that to `custom.el` to keep our init clean
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -105,6 +121,7 @@
   (set-face-background 'hl-line "#332C2C"))
 
 ;; modeline (this also includes the required all-the-icons)
+(require 'init-doom-modeline)
 
 ;; additional
 ;;(require 'init-no-littering)
@@ -122,5 +139,3 @@
 ;; no-byte-compile: t
 ;; End:
 ;;; init.el ends here
-
-(set-face-attribute 'default nil :font "Cozette")

@@ -101,39 +101,34 @@
 ;; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;; PACKAGES  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;; helpers / core
-(require 'init-straight)    ; straight.el (must be first)
-(require 'init-use-package) ; use-package
-
 ;; TODO: delete/refactor these 3 below
 ;; (require 'init-utils)
 ;; (require 'init-site-lisp) ;; must come before elpa
 ;; (require 'init-elpa)      ;; help install packages; calls (package-initialize)
 
-;; until it gets merged use PR themes
+;; helpers / core
+(require 'init-straight)    ; straight.el (must be first)
+(require 'init-use-package) ; use-package
+(require 'init-no-littering)
+
+;; until PR merged doom themes here to prevent relative path weirdness
 (use-package doom-themes
   :load-path "site-lisp/emacs-doom-themes"
   :config
-  ;; Global settings (defaults)
+  ;; settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-monokai-ristretto t)
   (set-face-background 'hl-line "#332C2C"))
 
-;; modeline (this also includes the required all-the-icons)
-(require 'init-doom-modeline)
-
-;; additional
-;;(require 'init-no-littering)
 ;;(require-package 'diminish)
 ;;(maybe-require-package 'scratch)
 (require 'init-evil)
+(require 'init-modeline)
 ;;(require 'init-rainbow-delimiters)
 ;;(require 'init-which-key)
-;;(require 'init-doom-modeline)
 
 (provide 'init)
-
 ;; Local Variables:
 ;; coding: utf-8
 ;; no-byte-compile: t

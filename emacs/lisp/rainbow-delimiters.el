@@ -3,7 +3,7 @@
 ;;; Code:
 
 (use-package rainbow-delimiters
-  :ensure t
+  :straight t
   :config
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 

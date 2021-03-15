@@ -2,60 +2,140 @@
 
 # SYMLINK TO `$HOME/.bashrc`
 
+# .profile, .bash_profile, .bashrc et al
+#   - .profile       environment variables, PATH, must be (mostly) shell agnostic
+#   - .bash_profile  for login shells (macOS always a login shell), aliases, ...
+#   - .bashrc        new instances of bash not from login e.g. typing /bin/bash
+#   - .bash_login    ensure this file never exists as it causes others to be ignored
+#
+#            +----------------+-----------+-----------+------+
+#            |                |Interactive|Interactive|Script|
+#            |                |login      |non-login  |      |
+#            +----------------+-----------+-----------+------+
+#            |/etc/profile    |   A       |           |      |
+#            +----------------+-----------+-----------+------+
+#            |/etc/bash.bashrc|           |    A      |      |
+#            +----------------+-----------+-----------+------+
+#            |~/.bashrc       |           |    B      |      |
+#            +----------------+-----------+-----------+------+
+#            |~/.bash_profile |   B1      |           |      |
+#            +----------------+-----------+-----------+------+
+#            |~/.bash_login   |   B2      |           |      |
+#            +----------------+-----------+-----------+------+
+#            |~/.profile      |   B3      |           |      |
+#            +----------------+-----------+-----------+------+
+#            |BASH_ENV        |           |           |  A   |
+#            +----------------+-----------+-----------+------+
+#            |~/.bash_logout  |    C      |           |      |
+#            +----------------+-----------+-----------+------+
+
+# TODO: using `exec -l` now, if any problems (doubt it) revert to this
 # reset all aliases so we can just reload this instead of relogging
-unalias -a
+# unalias -a
 
 
 
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# * * * * * * * * * ENV VARS
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_SESSION_TYPE='wayland'
-export ALTERNATE_EDITOR=""
-export EDITOR='emacsclient -ca ""'
-export VISUAL='emacs client -ca ""'
-export TERMINAL=footclient
-export GPG_TTY="$(tty)"
-export PINEENTRY_USER_DATA='USE_CURSES=1'
-export WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"
-export MOZ_ENABLE_WAYLAND=1
-export QT_QPA_PLATFORM='wayland-egl'
-export ELM_DISPLAY='wl'
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## SET UP SHOPT  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
+set -o noclobber
+set -b
+shopt -s cdspell
+shopt -s checkwinsize
+shopt -s histappend
 
-# xdg gnupg
+
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## ENV - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# xdg
+XDG_CONFIG_HOME="$HOME/.config";         export XDG_CONFIG_HOME
+XDG_SESSION_TYPE='wayland';              export XDG_SESSION_TYPE
+
+# locale
+: ${LANG:="en_US.UTF-8"};                export LANG
+: ${LANGUAGE:="en"};                     export LANGUAGE
+: ${LC_CTYPE:="en_US.UTF-8"};            export LC_CTYPE
+: ${LC_ALL:="en_US.UTF-8"};              export LC_ALL
+
+# editors
+ALTERNATE_EDITOR='';                     export ALTERNATE_EDITOR
+EDITOR='emacsclient -ca ""';             export EDITOR
+VISUAL='emacs client -ca ""';            export VISUAL
+
+# history
+HISTFILE="$XDG_DATA_HOME/bash/history";  export HISTFILE
+LESSHISTFILE="-";                        export LESSHISTFILE
+HISTIGNORE=ls:q:qq:exit
+HISTCONTROL=ignoredups
+HISTSIZE="INFINITE";                     export HISTSIZE
+
+# enable wayland
+MOZ_ENABLE_WAYLAND=1;                    export MOZ_ENABLE_WAYLAND
+QT_QPA_PLATFORM='wayland-egl';           export QT_QPA_PLATFORM
+ELM_DISPLAY='wl';                        export ELM_DISPLAY
+CLUTTER_BACKEND=wayland;                 export CLUTTER_BACKEND
+ECORE_EVAS_ENGINE=wayland-egl;           export ECORE_EVAS_ENGINE
+ELM_ENGINE=wayland_egl;                  export ELM_ENGINE
+SDL_VIDEODRIVER=wayland;                 export SDL_VIDEODRIVER
+_JAVA_AWT_WM_NONREPARENTING=1;           export _JAVA_AWT_WM_NONREPARENTING
+NO_AT_BRIDGE=1;                          export NO_AT_BRIDGE
+
+# paging
+PAGER='less -SFw';                        export PAGER
+MANPAGER="$PAGER";                       export MANPAGER
+
+# gpg / gnupg
+GNUPGHOME="$XDG_CONFIG_HOME/gnupg";      export GNUPGHOME
+GPG_TTY="$(tty)";                        export GPG_TTY
+PINEENTRY_USER_DATA='USE_CURSES=1';      export PINEENTRY_USER_DATA
+
+# misc
+TERMINAL=footclient;                     export TERMINAL
+DOTNET_CLI_TELEMETRY_OPTOUT=1;           export DOTNET_CLI_TELEMETRY_OPTOUT
+WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"; export WEECHAT_HOME
+
+
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## GUARDS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+[[ $- = *i* ]] || return     # interactive shell, or exit
+[[ $TERM = dumb ]] && return # emacs TRAMP so exit
+
+
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## START 'JOBS'  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# fix potential GNUPG permissions
 if command -v find &> /dev/null; then
   find "$XDG_CONFIG_HOME"/gnupg -type f -exec chmod 600 {} \;
   find "$XDG_CONFIG_HOME"/gnupg -type d -exec chmod 700 {} \;
 fi
-export GNUPGHOME="$XDG_CONFIG_HOME/gnupg"
 
 # xdg fnm; path has to be set here to load fnm in for dependent shell scripts
+# next line is temp
+TEMP_RUST_PATH="/Users/tsujp/.asdf/installs/rust/1.50.0/bin"
 FNM_DIR="$XDG_CONFIG_HOME/fnm/"
-PATH="$FNM_DIR:$PATH"
+PATH="$FNM_DIR:$TEMP_RUST_PATH:$PATH"
 eval "$(fnm env --use-on-cd)"
 
 # git; limited environment variables in git config so this is done here
 git config --global core.excludesfile "$XDG_CONFIG_HOME/git/gitignore_global"
-git config --global gpg.program $(which gpg2)
-
-
-# pre-interactive bash sets
-# https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
-set -o noclobber
-
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# * * * * * * * * * INTERACTIVE SHELL ONLY GUARD
-[[ $- = *i* ]] || return
 
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * PATHS
 export NVM_DIR="$XDG_CONFIG_HOME/nvm"
-export PATH="$HOME/.local/bin:$XDG_CONFIG_HOME/__helpers:$PATH"
-export PATH=/opt/local/bin:/opt/local/sbin:$PATH
+export PATH="$HOME/.local/bin:"\
+"/macports/libexec/gnubin:"\
+"/macports/bin:"\
+"$XDG_CONFIG_HOME/__helpers:"\
+"/opt/local/bin:"\
+"/opt/local/sbin:"\
+"$PATH"
 
 # KUBECONFIG="\
 # /add/another/route/note/the/trailing/colon/is/important:\
@@ -71,7 +151,7 @@ export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 # )
 
 # # SET THE ENVIRONMENT VARIABLES WE WANT PER PROJECT
-__cdenv ()
+# __cdenv ()
 #{
 #    cd "$@"
 
@@ -105,10 +185,10 @@ if [ -f ~/.acme.sh/acme.sh.env ]; then
 fi
 
 # chruby
-if [ -n "$BASH_VERSION" ]; then
-  source /usr/local/share/chruby/chruby.sh
-  source /usr/local/share/chruby/auto.sh
-fi
+#if [ -n "$BASH_VERSION" ]; then
+#  source /usr/local/share/chruby/chruby.sh
+#  source /usr/local/share/chruby/auto.sh
+#fi
 
 # fnm completion
 if [ -n $(type -P fnm) ]; then
@@ -165,36 +245,47 @@ fi
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * ALIASES
-alias sudo='sudo ' # NB: https://www.gnu.org/software/bash/manual/bash.html#Aliases
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+#alias sudo='sudo ' # NB: https://www.gnu.org/software/bash/manual/bash.html#Aliases
 alias mv='mv --no-clobber' # do not overwrite existing files
 # alias cd=__cdenv
 alias ee='exit'
 alias c='clear'
+alias h='history | tail -30'
 alias rm='rm -i'
-alias r='source $HOME/.bashrc'
-alias ebc="nvim $XDG_CONFIG_HOME/bash/bashrc"
-alias etec="nvim $XDG_CONFIG_HOME/foot/foot.ini"
-alias exdg="nvim $XDG_CONFIG_HOME"
-alias esshc='nvim ~/.ssh/config'
-alias ll='ls -lFhN --color --group-directories-first'
-alias l='ls -FhN --color --group-directories-first'
-# alias ls="gls -FhN --color $@"
+alias r="exec $SHELL -l"
+alias k=kubectl
+alias e-bc="$EDITOR $XDG_CONFIG_HOME/bash/bashrc"
+alias e-tc="$EDITOR $XDG_CONFIG_HOME/foot/foot.ini"
+alias e-ssh="$EDITOR ~/.ssh/config"
+alias ll='ls  -lFhN    --color --group-directories-first'
+alias lla='ls -lFhN -A --color --group-directories-first'
+alias ls='ls  -FhN     --color --group-directories-first'
+alias la='ls  -FhN  -A --color --group-directories-first'
 alias py='python3'
 #alias ssh='' # TODO: auto add alacritty terminfo to remote
 alias vssh='ssh'
 alias gnpm='npm list -g --depth 0'
-alias vim='nvim'
+#alias vim='nvim' # temp on macos until neovim releases an arm compatible build
 alias dpsv='docker ps -a | less -S'
 alias dps=''
 alias gb='git branch'
 alias ga='git add'
 alias glo='git log --pretty=online --abbrev-commit'
 alias gpg='gpg2'
+#alias sudo='doas '
 
+
+# COMPLETIONS
+# source <(kubectl completion bash)
+# complete -F __start_kubectl k
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * FUNCTIONS AS HELPERS
+
 
 __git_guard ()
 {
@@ -228,6 +319,24 @@ __print_error ()
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * FUNCTIONS SERVING AS ALIASES
+
+man() {
+	env \
+	LESS_TERMCAP_mb=$(tput bold; tput setaf 6) \
+	LESS_TERMCAP_md=$(tput bold; tput setaf 6) \
+	LESS_TERMCAP_me=$(tput sgr0) \
+	LESS_TERMCAP_se=$(tput rmso; tput sgr0) \
+	LESS_TERMCAP_ue=$(tput rmul; tput sgr0) \
+	LESS_TERMCAP_us=$(tput smul; tput bold; tput setaf 4) \
+	LESS_TERMCAP_mr=$(tput rev) \
+	LESS_TERMCAP_mh=$(tput dim) \
+	LESS_TERMCAP_ZN=$(tput ssubm) \
+	LESS_TERMCAP_ZV=$(tput rsubm) \
+	LESS_TERMCAP_ZO=$(tput ssupm) \
+	LESS_TERMCAP_ZW=$(tput rsupm) \
+		man "$@"
+}
+
 
 # CREATE NEW GITHUB BRANCH, OPTIONALLY ON THE GIVEN REMOTE TOO
 gnb ()
@@ -346,10 +455,10 @@ export LS_COLORS="rs=0:fi=0:di=1;34:ln=95:mh=30;46:pi=40;38;5;11:so=95:do=95:bd=
 bind 'set editing-mode vi'
 bind 'set show-mode-in-prompt on'
 bind 'set keyseq-timeout 50'
-bind 'set vi-ins-mode-string "\1\e[0m\2(ins)"'
-bind 'set vi-cmd-mode-string "\1\e[32m\2(cmd)\1\e[0m\2"'
+bind 'set vi-ins-mode-string "\1\e[0m\2(i)"'
+bind 'set vi-cmd-mode-string "\1\e[32m\2(c)\1\e[0m\2"'
 
-shell_prompt_decoration=">"
+shell_prompt_decoration="〉"
 shell_depth=""
 if command -v pstree &> /dev/null; then
   depth="$(pstree -s "$$" | grep bash- -o | tail +2 | wc -l)"
@@ -363,7 +472,7 @@ fi
 
 PROMPT_COMMAND="__git_prompt;"
 PS1_PREFIX=" $(__uc CYAN)\W$(__uc RESET) "
-PS1_SUFFIX="$(__uc YELLOW)$shell_depth$(__uc RESET) "
+PS1_SUFFIX="$(__uc YELLOW)$shell_depth$(__uc RESET)"
 
 
 
@@ -444,12 +553,5 @@ __git_prompt ()
   fi
 }
 
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# * * * * * * * * * PYTHON
-# this is SOOOOOOOOOOOOO SLOW, look at running `venv` instead
-# eval "$(pyenv init -)"
-# eval "$(pyenv virtualenv-init -)"
-
-# TODO unsets wanted here? could be good prac to do so
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash

@@ -5,14 +5,11 @@
 (setq-default mode-line-format
                   (list
            ;; value of `mode-name'
-           "%m: "
+           "%m"
            ;; value of current buffer name
-           "buffer %b, "
+           "%b, "
            ;; line number and column
-           "%l:%c "
-           "-- user: "
-           ;; value of user
-           (getenv "USER")))
+           "%l,%c "))
 
 (provide 'init-modeline)
 ;;; init-modeline.el ends here

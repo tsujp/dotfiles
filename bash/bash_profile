@@ -6,3 +6,4 @@
 if [ -f "$HOME"/.config/bash/bashrc ]; then
   source "$HOME"/.config/bash/bashrc
 fi
+eval "$(/opt/homebrew/bin/brew shellenv)"

@@ -1,0 +1,3 @@
+to shut up logged in logged out etc
+
+(setq erc-hide-list '("JOIN" "PART" "QUIT" "NICK")) etc

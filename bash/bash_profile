@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-# SYMLINK TO `$HOME/.bash_profile`
-
-# LOAD CUSTOM PROFILE, IF IT EXISTS
-if [ -f "$HOME"/.config/bash/bashrc ]; then
-  source "$HOME"/.config/bash/bashrc
-fi
-eval "$(/opt/homebrew/bin/brew shellenv)"

@@ -28,6 +28,7 @@ tasks:
       git remote add github git@github.com:tsujp/dotfiles.git
       git push --prune github +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/*
 
+# TODO: suck this out, also stop is pushing HEAD as a branch
 # refspec src then colon then dest, e.g. src:dest
 # optional + can prefix this src:dest block e.g. +src:dest
 #

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Todoist
+Exec=/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=todoist com.todoist.Todoist
+Terminal=false
+Type=Application
+Icon=com.todoist.Todoist
+StartupWMClass=Todoist
+Comment=The Best To-Do List App & Task Manager
+Categories=Office;
+X-Flatpak-Tags=proprietary;
+X-Flatpak=com.todoist.Todoist

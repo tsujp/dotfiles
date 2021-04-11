@@ -51,7 +51,8 @@ shopt -s histappend
 
 # xdg
 XDG_CONFIG_HOME="$HOME/.config";         export XDG_CONFIG_HOME
-XDG_SESSION_TYPE='wayland';              export XDG_SESSION_TYPE
+# XDG_SESSION_TYPE='wayland';              export XDG_SESSION_TYPE
+# TODO: optional line above
 
 # locale
 : ${LANG:="en_US.UTF-8"};                export LANG
@@ -71,16 +72,17 @@ HISTIGNORE=ls:q:qq:exit
 HISTCONTROL=ignoredups
 HISTSIZE="INFINITE";                     export HISTSIZE
 
+# TODO: make optional since for work-stuff need zoom and so need x11 :(
 # enable wayland
-MOZ_ENABLE_WAYLAND=1;                    export MOZ_ENABLE_WAYLAND
-QT_QPA_PLATFORM='wayland-egl';           export QT_QPA_PLATFORM
-ELM_DISPLAY='wl';                        export ELM_DISPLAY
-CLUTTER_BACKEND=wayland;                 export CLUTTER_BACKEND
-ECORE_EVAS_ENGINE=wayland-egl;           export ECORE_EVAS_ENGINE
-ELM_ENGINE=wayland_egl;                  export ELM_ENGINE
-SDL_VIDEODRIVER=wayland;                 export SDL_VIDEODRIVER
-_JAVA_AWT_WM_NONREPARENTING=1;           export _JAVA_AWT_WM_NONREPARENTING
-NO_AT_BRIDGE=1;                          export NO_AT_BRIDGE
+#MOZ_ENABLE_WAYLAND=1;                    export MOZ_ENABLE_WAYLAND
+#QT_QPA_PLATFORM='wayland-egl';           export QT_QPA_PLATFORM
+#ELM_DISPLAY='wl';                        export ELM_DISPLAY
+#CLUTTER_BACKEND=wayland;                 export CLUTTER_BACKEND
+#ECORE_EVAS_ENGINE=wayland-egl;           export ECORE_EVAS_ENGINE
+#ELM_ENGINE=wayland_egl;                  export ELM_ENGINE
+#SDL_VIDEODRIVER=wayland;                 export SDL_VIDEODRIVER
+#_JAVA_AWT_WM_NONREPARENTING=1;           export _JAVA_AWT_WM_NONREPARENTING
+#NO_AT_BRIDGE=1;                          export NO_AT_BRIDGE
 
 # paging
 PAGER='less -SFw';                       export PAGER
@@ -93,7 +95,7 @@ GPG_TTY="$(tty)";                        export GPG_TTY
 PINEENTRY_USER_DATA='USE_CURSES=1';      export PINEENTRY_USER_DATA
 
 # misc
-TERMINAL=footclient;                     export TERMINAL
+# TERMINAL=footclient;                     export TERMINAL
 DOTNET_CLI_TELEMETRY_OPTOUT=1;           export DOTNET_CLI_TELEMETRY_OPTOUT
 WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"; export WEECHAT_HOME
 

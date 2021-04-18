@@ -32,13 +32,12 @@ Easily configure packages (not a package manager).
 Decent window frame size upon startup.
 
 #+begin_src emacs-lisp
-(if (eq system-type 'darwin)
     (if (display-graphic-p)
         (progn
           (setq default-frame-alist
                 '(
-                  (width . 150)
-                  (height . 80))))))
+                  (width . 135)
+                  (height . 50)))))
 #+end_src
 
 Thin window edges.
@@ -51,48 +50,45 @@ Thin window edges.
 Select appropriate fonts per system.
 
 #+begin_src emacs-lisp
-(if (eq system-type 'darwin)
-    (progn
-      (add-to-list 'default-frame-alist '(font . "Iosevka Fixed-13"))
-      (set-face-attribute 'default t :font "Iosevka Fixed-13")
-      (display-time-mode -1)
-      (display-battery-mode -1))
-    (progn
-      (add-to-list 'default-frame-alist '(font . "Cozette"))
-      (set-face-attribute 'default t :font "Cozette")))
+(add-to-list 'default-frame-alist '(font . "Iosevka Fixed Medium-10.5"))
+(set-face-attribute 'default t :font "Iosevka Fixed Medium-10.5")
+(set-face-attribute 'bold t :font "Iosevka Fixed Heavy-10.5")
+(display-time-mode -1)
+(display-battery-mode -1)
 #+end_src
 
 Defaults behaviour.
 
 #+begin_src emacs-lisp
-(setq-default
- custom-file (expand-file-name "custom.el" user-emacs-directory) ; custom (generated) lisp code location
- fill-column 80                          ; 80 char wide babbyyy
- delete-by-moving-to-trash t             ; delete by moving to trash
- select-enable-clipboard t               ; unify emacs and system clipboard
- sentence-end-double-space nil           ; single space after fullstop
- indent-tabs-mode nil                    ; sane whitespace, please
- initial-scratch-message ";; Scratch"    ; initial scratch message
- inhibit-splash-screen t                 ; hide welcome screen
- inhibit-startup-echo-area-message t     ; no echo area message
- buffer-file-coding-system 'utf-8-unix   ; utf8 encoding
- locale-coding-system 'utf-8-unix        ; utf8 encoding
- require-final-newline t                 ; add newline on buffer save
- display-line-numbers-type 'relative     ; set line numbers to relative
- show-paren-delay 0                      ; no matching paren show delay
- gc-cons-threshold 100000000             ; increase consing before gc runs
- read-process-output-max (* 1024 1024))  ; increase max bytes read per chunk
+  (setq-default
+   custom-file (expand-file-name "custom.el" user-emacs-directory) ; custom (generated) lisp code location
+   fill-column 80                          ; 80 char wide babbyyy
+   delete-by-moving-to-trash t             ; delete by moving to trash
+   select-enable-clipboard t               ; unify emacs and system clipboard
+   sentence-end-double-space nil           ; single space after fullstop
+   indent-tabs-mode nil                    ; sane whitespace, please
+   initial-scratch-message ";; Scratch"    ; initial scratch message
+   inhibit-splash-screen t                 ; hide welcome screen
+   inhibit-startup-echo-area-message t     ; no echo area message
+   buffer-file-coding-system 'utf-8-unix   ; utf8 encoding
+   locale-coding-system 'utf-8-unix        ; utf8 encoding
+   require-final-newline t                 ; add newline on buffer save
+   display-line-numbers-type 'relative     ; set line numbers to relative
+   show-paren-delay 0                      ; no matching paren show delay
+   gc-cons-threshold 100000000             ; increase consing before gc runs
+   read-process-output-max (* 1024 1024)   ; increase max bytes read per chunk
+   x-hyper-keysym 'ctrl)                   ; pressing hyper simulates ctrl
 
-(set-default-coding-systems 'utf-8-unix) ; utf8
-(prefer-coding-system 'utf-8-unix)       ; utf8
-(global-display-line-numbers-mode)       ; enable relative line numbers
-(global-hl-line-mode)                    ; enable hilight current line
-(show-paren-mode 1)                      ; enable show matching parens
-(scroll-bar-mode -1)                     ; hide scroll
-(menu-bar-mode -1)                       ; hide menu bar
-(tool-bar-mode -1)                       ; hide tool bar
-(fset 'yes-or-no-p 'y-or-n-p)            ; yes/no -> y/n
-(global-font-lock-mode 1)                ; force-enable font-face
+  (set-default-coding-systems 'utf-8-unix) ; utf8
+  (prefer-coding-system 'utf-8-unix)       ; utf8
+  (global-display-line-numbers-mode)       ; enable relative line numbers
+  (global-hl-line-mode)                    ; enable hilight current line
+  (show-paren-mode 1)                      ; enable show matching parens
+  (scroll-bar-mode -1)                     ; hide scroll
+  (menu-bar-mode -1)                       ; hide menu bar
+  (tool-bar-mode -1)                       ; hide tool bar
+  (fset 'yes-or-no-p 'y-or-n-p)            ; yes/no -> y/n
+  (global-font-lock-mode 1)                ; force-enable font-face
 #+end_src
 
 Re-enable certain things we want per-system

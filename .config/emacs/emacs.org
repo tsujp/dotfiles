@@ -60,35 +60,37 @@ Select appropriate fonts per system.
 Defaults behaviour.
 
 #+begin_src emacs-lisp
-  (setq-default
-   custom-file (expand-file-name "custom.el" user-emacs-directory) ; custom (generated) lisp code location
-   fill-column 80                          ; 80 char wide babbyyy
-   delete-by-moving-to-trash t             ; delete by moving to trash
-   select-enable-clipboard t               ; unify emacs and system clipboard
-   sentence-end-double-space nil           ; single space after fullstop
-   indent-tabs-mode nil                    ; sane whitespace, please
-   initial-scratch-message ";; Scratch"    ; initial scratch message
-   inhibit-splash-screen t                 ; hide welcome screen
-   inhibit-startup-echo-area-message t     ; no echo area message
-   buffer-file-coding-system 'utf-8-unix   ; utf8 encoding
-   locale-coding-system 'utf-8-unix        ; utf8 encoding
-   require-final-newline t                 ; add newline on buffer save
-   display-line-numbers-type 'relative     ; set line numbers to relative
-   show-paren-delay 0                      ; no matching paren show delay
-   gc-cons-threshold 100000000             ; increase consing before gc runs
-   read-process-output-max (* 1024 1024)   ; increase max bytes read per chunk
-   x-hyper-keysym 'ctrl)                   ; pressing hyper simulates ctrl
+    (setq-default
+     custom-file (expand-file-name "custom.el" user-emacs-directory) ; custom (generated) lisp code location
+     fill-column 80                          ; 80 char wide babbyyy
+     delete-by-moving-to-trash t             ; delete by moving to trash
+     select-enable-clipboard t               ; unify emacs and system clipboard
+     sentence-end-double-space nil           ; single space after fullstop
+     indent-tabs-mode nil                    ; sane whitespace, please
+     initial-scratch-message ";; Scratch"    ; initial scratch message
+     inhibit-splash-screen t                 ; hide welcome screen
+     inhibit-startup-echo-area-message t     ; no echo area message
+     buffer-file-coding-system 'utf-8-unix   ; utf8 encoding
+     locale-coding-system 'utf-8-unix        ; utf8 encoding
+     require-final-newline t                 ; add newline on buffer save
+     display-line-numbers-type 'visual       ; set line numbers to relative
+     display-line-numbers-grow-only t
+     show-paren-delay 0                      ; no matching paren show delay
+     gc-cons-threshold 100000000             ; increase consing before gc runs
+     read-process-output-max (* 1024 1024)   ; increase max bytes read per chunk
+     display-raw-bytes-as-hex t
+     x-hyper-keysym 'ctrl)                   ; pressing hyper simulates ctrl
 
-  (set-default-coding-systems 'utf-8-unix) ; utf8
-  (prefer-coding-system 'utf-8-unix)       ; utf8
-  (global-display-line-numbers-mode)       ; enable relative line numbers
-  (global-hl-line-mode)                    ; enable hilight current line
-  (show-paren-mode 1)                      ; enable show matching parens
-  (scroll-bar-mode -1)                     ; hide scroll
-  (menu-bar-mode -1)                       ; hide menu bar
-  (tool-bar-mode -1)                       ; hide tool bar
-  (fset 'yes-or-no-p 'y-or-n-p)            ; yes/no -> y/n
-  (global-font-lock-mode 1)                ; force-enable font-face
+    (set-default-coding-systems 'utf-8-unix) ; utf8
+    (prefer-coding-system 'utf-8-unix)       ; utf8
+    (global-display-line-numbers-mode)       ; enable relative line numbers
+    (global-hl-line-mode)                    ; enable hilight current line
+    (show-paren-mode 1)                      ; enable show matching parens
+    (scroll-bar-mode -1)                     ; hide scroll
+    (menu-bar-mode -1)                       ; hide menu bar
+    (tool-bar-mode -1)                       ; hide tool bar
+    (fset 'yes-or-no-p 'y-or-n-p)            ; yes/no -> y/n
+    (global-font-lock-mode 1)                ; force-enable font-face
 #+end_src
 
 Re-enable certain things we want per-system
@@ -139,8 +141,12 @@ Remove all of the ~ and what not files that get scattered about, please.
 Latest Org mode for a safe bet.
 
 #+begin_src emacs-lisp
-(use-package org
-:straight t)
+  (use-package org
+    :straight t
+    :custom
+    (org-adapt-indentation nil)
+  (org-startup-folded "content")
+  )
 #+end_src
 
 ** Org Tempo
@@ -196,35 +202,29 @@ Set face background of colour to that colour's value (basically swatch preview).
 Theme.
 
 #+begin_src emacs-lisp
-(use-package doom-themes
-  :straight t
-  :config
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
- (doom-themes-org-config) ; improve org-mode's fontification
- (load-theme 'doom-ephemeral t)
-  (set-face-background 'hl-line "#2A3542"))
+  (use-package doom-themes
+    :straight t
+    :config
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+   (doom-themes-org-config) ; improve org-mode's fontification
+   ; (load-theme 'doom-ephemeral t)
+    (load-theme 'doom-monokai-pro t)
+    (set-face-background 'hl-line "#353136")
+    (set-face-foreground 'line-number "#5E565F"))
 #+end_src
 
-** Boon
+** Sidebar
 
-Modal editing inline with Emacs traditions (not vim).
+Dired-sidebar.
 
 #+begin_src emacs-lisp
-(use-package boon
-:straight t
-:init
-(require 'boon-qwerty)
-(require 'boon-tutorial)
-(boon-mode)
-:config
-(setq boon-command-cursor-color "#F48FB1"
-      boon-insert-cursor-color "#00FF00"))
-; boon-special-cursor-color
-; boon-default-cursor-color
+(use-package dired-sidebar
+  :straight t
+  :commands (dired-sidebar-toggle-sidebar))
 #+end_src
 
-** COMMENT Evil Mode
+** Evil Mode
 
 Vim-key emulation.
 
@@ -442,7 +442,9 @@ Add Language Server Protocol support.
 
 ** Lispy
 
-Paredit et al but today.
+Paredit et al but all-in-one.
+
+# TODO : lispy-multiline and lispy-oneline not working
 
 #+begin_src emacs-lisp
 (use-package lispy
@@ -485,3 +487,24 @@ YAML major mode.
           (lambda () (run-hooks 'prog-mode-hook))
   (add-hook 'yaml-mode-hook 'set-yaml-variable-name-face)))
 #+end_src
+
+** Org-roam
+
+Zettelkasten-style note taking with Org.
+
+#+begin_src emacs-lisp
+(use-package org-roam
+      :straight t
+      :hook
+      (after-init . org-roam-mode)
+      :custom
+      (org-roam-directory "/home/tsujp/Documents/org-roam-test")
+      :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n g" . org-roam-graph))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert))
+              (("C-c n I" . org-roam-insert-immediate))))
+#+end_src
+

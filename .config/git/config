@@ -8,6 +8,6 @@
     editor = nvim
 	excludesfile = /home/jordan/.config/git/gitignore_global
 [init]
-    defaultBranch = master
+  defaultBranch = master
 [pull]
-	rebase = false
+	rebase = true

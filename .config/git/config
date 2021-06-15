@@ -1,13 +1,15 @@
 [user]
-    signingkey = F84846C9349D247B
-    name = Jordan Ellis Coppard
-    email = jc+git@wz.ht
+	signingkey = F84846C9349D247B
+	name = Jordan Ellis Coppard
+	email = jc+git@wz.ht
 [commit]
-    gpgsign = true
+	gpgsign = true
 [core]
-    editor = nvim
-	excludesfile = /home/jordan/.config/git/gitignore_global
+	editor = vim
+	excludesfile = /home/tsujp/.config/git/gitignore_global
 [init]
-  defaultBranch = master
+	defaultBranch = master
 [pull]
 	rebase = true
+[gpg]
+	program = /usr/sbin/gpg2

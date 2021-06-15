@@ -149,6 +149,8 @@ fi
 git config --global core.excludesfile "$XDG_CONFIG_HOME/git/gitignore_global"
 git config --global gpg.program $(which gpg2)
 
+# TODO: check ~/.ssh/config only has permissions 600, else set it so
+
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

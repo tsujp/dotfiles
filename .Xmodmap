@@ -1,0 +1,14 @@
+clear mod1
+clear mod2
+clear mod3
+clear mod4
+clear mod5
+
+add mod1 = Alt_R
+add mod2 = Num_Lock
+add mod3 = Super_R
+add mod4 = Super_L
+add mod5 = Mode_switch
+
+! natural scroll
+pointer = 1 2 3 5 4 7 6 8 9 10 11 12

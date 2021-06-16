@@ -1,3 +1,5 @@
+unclutter &
+xbanish &
 numlockx &
 
 THE_WM="/home/tsujp/.xmonad/xmonad-$(uname -m)-$(uname | tr '[:upper:]' '[:lower:]')"
@@ -5,7 +7,7 @@ THE_WM="/home/tsujp/.xmonad/xmonad-$(uname -m)-$(uname | tr '[:upper:]' '[:lower
 # configuire x environment
 xrdb ~/.Xresources
 xmodmap ~/.Xmodmap
-xset r rate 200 50
+xset r rate 220 60
 
 # allow local networked connections to X server
 xhost +local:

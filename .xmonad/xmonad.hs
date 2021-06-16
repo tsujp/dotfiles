@@ -196,7 +196,9 @@ myLogHook = return ()
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook = return ()
+myStartupHook =
+	<+> hsetroot -solid '#635657'
+	<+> xsetroot -cursor_name right_ptr
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.

@@ -193,7 +193,11 @@ alias glo='git log --pretty=online --abbrev-commit'
 alias gpg='gpg2'
 alias gpg-restart='gpg-connect-agent reloadagent /bye'
 alias rsync='rsync -I --info=progress2'
-alias wget=wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"
+alias wget="wget --hsts-file=$XDG_CACHE_HOME/wget-hsts"
+
+# TODO: put this in it's own script which is included if voidlinux
+alias xbpsi='sudo xbps-install -Su'
+alias xbpsq='xbps-query -Rs'
 
 # COMPLETIONS
 # source <(kubectl completion bash)

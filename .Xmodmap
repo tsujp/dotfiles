@@ -10,5 +10,5 @@ add mod3 = Super_R
 add mod4 = Super_L
 add mod5 = Mode_switch
 
-! natural scroll
-pointer = 1 2 3 5 4 7 6 8 9 10 11 12
+! natural scroll (using set-prop instead, for libinput)
+! pointer = 1 2 3 5 4 7 6 8 9 10 11 12

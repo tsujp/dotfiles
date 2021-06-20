@@ -474,5 +474,5 @@ __git_prompt ()
   fi
 }
 
-[[ -f "$HOME/.asdf/asdf.sh" ]] && source "$HOME/.asdf/asdf.sh"
-[[ -f "$HOME/.asdf/completions/asdf.bash" ]] && source "$HOME/.asdf/completions/asdf.bash"
+[[ -f "$HOME/bin/asdf/asdf.sh" ]] && source "$HOME/bin/asdf/asdf.sh"
+[[ -f "$HOME/bin/asdf/completions/asdf.bash" ]] && source "$HOME/bin/asdf/completions/asdf.bash"

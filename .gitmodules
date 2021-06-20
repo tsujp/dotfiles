@@ -4,3 +4,6 @@
 [submodule "emacs/site-lisp/emacs-doom-themes"]
   path = emacs/site-lisp/emacs-doom-themes
   url = git@github.com:hlissner/emacs-doom-themes.git
+[submodule "bin/asdf"]
+	path = bin/asdf
+	url = https://github.com/asdf-vm/asdf.git

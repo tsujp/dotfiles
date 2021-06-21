@@ -479,4 +479,4 @@ __git_prompt ()
 
 export PATH="$PATH:/$XDG_CONFIG_HOME/bin"
 
-source "XDG_CONFIG_HOME/lib/azure-cli/az.completion"
+source "$XDG_CONFIG_HOME/lib/azure-cli/az.completion"

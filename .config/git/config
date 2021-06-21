@@ -15,6 +15,7 @@
 [pull]
 	rebase = true
 [alias]
+	p = push
 	cm = commit -m
 	b = branch
 	lg = log --oneline --decorate --abbrev-commit --reverse

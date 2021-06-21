@@ -14,3 +14,10 @@
 	defaultBranch = master
 [pull]
 	rebase = true
+[alias]
+	cm = commit -m
+	b = branch
+	lg = log --oneline --decorate --abbrev-commit --reverse
+	sqr = "!git rebase --interactive --autosquash HEAD^{/\"$1\"}~1 #"
+[pager]
+	log = less +G

@@ -19,6 +19,8 @@
 	cm = commit -m
 	b = branch
 	lg = log --oneline --decorate --abbrev-commit --reverse
-	sqr = "!git rebase --interactive --autosquash HEAD^{/\"$1\"}~1 #"
+	sqri = "!git rebase --interactive --autosquash HEAD^{/\"$1\"}~1 #"
+	sqre = "!git rebase --interactive --autosquash :/\"$1\" #"
+	sqrd = rebase --interactive --autosquash
 [pager]
 	log = less +G

@@ -6,10 +6,11 @@
 	gpgsign = true
 [core]
 	editor = vim
-	excludesfile = /home/tsujp/.config/git/gitignore_global
+	excludesfile = ~/.config/git/gitignore_global
+[include]
+	path = ~/.config/git/secret
+	path = ~/.config/git/variable
 [init]
 	defaultBranch = master
 [pull]
 	rebase = true
-[gpg]
-	program = /usr/sbin/gpg2

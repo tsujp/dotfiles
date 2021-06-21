@@ -146,8 +146,8 @@ if command -v find &> /dev/null; then
 fi
 
 # git; limited environment variables in git config so this is done here
-git config --global core.excludesfile "$XDG_CONFIG_HOME/git/gitignore_global"
-git config --global gpg.program $(which gpg2)
+# git config --global core.excludesfile "$XDG_CONFIG_HOME/git/gitignore_global"
+git config --file "$XDG_CONFIG_HOME/git/variable"  gpg.program $(which gpg2)
 
 # TODO: check ~/.ssh/config only has permissions 600, else set it so
 
@@ -474,5 +474,9 @@ __git_prompt ()
   fi
 }
 
-[[ -f "$HOME/bin/asdf/asdf.sh" ]] && source "$HOME/bin/asdf/asdf.sh"
-[[ -f "$HOME/bin/asdf/completions/asdf.bash" ]] && source "$HOME/bin/asdf/completions/asdf.bash"
+[[ -f "$HOME/.asdf/asdf.sh" ]] && source "$HOME/.asdf/asdf.sh"
+[[ -f "$HOME/.asdf/completions/asdf.bash" ]] && source "$HOME/.asdf/completions/asdf.bash"
+
+export PATH="$PATH:/$XDG_CONFIG_HOME/bin"
+
+source "XDG_CONFIG_HOME/lib/azure-cli/az.completion"

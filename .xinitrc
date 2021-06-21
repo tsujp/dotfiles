@@ -2,7 +2,8 @@ unclutter &
 xbanish &
 numlockx &
 
-THE_WM="/home/tsujp/.xmonad/xmonad-$(uname -m)-$(uname | tr '[:upper:]' '[:lower:]')"
+THE_WM="$HOME/.xmonad/xmonad-$(uname -m)-$(uname | tr '[:upper:]' '[:lower:]')"
+#THE_WM="$HOME/.cabal/bin/xmonad"
 
 # configuire x environment
 xrdb ~/.Xresources

@@ -1,1 +1,1 @@
-.config/bash/bashrc
+.config/shell-profiles/common.bashrc

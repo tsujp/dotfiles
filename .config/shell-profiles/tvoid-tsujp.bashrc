@@ -1,139 +1,29 @@
 #!/usr/bin/env bash
 
-# SYMLINK TO `$HOME/.bashrc`
-
-# .profile, .bash_profile, .bashrc et al
-#   - .profile       environment variables, PATH, must be (mostly) shell agnostic
-#   - .bash_profile  for login shells (macOS always a login shell), aliases, ...
-#   - .bashrc        new instances of bash not from login e.g. typing /bin/bash
-#   - .bash_login    ensure this file never exists as it causes others to be ignored
-#
-#  A, B, C means executes A then B then C
-#  B1, B2, B3 means it will only execute a single one (first found)
-#
-#  So, if ~/.profile found first (B3) then B2 and B1 never execute, profile
-#  could itself call say ~/.bashrc though
-#
-#            +----------------+-----------+-----------+------+
-#            |                |Interactive|Interactive|Script|
-#            |                |login      |non-login  |      |
-#            +----------------+-----------+-----------+------+
-#            |/etc/profile    |   A       |           |      |
-#            +----------------+-----------+-----------+------+
-#            |/etc/bash.bashrc|           |    A      |      |
-#            +----------------+-----------+-----------+------+
-#            |~/.bashrc       |           |    B      |      |
-#            +----------------+-----------+-----------+------+
-#            |~/.bash_profile |   B1      |           |      |
-#            +----------------+-----------+-----------+------+
-#            |~/.bash_login   |   B2      |           |      |
-#            +----------------+-----------+-----------+------+
-#            |~/.profile      |   B3      |           |      |
-#            +----------------+-----------+-----------+------+
-#            |BASH_ENV        |           |           |  A   |
-#            +----------------+-----------+-----------+------+
-#            |~/.bash_logout  |    C      |           |      |
-#            +----------------+-----------+-----------+------+
-
-
+export YOLO='SWAG'
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## SET UP SHOPT  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
-set -o noclobber
-set -b
-shopt -s cdspell
-shopt -s checkwinsize
-
-
-
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## XDG COERCION - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# base
-XDG_CONFIG_HOME="$HOME/.config";     export XDG_CONFIG_HOME
-XDG_DATA_HOME="$HOME/.local/share";  export XDG_DATA_HOME
-XDG_CACHE_HOME="$HOME/.local/cache"; export XDG_CACHE_HOME
-XDG_DESKTOP_DIR="$HOME/desktop";     export XDG_DESKTOP_DIR
-XDG_DOCUMENTS_DIR="$HOME/documents"; export XDG_DOCUMENTS_DIR
-XDG_DOWNLOAD_DIR="$HOME/downloads";  export XDG_DOWNLOAD_DIR
-XDG_MUSIC_DIR="$HOME/music";         export XDG_MUSIC_DIR
-XDG_PICTURES_DIR="$HOME/pictures";   export XDG_PICTURES_DIR
-XDG_VIDEOS_DIR="$HOME/videos";       export XDG_VIDEOS_DIR
-
-# XDG_SESSION_TYPE='wayland';              export XDG_SESSION_TYPE
-# TODO: optional line above
-
-# wget
-WGETRC="$XDG_CONFIG_HOME/wgetrc"; export WGETRC
-
-# cabal
-#CABAL_CONFIG="$XDG_CONFIG_HOME/cabal/config"; export CABAL_CONFIG
-#CABAL_DIR="$XDG_CACHE_HOME/cabal";            export CABAL_DIR
-
-# rust
-CARGO_HOME="$XDG_DATA_HOME/cargo";            export CARGO_HOME
-
+set -o noclobber       # prevent >, >&, <> from overwriting existing files
+set -b                 # report terminated background job exit code immediately
+shopt -s cdspell       # autocorrect close cd typos
+shopt -s checkwinsize  # update LINES and COLUMNS after commands to current size
+shopt -s histappend    # append to history don't overwrite
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## NON-XDG-ENV - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## SOURCE MORE - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# locale
-: ${LANG:="en_US.UTF-8"};     export LANG
-: ${LANGUAGE:="en"};          export LANGUAGE
-: ${LC_CTYPE:="en_US.UTF-8"}; export LC_CTYPE
-: ${LC_ALL:="en_US.UTF-8"};   export LC_ALL
-
-# editors
-ALTERNATE_EDITOR='vim';       export ALTERNATE_EDITOR
-EDITOR='emacsclient -ca ""';  export EDITOR
-VISUAL='emacs client -ca ""'; export VISUAL
-
-# history
-HISTFILE="$XDG_DATA_HOME/history";  export HISTFILE
-LESSHISTFILE="-";                        export LESSHISTFILE
-#HISTIGNORE=ls:q:qq:exit
-HISTCONTROL=ignoredups:erasedups         export HISTCONTROL
-HISTSIZE=65536;                          export HISTSIZE
-shopt -s histappend
-
-# TODO: make optional since for work-stuff need zoom and so need x11 :(
-# enable wayland
-#MOZ_ENABLE_WAYLAND=1;                    export MOZ_ENABLE_WAYLAND
-#QT_QPA_PLATFORM='wayland-egl';           export QT_QPA_PLATFORM
-#ELM_DISPLAY='wl';                        export ELM_DISPLAY
-#CLUTTER_BACKEND=wayland;                 export CLUTTER_BACKEND
-#ECORE_EVAS_ENGINE=wayland-egl;           export ECORE_EVAS_ENGINE
-#ELM_ENGINE=wayland_egl;                  export ELM_ENGINE
-#SDL_VIDEODRIVER=wayland;                 export SDL_VIDEODRIVER
-#_JAVA_AWT_WM_NONREPARENTING=1;           export _JAVA_AWT_WM_NONREPARENTING
-#NO_AT_BRIDGE=1;                          export NO_AT_BRIDGE
-
-# xorg
-#CLUTTER_BACKEND=x11;                     export CLUTTER_BACKEND
-
-# paging
-PAGER='less -SFw';                       export PAGER
-SYSTEMD_PAGER='less -SFw';               export SYSTEMD_PAGER
-MANPAGER="$PAGER";                       export MANPAGER
-
-# gpg / gnupg
-GNUPGHOME="$XDG_CONFIG_HOME/gnupg";      export GNUPGHOME
-GPG_TTY="$(tty)";                        export GPG_TTY
-PINEENTRY_USER_DATA='USE_CURSES=1';      export PINEENTRY_USER_DATA
-
-# misc
-DOTNET_CLI_TELEMETRY_OPTOUT=1;           export DOTNET_CLI_TELEMETRY_OPTOUT
-WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"; export WEECHAT_HOME
-
+# asdf version manager, and its shell completion
+[ -e "$HOME/bin/asdf/asdf.sh" ] && source "$HOME/bin/asdf/asdf.sh"
+[ -e "$HOME/bin/asdf/completions/asdf.bash" ] && source "$HOME/bin/asdf/completions/asdf.bash"
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## GUARDS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [[ "$-" = *i* ]] || return     # interactive shell, or exit
 [[ "$TERM" = dumb ]] && return # emacs TRAMP so exit
-
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -166,8 +56,6 @@ export PATH="$HOME/.cabal/bin:$PATH"
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
-#alias sudo='sudo ' # NB: https://www.gnu.org/software/bash/manual/bash.html#Aliases
-#alias sudo='doas '
 alias mv='mv --no-clobber' # do not overwrite existing files
 # alias cd=__cdenv
 alias ee='exit'
@@ -176,14 +64,15 @@ alias h='history | tail -30'
 alias rm='rm -i'
 alias r="exec $SHELL -l"
 alias k=kubectl
-alias e-bc="$EDITOR $XDG_CONFIG_HOME/bash/bashrc"
+alias e-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
 alias e-foot="$EDITOR $XDG_CONFIG_HOME/foot/foot.ini"
-alias e-wez="$EDITOR $XDG_CONFIG_HOME/wezterm/wezterm.lua"
 alias e-ssh="$EDITOR ~/.ssh/config"
 alias ll='ls  -lFhN    --color --group-directories-first'
 alias lla='ls -lFhN -A --color --group-directories-first'
+alias l='ls  -FhN     --color --group-directories-first'
 alias ls='ls  -FhN     --color --group-directories-first'
 alias la='ls  -FhN  -A --color --group-directories-first'
+alias recent='ls -ltch --color'
 alias py='python3'
 alias gnpm='npm list -g --depth 0'
 alias dpsv='docker ps -a | less -S'
@@ -472,9 +361,40 @@ __git_prompt ()
   fi
 }
 
-[[ -f "$HOME/.asdf/asdf.sh" ]] && source "$HOME/.asdf/asdf.sh"
-[[ -f "$HOME/.asdf/completions/asdf.bash" ]] && source "$HOME/.asdf/completions/asdf.bash"
 
-export PATH="$PATH:/$XDG_CONFIG_HOME/bin"
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## NOTES - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-source "$XDG_CONFIG_HOME/lib/azure-cli/az.completion"
+# .profile, .bash_profile, .bashrc et al
+#   - .profile       environment variables, PATH, must be (mostly) shell agnostic
+#   - .bash_profile  for login shells (macOS always a login shell), aliases, ...
+#   - .bashrc        new instances of bash not from login e.g. typing /bin/bash
+#   - .bash_login    ensure this file never exists as it causes others to be ignored
+#
+#  A, B, C means executes A then B then C
+#  B1, B2, B3 means it will only execute a single one (first found)
+#
+#  So, if ~/.profile found first (B3) then B2 and B1 never execute, profile
+#  could itself call say ~/.bashrc though
+#
+#            +----------------+-----------+-----------+------+
+#            |                |Interactive|Interactive|Script|
+#            |                |login      |non-login  |      |
+#            +----------------+-----------+-----------+------+
+#            |/etc/profile    |   A       |           |      |
+#            +----------------+-----------+-----------+------+
+#            |/etc/bash.bashrc|           |    A      |      |
+#            +----------------+-----------+-----------+------+
+#            |~/.bashrc       |           |    B      |      |
+#            +----------------+-----------+-----------+------+
+#            |~/.bash_profile |   B1      |           |      |
+#            +----------------+-----------+-----------+------+
+#            |~/.bash_login   |   B2      |           |      |
+#            +----------------+-----------+-----------+------+
+#            |~/.profile      |   B3      |           |      |
+#            +----------------+-----------+-----------+------+
+#            |BASH_ENV        |           |           |  A   |
+#            +----------------+-----------+-----------+------+
+#            |~/.bash_logout  |    C      |           |      |
+#            +----------------+-----------+-----------+------+
+

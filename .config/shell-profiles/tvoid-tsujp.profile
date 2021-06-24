@@ -3,9 +3,6 @@
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## NON-XDG-ENV - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# dotnet
-export DOTNET_CLI_TELEMETRY_OPTOUT=1
-
 # rust
 export CARGO_HOME="$XDG_DATA_HOME/cargo"
 

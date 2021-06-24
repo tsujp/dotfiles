@@ -41,5 +41,3 @@ export LESSHISTFILE='-'
 export HISTCONTROL=ignoredups:erasedups
 export HISTSIZE=65536
 
-# custom profile per "account"
-[ -e "$HOME/.config/shell-profiles/$(hostname)-$(whoami).profile" ] && source "$HOME/.config/shell-profiles/$(hostname)-$(whoami).profile"

@@ -64,7 +64,8 @@ alias h='history | tail -30'
 alias rm='rm -i'
 alias r="exec $SHELL -l"
 alias k=kubectl
-alias e-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
+alias e-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).bashrc"
+alias e-bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
 alias e-foot="$EDITOR $XDG_CONFIG_HOME/foot/foot.ini"
 alias e-ssh="$EDITOR ~/.ssh/config"
 alias ll='ls  -lFhN    --color --group-directories-first'
@@ -81,6 +82,7 @@ alias gpg='gpg2'
 alias gpg-restart='gpg-connect-agent reloadagent /bye'
 alias rsync='rsync -I --info=progress2'
 alias wget="wget --hsts-file=$XDG_CACHE_HOME/wget-hsts"
+alias off='sudo shutdown -P now'
 
 # TODO: put this in it's own script which is included if voidlinux
 alias xbpsi='sudo xbps-install -Su'

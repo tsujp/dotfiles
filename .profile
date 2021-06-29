@@ -41,3 +41,11 @@ export LESSHISTFILE='-'
 export HISTCONTROL=ignoredups:erasedups
 export HISTSIZE=65536
 
+# path
+export PATH="$PATH:\
+$HOME/bin/$(hostname):\
+$HOME/bin/$(hostname)/$(whoami):\
+$HOME/bin/$(hostname)/$(whoami)/$(uname -m):\
+$HOME/bin:\
+"
+

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+fuzzel \
+  -f cozette:size=10 \
+  -w 64 \
+  -b 2C2525FF \
+  -t FFFFFFFF \
+  -m F9CC6CFF \
+  -C 635657FF \
+  -s 3C3032ff \
+  -B 1 \
+  -r 0 \
+  -x 20 \
+  -l 10 \
+  --no-icons \
+  --line-height 13 \
+  "$@" \
+  <&0
+

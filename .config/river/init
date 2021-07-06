@@ -10,14 +10,19 @@
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # AUTOSTART  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+riverctl spawn kanshi
+riverctl spawn kile
 riverctl spawn waybar
 riverctl spawn foot --server
-riverctl spawn redshift
+riverctl spawn pipewire
+riverctl spawn pipewire-pulse
+
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # VARS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-mod="Control"
+mod="Mod4"
+rightOfSpace=""
 
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -25,18 +30,22 @@ mod="Control"
 
 # set the layout on startup
 # riverctl layout rivertile left
-riverctl layout "$XDG_CONFIG_HOME"/river/layout
+# riverctl layout "$XDG_CONFIG_HOME"/river/layout
+riverctl default-layout kile
 
 # app-ids of views which should float
 riverctl float-filter-add "float"
 riverctl float-filter-add "popup"
+
+riverctl set-layout-value kile int outer_padding 7
+riverctl set-layout-value kile int view_padding 3
 
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # INPUT  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # key repeat rates
-riverctl set-repeat 72 300
+riverctl set-repeat 72 250
 
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -52,7 +61,7 @@ riverctl border-color-unfocused '#6B617D'
 # VIEWS & MAPS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # launcher
-riverctl map normal "$mod" R spawn "$XDG_CONFIG_HOME/fuzzel/launch.sh"
+riverctl map normal "$mod" R spawn fuzzel
 
 # close the focused view
 riverctl map normal "$mod" Q close
@@ -62,7 +71,7 @@ riverctl map normal "$mod"+Shift Return spawn foot
 # riverctl map normal "$mod"+Mod1 R spawn foot
 
 # exit river
-riverctl map normal "$mod"+Shift E exit
+riverctl map normal "$mod"+"Mod1" E exit
 
 # zoom current view
 riverctl map normal "$mod" Return zoom
@@ -193,5 +202,4 @@ riverctl map normal "$mod"+Shift L mod-master-count -1
 
 # # Mod+F11 to return to normal mode
 # riverctl map passthrough $mod F11 enter-mode normal
-
 

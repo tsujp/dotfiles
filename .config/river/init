@@ -12,7 +12,7 @@
 
 riverctl spawn kanshi
 riverctl spawn kile
-riverctl spawn waybar
+#riverctl spawn waybar
 riverctl spawn foot --server
 riverctl spawn pipewire
 riverctl spawn pipewire-pulse
@@ -29,9 +29,10 @@ rightOfSpace=""
 # LAYOUT - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # set the layout on startup
-# riverctl layout rivertile left
-# riverctl layout "$XDG_CONFIG_HOME"/river/layout
 riverctl default-layout kile
+
+# kile layouts
+riverctl set-layout-value kile string 1 '{ v: h h }'
 
 # app-ids of views which should float
 riverctl float-filter-add "float"
@@ -46,6 +47,10 @@ riverctl set-layout-value kile int view_padding 3
 
 # key repeat rates
 riverctl set-repeat 72 250
+
+# mouse
+riverctl input 5426:145:Razer_Razer_Viper_8KHz natural-scroll enabled
+riverctl input 5426:145:Razer_Razer_Viper_8KHz pointer-accel -1
 
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

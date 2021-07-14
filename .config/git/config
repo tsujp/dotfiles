@@ -16,11 +16,12 @@
 	rebase = true
 [alias]
 	p = push
+  pu = push -u origin HEAD
 	cm = commit -m
 	b = branch
 	lg = log --oneline --decorate --abbrev-commit --reverse
-	sqri = "!git rebase --interactive --autosquash HEAD^{/\"$1\"}~1 #"
-	sqre = "!git rebase --interactive --autosquash :/\"$1\" #"
-	sqrd = rebase --interactive --autosquash
+	sqi = "!git rebase --interactive --autosquash HEAD^{/\"$1\"}~1 #"
+	sqe = "!git rebase --interactive --autosquash :/\"$1\" #"
+	sqd = rebase --interactive --autosquash
 [pager]
 	log = less +G

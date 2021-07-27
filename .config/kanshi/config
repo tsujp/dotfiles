@@ -1,4 +1,4 @@
 profile perth {
-  output DP-1 enable mode 5120x1440@119.999001Hz position 0,0
+  output DP-1 enable mode 5120x1440@120Hz position 0,0
 }
 

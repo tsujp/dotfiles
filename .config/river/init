@@ -12,7 +12,7 @@
 
 riverctl spawn kanshi
 riverctl spawn kile
-#riverctl spawn waybar
+riverctl spawn yambar
 riverctl spawn foot --server
 riverctl spawn pipewire
 riverctl spawn pipewire-pulse

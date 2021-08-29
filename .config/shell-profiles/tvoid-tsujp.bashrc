@@ -268,7 +268,7 @@ bind 'set keyseq-timeout 50'
 bind 'set vi-ins-mode-string "\1\e[0m\2(i)"'
 bind 'set vi-cmd-mode-string "\1\e[32m\2(c)\1\e[0m\2"'
 
-shell_prompt_decoration="〉"
+shell_prompt_decoration="# "
 shell_depth=""
 if command -v pstree &> /dev/null; then
   depth="$(pstree -s "$$" | grep bash- -o | tail +2 | wc -l)"

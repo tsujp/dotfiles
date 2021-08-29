@@ -1,31 +1,3 @@
-* Handling Packages, and Straight MELPA
-** Straight
-
-Alternative (to package.el) package manager.
-
-#+begin_src emacs-lisp
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-#+end_src
-
-** Use Package
-
-Easily configure packages (not a package manager).
-
-#+begin_src emacs-lisp
-(straight-use-package 'use-package)
-#+end_src
-
 * Preamble
 ** Set Defaults
 
@@ -50,9 +22,9 @@ Thin window edges.
 Select appropriate fonts per system.
 
 #+begin_src emacs-lisp
-(add-to-list 'default-frame-alist '(font . "Iosevka Fixed Medium-10.5"))
-(set-face-attribute 'default t :font "Iosevka Fixed Medium-10.5")
-(set-face-attribute 'bold t :font "Iosevka Fixed Heavy-10.5")
+(add-to-list 'default-frame-alist '(font . "SF Mono-10.5"))
+(set-face-attribute 'default t :font "SF Mono-10.5")
+(set-face-attribute 'bold t :font "SF Mono-10.5")
 (display-time-mode -1)
 (display-battery-mode -1)
 #+end_src
@@ -60,7 +32,7 @@ Select appropriate fonts per system.
 Defaults behaviour.
 
 #+begin_src emacs-lisp
-    (setq-default
+(setq-default
      custom-file (expand-file-name "custom.el" user-emacs-directory) ; custom (generated) lisp code location
      fill-column 80                          ; 80 char wide babbyyy
      delete-by-moving-to-trash t             ; delete by moving to trash
@@ -79,7 +51,8 @@ Defaults behaviour.
      gc-cons-threshold 100000000             ; increase consing before gc runs
      read-process-output-max (* 1024 1024)   ; increase max bytes read per chunk
      display-raw-bytes-as-hex t
-     x-hyper-keysym 'ctrl)                   ; pressing hyper simulates ctrl
+     x-hyper-keysym 'ctrl                   ; pressing hyper simulates ctrl
+     x-super-keysym 'ctrl)                   ; pressing hyper simulates ctrl
 
     (set-default-coding-systems 'utf-8-unix) ; utf8
     (prefer-coding-system 'utf-8-unix)       ; utf8
@@ -117,10 +90,38 @@ Smooth (1 line at a time) scrolling via mouse, and prevent scrolling jumps.
  scroll-conservatively 1000                   ; only 'jump' when moving this far
  scroll-margin 4                              ; scroll N lines to screen edge
  scroll-step 1                                ; keyboard scroll one line at a time
- mouse-wheel-scroll-amount '(1 ((shift) . 1)) ; mouse scroll N lines
+ mouse-wheel-scroll-amount '(3 ((shift) . 3)) ; mouse scroll N lines
  mouse-wheel-progressive-speed nil            ; don't accelerate scrolling
- fast-but-imprecise-scrolling nil             ; redraw immediately when scrolling (v)
+ fast-but-imprecise-scrolling t               ; redraw immediately when scrolling (v)
  jit-lock-defer-time 0)
+#+end_src
+
+* Handling Packages, and Straight MELPA
+** Straight
+
+Alternative (to package.el) package manager.
+
+#+begin_src emacs-lisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+end_src
+
+** Use Package
+
+Easily configure packages (not a package manager).
+
+#+begin_src emacs-lisp
+(straight-use-package 'use-package)
 #+end_src
 
 * Packages
@@ -155,6 +156,24 @@ Brings back `<s` to create org inline scripts more easily.
 
 #+begin_src emacs-lisp
 (require 'org-tempo)
+#+end_src
+
+** Boon
+
+Ergonomic modal editing which also sticks to emacs conventions.
+
+#+begin_src emacs-lisp
+(use-package boon
+:straight t
+:init
+(require 'boon-qwerty)
+(require 'boon-tutorial)
+(boon-mode)
+:config
+(setq boon-command-cursor-color "#F48FB1"
+      boon-insert-cursor-color "#00FF00"))
+; boon-special-cursor-color
+; boon-default-cursor-color
 #+end_src
 
 ** Whitespace
@@ -224,145 +243,6 @@ Dired-sidebar.
   :commands (dired-sidebar-toggle-sidebar))
 #+end_src
 
-** Evil Mode
-
-Vim-key emulation.
-
-*** Leader
-
-Vim leader-key emulation.
-
-#+begin_src emacs-lisp
-(defun config-evil-leader ()
-  "Configure evil leader mode."
-  (evil-leader/set-leader ","))
-#+end_src
-
-*** Buffer Behavour
-
-`:wq` saves and then kills the buffer.
-
- #+begin_src emacs-lisp
-(defun tsujp/save-and-kill-this-buffer ()
-  "Save and then kill current buffer."
-  (interactive)
-  (save-buffer)
-  (kill-this-buffer))
-#+end_src
-
-*** Evil
-
-The main event.
-
-#+begin_src emacs-lisp
-(use-package evil
-  :straight t
-  :init
-  (setq evil-want-keybinding nil)
-  :config
-  (evil-mode 1)
-  (setq blink-cursor-mode 0
-        evil-normal-state-cursor '(box "#BFB3B5")
-        evil-insert-state-cursor '((bar . 2) "#F9CC7C")
-        evil-visual-state-cursor '(box "#85DACC")
-        evil-motion-state-cursor '(box "red") ;; TODO
-        evil-replace-state-cursor '(box "red") ;; TODO
-        evil-operator-state-cursor '(box "red")) ;; TODO
-  (evil-ex-define-cmd "q" #'kill-this-buffer)
-  (evil-ex-define-cmd "wq" #'tsujp/save-and-kill-this-buffer))
-#+end_src
-
-*** Evil Collection
-
-Good and more complete keybindings for evil mode.
-
-#+begin_src emacs-lisp
-(use-package evil-collection
-    :straight t
-    :after evil
-    :custom (evil-collection-setup-minibuffer t)
-    :config
-    (setq evil-collection-mode-list
-    '(ag dired magit mu4e which-key))
-    (evil-collection-init))
-#+end_src
-
-*** Evil Org
-
-Evil mode keybindings in Org mode.
-
-#+begin_src emacs-lisp
-   (use-package evil-org
-  :straight t
-  :after org
-  :config
-  (add-hook 'org-mode-hook 'evil-org-mode)
-  (add-hook 'evil-org-mode-hook
-  (lambda () (evil-org-set-key-theme)))
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
-#+end_src
-
-*** Evil Commentary
-
-Toggle comments via Evil keybindings.
-
-#+begin_src emacs-lisp
-   (use-package evil-commentary
-    :straight t
-    :after evil
-    :config (evil-commentary-mode +1))
-#+end_src
-
-*** Evil Goggles
-
-Flash a colour when editing with Evil keybindings.
-
-#+begin_src emacs-lisp
-   (use-package evil-goggles
-    :straight t
-    :after evil
-    :config
-    (evil-goggles-mode))
-#+end_src
-
-*** Evil Leader
-
-Emulate Vim leader-key.
-
-#+begin_src emacs-lisp
-   (use-package evil-leader
-    :straight t
-    :after evil
-    :config
-    (global-evil-leader-mode)
-    (config-evil-leader))
-#+end_src
-
-*** Evil Snipe
-
-Evil motions to go-to (cursor-wise) anything quickly.
-
-#+begin_src emacs-lisp
-   (use-package evil-snipe
-    :straight t
-    :after evil
-    :config
-    (evil-snipe-mode))
-#+end_src
-
-*** Evil Surround
-
-Surround text, the Evil way.
-
-#+begin_src emacs-lisp
-   (use-package evil-surround
-    :straight t
-    :after evil
-    :config
-    (global-evil-surround-mode 1))
-#+end_src
-
 ** Which Key
 
 Display a popup buffer if we take too long to input a command (we could be forgetting, so it helps).
@@ -396,11 +276,11 @@ Highlight indentation bars for easier visual grepping.
 Better fontification (syntax highlighting).
 
 #+begin_src emacs-lisp
-  ;;(use-package tree-sitter
-  ;; :straight t)
+(use-package tree-sitter
+     :straight t)
 
-  ;; (use-package tree-sitter-langs
-  ;; :straight t)
+     (use-package tree-sitter-langs
+     :straight t)
 #+end_src
 
 ** Smartparens
@@ -493,18 +373,33 @@ YAML major mode.
 Zettelkasten-style note taking with Org.
 
 #+begin_src emacs-lisp
-(use-package org-roam
-      :straight t
-      :hook
-      (after-init . org-roam-mode)
-      :custom
-      (org-roam-directory "/home/tsujp/Documents/org-roam-test")
-      :bind (:map org-roam-mode-map
-              (("C-c n l" . org-roam)
-               ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-graph))
-              :map org-mode-map
-              (("C-c n i" . org-roam-insert))
-              (("C-c n I" . org-roam-insert-immediate))))
+;(use-package org-roam
+ ;     :straight t
+  ;    :hook
+   ;   (after-init . org-roam-setup)
+    ;  :custom
+     ; (org-roam-directory "/home/tsujp/Documents/org-roam-test")
+      ;:bind (:map org-roam-mode-map
+       ;       (("C-c n l" . org-roam)
+        ;       ("C-c n f" . org-roam-find-file)
+         ;      ("C-c n g" . org-roam-graph))
+          ;    :map org-mode-map
+           ;   (("C-c n i" . org-roam-insert))
+            ;  (("C-c n I" . org-roam-insert-immediate))))
 #+end_src
 
+** Notmuch
+
+Email.
+
+#+begin_src emacs-lisp
+;(use-package mu4e
+;  :straight ( :host github 
+;                :repo "djcb/mu"  
+;                :branch "master"
+;                :files ("mu4e/*")   
+;                :pre-build (("./autogen.sh") ("make"))) 
+;    :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu"))))
+      (use-package notmuch
+        :straight t)
+#+end_src

@@ -92,7 +92,9 @@ alias xbpsq='xbps-query -Rs'
 ## - - - - - - - - - - - - - - - - - - 
 ## FUNCTION ALIASES  - - - - - - - - -
 
-man() {
+man ()
+{
+  # TODO: replace tput with escape codes for colour
 	env \
 	LESS_TERMCAP_mb=$(tput bold; tput setaf 6) \
 	LESS_TERMCAP_md=$(tput bold; tput setaf 6) \

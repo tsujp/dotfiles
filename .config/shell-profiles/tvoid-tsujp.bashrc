@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-export YOLO='SWAG'
-
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## SET UP SHOPT  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 # https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
 set -o noclobber       # prevent >, >&, <> from overwriting existing files
 set -b                 # report terminated background job exit code immediately
@@ -16,14 +15,17 @@ shopt -s histappend    # append to history don't overwrite
 ## SOURCE MORE - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # asdf version manager, and its shell completion
-[ -e "$HOME/bin/asdf/asdf.sh" ] && source "$HOME/bin/asdf/asdf.sh"
-[ -e "$HOME/bin/asdf/completions/asdf.bash" ] && source "$HOME/bin/asdf/completions/asdf.bash"
+[[ -e "$HOME/bin/asdf/asdf.sh" ]] && source "$HOME/bin/asdf/asdf.sh"
+[[ -e "$HOME/bin/asdf/completions/asdf.bash" ]] && {
+  source "$HOME/bin/asdf/completions/asdf.bash"
+}
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## GUARDS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-[[ "$-" = *i* ]] || return     # interactive shell, or exit
-[[ "$TERM" = dumb ]] && return # emacs TRAMP so exit
+
+[[ "$-" = *i* ]] || return     # if interactive shell, exit
+[[ "$TERM" = dumb ]] && return # in emacs TRAMP, exit
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -42,17 +44,9 @@ git config --file "$XDG_CONFIG_HOME/git/variable"  gpg.program $(which gpg2)
 # TODO: check ~/.ssh/config only has permissions 600, else set it so
 
 
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## ALIASES - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# * * * * * * * * * PATHS
-
-[[ -d "$HOME"/.local/bin ]] && export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.cabal/bin:$PATH"
-
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# * * * * * * * * * ALIASES
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
@@ -62,7 +56,7 @@ alias ee='exit'
 alias c='clear'
 alias h='history | tail -30'
 alias rm='rm -i'
-alias r="exec $SHELL -l"
+alias r=_reload_shell
 alias k=kubectl
 alias e-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).bashrc"
 alias e-bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
@@ -83,6 +77,8 @@ alias gpg-restart='gpg-connect-agent reloadagent /bye'
 alias rsync='rsync -I --info=progress2'
 alias wget="wget --hsts-file=$XDG_CACHE_HOME/wget-hsts"
 alias off='sudo shutdown -P now'
+alias grepi='grep -i'
+alias ppath=pretty_print_path
 
 # TODO: put this in it's own script which is included if voidlinux
 alias xbpsi='sudo xbps-install -Su'
@@ -92,6 +88,36 @@ alias xbpsq='xbps-query -Rs'
 # source <(kubectl completion bash)
 # complete -F __start_kubectl k
 
+
+## - - - - - - - - - - - - - - - - - - 
+## FUNCTION ALIASES  - - - - - - - - -
+
+man() {
+	env \
+	LESS_TERMCAP_mb=$(tput bold; tput setaf 6) \
+	LESS_TERMCAP_md=$(tput bold; tput setaf 6) \
+	LESS_TERMCAP_me=$(tput sgr0) \
+	LESS_TERMCAP_se=$(tput rmso; tput sgr0) \
+	LESS_TERMCAP_ue=$(tput rmul; tput sgr0) \
+	LESS_TERMCAP_us=$(tput smul; tput bold; tput setaf 4) \
+	LESS_TERMCAP_mr=$(tput rev) \
+	LESS_TERMCAP_mh=$(tput dim) \
+	LESS_TERMCAP_ZN=$(tput ssubm) \
+	LESS_TERMCAP_ZV=$(tput rsubm) \
+	LESS_TERMCAP_ZO=$(tput ssupm) \
+	LESS_TERMCAP_ZW=$(tput rsupm) \
+		man "$@"
+}
+
+
+## - - - - - - - - - - - - - - - - - - 
+## FUNCTION HELPERS  - - - - - - - - -
+
+_reload_shell ()
+{
+  puts_section 'Reloading shell configuration'
+  hash -r && _SHOW_MESSAGES=1 exec -a -bash bash
+}
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * FUNCTIONS AS HELPERS
@@ -130,22 +156,6 @@ __print_error ()
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * FUNCTIONS SERVING AS ALIASES
 
-man() {
-	env \
-	LESS_TERMCAP_mb=$(tput bold; tput setaf 6) \
-	LESS_TERMCAP_md=$(tput bold; tput setaf 6) \
-	LESS_TERMCAP_me=$(tput sgr0) \
-	LESS_TERMCAP_se=$(tput rmso; tput sgr0) \
-	LESS_TERMCAP_ue=$(tput rmul; tput sgr0) \
-	LESS_TERMCAP_us=$(tput smul; tput bold; tput setaf 4) \
-	LESS_TERMCAP_mr=$(tput rev) \
-	LESS_TERMCAP_mh=$(tput dim) \
-	LESS_TERMCAP_ZN=$(tput ssubm) \
-	LESS_TERMCAP_ZV=$(tput rsubm) \
-	LESS_TERMCAP_ZO=$(tput ssupm) \
-	LESS_TERMCAP_ZW=$(tput rsupm) \
-		man "$@"
-}
 
 
 # CREATE NEW GITHUB BRANCH, OPTIONALLY ON THE GIVEN REMOTE TOO

@@ -7,18 +7,23 @@
 # ██║  ██║██║ ╚████╔╝ ███████╗██║  ██║
 # ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝
 
+# Trace if debug.
+if [ -n "$DEBUG_DOTS" ]; then
+  set -x
+fi
+
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # AUTOSTART  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-riverctl spawn kanshi
-riverctl spawn kile
-riverctl spawn yambar
-riverctl spawn foot --server
-riverctl spawn pipewire
-riverctl spawn pipewire-pulse
-riverctl spawn emacs --daemon
-riverctl spawn /usr/libexec/xdg-desktop-portal-wlr
-riverctl spawn /usr/libexec/xdg-desktop-portal -r
+riverctl spawn 'kanshi'
+riverctl spawn 'kile -n lns'
+riverctl spawn 'yambar'
+riverctl spawn 'foot --server'
+riverctl spawn 'pipewire'
+riverctl spawn 'pipewire-pulse'
+riverctl spawn 'emacs --daemon'
+riverctl spawn '/usr/libexec/xdg-desktop-portal-wlr'
+riverctl spawn '/usr/libexec/xdg-desktop-portal -r'
 
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -31,18 +36,22 @@ rightOfSpace=""
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # LAYOUT - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# set the layout on startup
-riverctl default-layout kile
-
-# kile layouts and configuration
-riverctl set-layout-value kile string 1 '{ v: h h }'
-riverctl set-layout-value kile string 2 '{ v: h h }'
-riverctl set-layout-value kile int outer_padding 7
-riverctl set-layout-value kile int view_padding 3
-
+# New views go to bottom of stack so top-view (our main) isn't moved.
 riverctl attach-mode bottom
 
-# app-ids of views which should float
+# Set the layout on startup.
+riverctl output-layout 'lns'
+
+# Kile layouts and configuration.
+riverctl send-layout-cmd lns 'main_factor 0.5'
+# - - Layouts per tag.
+riverctl send-layout-cmd lns 'focused all ( v: h h )'
+# - - Padding.
+riverctl send-layout-cmd lns 'outer_padding 7'
+riverctl send-layout-cmd lns 'view_padding 3'
+# ---/
+
+# `app-ids` of views which should float.
 riverctl float-filter-add "float"
 riverctl float-filter-add "popup"
 
@@ -61,10 +70,10 @@ riverctl input 5426:145:Razer_Razer_Viper_8KHz pointer-accel -1
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # APPEARANCE - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-riverctl background-color '#635657'
+riverctl background-color 0x635657
 riverctl border-width 1
-riverctl border-color-focused '#D2BDF7'
-riverctl border-color-unfocused '#6B617D'
+riverctl border-color-focused 0xD2BDF7
+riverctl border-color-unfocused 0x6B617D
 # riverctl xcursor-theme retrosmart-xcursor-black-shadow/
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

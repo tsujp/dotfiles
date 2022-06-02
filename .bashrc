@@ -1,1 +1,1 @@
-.config/shell-profiles/universal-entry.sh
+.config/shell-profiles/entry.bashrc

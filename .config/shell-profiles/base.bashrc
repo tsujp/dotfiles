@@ -4,20 +4,10 @@
 ## SET UP SHOPT  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
-set -b                 # report terminated background job exit code immediately
-shopt -s cdspell       # autocorrect close cd typos
-shopt -s checkwinsize  # update LINES and COLUMNS after commands to current size
-shopt -s histappend    # append to history don't overwrite
-
-
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## SOURCE MORE - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# asdf version manager, and its shell completion
-[[ -e "$HOME/bin/asdf/asdf.sh" ]] && source "$HOME/bin/asdf/asdf.sh"
-[[ -e "$HOME/bin/asdf/completions/asdf.bash" ]] && {
-  source "$HOME/bin/asdf/completions/asdf.bash"
-}
+set -b                 # Report terminated background job exit code immediately.
+shopt -s cdspell       # Autocorrect close cd typos.
+shopt -s checkwinsize  # Uupdate LINES and COLUMNS after commands to current size.
+shopt -s histappend    # Append to history; don't overwrite.
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -49,23 +39,30 @@ git config --file "$XDG_CONFIG_HOME/git/variable"  gpg.program $(which gpg2)
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
+
 alias mv='mv --no-clobber' # do not overwrite existing files
 # alias cd=__cdenv
+
 alias ee='exit'
 alias c='clear'
 alias h='history | tail -30'
 alias rm='rm -i'
 alias r=_reload_shell
 alias k=kubectl
-alias e-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).bashrc"
-alias e-bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
+
+alias e-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/base.bashrc"
+alias e-my-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).bashrc"
+alias e-bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/base.profile"
+alias e-my-bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
 alias e-foot="$EDITOR $XDG_CONFIG_HOME/foot/foot.ini"
 alias e-ssh="$EDITOR ~/.ssh/config"
+
 #alias ll='ls  -lFhN    --color --group-directories-first'
 #alias lla='ls -lFhN -A --color --group-directories-first'
 #alias l='ls  -FhN     --color --group-directories-first'
 #alias ls='ls  -FhN     --color --group-directories-first'
 #alias la='ls  -FhN  -A --color --group-directories-first'
+
 alias recent='ls -ltch --color'
 alias py='python3'
 alias gnpm='npm list -g --depth 0'
@@ -79,9 +76,9 @@ alias off='sudo shutdown -P now'
 alias grepi='grep -i'
 alias ppath=pretty_print_path
 
-# TODO: put this in it's own script which is included if voidlinux
-alias xbpsi='sudo xbps-install -Su'
-alias xbpsq='xbps-query -Rs'
+# TODO: put this in tvoid's own profile
+#alias xbpsi='sudo xbps-install -Su'
+#alias xbpsq='xbps-query -Rs'
 
 # COMPLETIONS
 # source <(kubectl completion bash)
@@ -119,114 +116,6 @@ _reload_shell ()
   #puts_section 'Reloading shell configuration'
   hash -r && _SHOW_MESSAGES=1 exec -a -bash bash
 }
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# * * * * * * * * * FUNCTIONS AS HELPERS
-
-
-__git_guard ()
-{
-  git -C . rev-parse
-}
-
-__help_hook ()
-{
-  if [[ "$1" = --help ]]; then
-    __print_help "$2" "$3"
-    return 1
-  else
-    return 0
-  fi
-}
-
-__print_help ()
-{
-  COLUMNS=$(tput cols)
-  title="USER MANUAL ($1)"
-  printf "%*s\n" $((($(printf "%s" "$title" | wc -c ) + 80) / 2)) "$title"
-  printf "%s" "$2"
-}
-
-__print_error ()
-{
-  printf "$(tput setaf 1)error $(tput setaf 2)%s $(tput sgr0)%s\n" "$1" "$2"
-}
-
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# * * * * * * * * * FUNCTIONS SERVING AS ALIASES
-
-
-
-# CREATE NEW GITHUB BRANCH, OPTIONALLY ON THE GIVEN REMOTE TOO
-gnb ()
-{
-  # function name
-  local name="${FUNCNAME[0]}"
-
-  # help text
-  local help="
-NAME
-      ${FUNCNAME[0]} - Git New Branch
-
-SYNOPSIS
-      ${FUNCNAME[0]} [FLAGS] BRANCH
-
-DESCRIPTION
-      Creates a new git branch for you and also optionally updates the remote
-      with said branch.
-
-OPERANDS
-      BRANCH   git compliant branch name
-
-FLAGS
-      -r       if present also pushes branch to remote.
-"
-
-  __help_hook "$1" "$name" "$help" || return 1
-  __git_guard || return 1
-
-  # check required args
-  if [[ "$#" -lt 1 ]]; then
-    __print_error "$name" "missing BRANCH operand" && return 1
-  fi
-
-  # OPTIND required for predictable behaviour
-  local OPTIND remote
-
-  # default to $1 for branch, if -r is set it will override
-  local branch="$1"
-
-  while getopts ":r:" flag; do
-    case "$flag" in
-      r)
-        remote=1
-        branch="$OPTARG"
-        ;;
-      \?)
-        __print_error "-$OPTARG" "is not a valid flag, see --help" && return 1
-        break
-        ;;
-      :)
-        __print_error "-$OPTARG" "requires a BRANCH operand" && return 1
-        break
-        ;;
-    esac
-  done
-  shift $((OPTIND-1))
-
-  git checkout -b "$branch"
-
-  if [[ "$?" != "0" ]]; then
-    __print_error "$branch" "already exists, stopping execution" && return 1
-  fi
-
-  if ((remote)); then
-    git push --set-upstream origin "$branch"
-  fi
-}
-
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

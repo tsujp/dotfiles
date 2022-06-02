@@ -117,7 +117,7 @@ man ()
 _reload_shell ()
 {
   #puts_section 'Reloading shell configuration'
-  hash -r && _SHOW_MESSAGES=1 exec -a -bash bash
+  hash -r && _SHOW_MESSAGES=1 exec -a "$0" bash
 }
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

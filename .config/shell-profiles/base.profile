@@ -37,6 +37,7 @@ export MANPAGER="$PAGER"
 # GnuPG.
 export GNUPGHOME="$XDG_CONFIG_HOME/gnupg"
 export PINEENTRY_USER_DATA='USE_CURSES=1'
+export GPG_TTY="$(tty)"
 
 # WGet.
 export WGETRC="$XDG_CONFIG_HOME/wgetrc"

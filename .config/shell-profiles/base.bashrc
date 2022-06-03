@@ -68,13 +68,16 @@ alias py='python3'
 alias gnpm='npm list -g --depth 0'
 alias dpsv='docker ps -a | less -S'
 alias gb='git branch'
-alias gpg='gpg2'
+#alias gpg='gpg2'
 alias gpg-restart='gpg-connect-agent reloadagent /bye'
 alias rsync='rsync -I --info=progress2'
 alias wget="wget --hsts-file=$XDG_CACHE_HOME/wget-hsts"
 alias off='sudo shutdown -P now'
 alias grepi='grep -i'
+
+# TODO: Put this in bin as these are 'static' helpers
 alias ppath=pretty_print_path
+alias chk-gpg=_check_gnupg_working
 
 # TODO: put this in tvoid's own profile
 #alias xbpsi='sudo xbps-install -Su'
@@ -115,6 +118,11 @@ _reload_shell ()
 {
   #puts_section 'Reloading shell configuration'
   hash -r && _SHOW_MESSAGES=1 exec -a -bash bash
+}
+
+_check_gnupg_working ()
+{
+  printf 'foo bar\n' | gpg --clearsign
 }
 
 

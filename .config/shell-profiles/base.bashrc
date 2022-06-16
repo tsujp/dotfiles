@@ -67,7 +67,10 @@ alias recent='ls -ltch --color'
 alias py='python3'
 alias gnpm='npm list -g --depth 0'
 alias dpsv='docker ps -a | less -S'
+
 alias gb='git branch'
+alias g='git'
+
 #alias gpg='gpg2'
 alias gpg-restart='gpg-connect-agent reloadagent /bye'
 alias rsync='rsync -I --info=progress2'

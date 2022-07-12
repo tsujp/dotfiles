@@ -13,8 +13,8 @@
 . "$HOME/.config/shell-profiles/base.profile"
 
 # host-user combination `profile` if it exists.
-[ -f "$HOME/.config/shell-profiles/$(hostname)-$(whoami).profile" ] && {
-  . "$HOME/.config/shell-profiles/$(hostname)-$(whoami).profile"
+[ -f "$HOME/.config/shell-profiles/$(uname -n)-$(id -un).profile" ] && {
+  . "$HOME/.config/shell-profiles/$(uname -n)-$(id -un).profile"
 }
 
 # If macOS load `entry.bashrc`, see top-of-file note on why.

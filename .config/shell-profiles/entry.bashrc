@@ -7,6 +7,6 @@
 . "$HOME/.config/shell-profiles/base.bashrc"
 
 # host-user combination `bashrc` if it exists.
-[ -f "$HOME/.config/shell-profiles/$(hostname)-$(whoami).bashrc" ] && {
-  . "$HOME/.config/shell-profiles/$(hostname)-$(whoami).bashrc"
+[ -f "$HOME/.config/shell-profiles/$(uname -n)-$(id -un).bashrc" ] && {
+  . "$HOME/.config/shell-profiles/$(uname -n)-$(id -un).bashrc"
 }

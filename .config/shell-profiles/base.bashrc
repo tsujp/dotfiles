@@ -38,14 +38,16 @@ git config --file "$XDG_CONFIG_HOME/git/variable"  gpg.program $(which gpg2)
 
 alias ..='cd ..'
 alias ...='cd ../..'
-alias ....='cd ../../..'
+# make .. a function which takes numeric args to go up N levels
 
-alias mv='mv --no-clobber' # do not overwrite existing files
+#alias mv='mv --no-clobber' # do not overwrite existing files
 # alias cd=__cdenv
+alias mv='mv -i'
 
 alias ee='exit'
 alias c='clear'
-alias h='history | tail -30'
+alias hh='history | tail -30'
+alias h='history'
 alias rm='rm -i'
 alias r=_reload_shell
 alias k=kubectl

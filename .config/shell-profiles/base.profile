@@ -56,7 +56,7 @@ export HISTSIZE=65536
 
 # Two special cases, (1) for local precedence, (2) for macOS.
 [ -d "$HOME"/.local/bin ] && PATH="$HOME/.local/bin:$PATH"
-[ -d /macports/bin ] && PATH="/macports/bin:$PATH"
+[ -d /opt/local/bin ] && PATH="/opt/local/bin:$PATH"
 
 # Regular pattern.
 export PATH="\

@@ -28,5 +28,6 @@
 	sqe = "!git rebase --interactive --autosquash :/\"$1\" #"
 	sqd = rebase --interactive --autosquash
 	rsl = "!git fetch --all -Pp && git pull --rebase"
+	initsrht = ! srht_remote
 [pager]
 	log = less +G

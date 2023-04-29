@@ -38,26 +38,30 @@ git config --file "$XDG_CONFIG_HOME/git/variable"  gpg.program $(which gpg2)
 
 alias ..='cd ..'
 alias ...='cd ../..'
-# make .. a function which takes numeric args to go up N levels
+# TODO: make .. a function which takes numeric args to go up N levels
 
-#alias mv='mv --no-clobber' # do not overwrite existing files
+alias mv='mv -i -v'
 # alias cd=__cdenv
-alias mv='mv -i'
 
 alias ee='exit'
 alias c='clear'
-alias hh='history | tail -30'
 alias h='history'
+alias hh='history | less +G'
+# history | tail -30
 alias rm='rm -i'
 alias r=_reload_shell
 alias k=kubectl
 
-alias e-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/base.bashrc"
-alias e-my-bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).bashrc"
-alias e-bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/base.profile"
-alias e-my-bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
-alias e-foot="$EDITOR $XDG_CONFIG_HOME/foot/foot.ini"
-alias e-ssh="$EDITOR ~/.ssh/config"
+alias e_bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/base.bashrc"
+alias e_my_bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).bashrc"
+
+alias e_bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/base.profile"
+alias e_my_bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
+
+alias e_foot="$EDITOR $XDG_CONFIG_HOME/foot/foot.ini"
+alias e_ssh="$EDITOR ~/.ssh/config"
+
+alias e_gc="$EDITOR ${XDG_CONFIG_HOME}/git/config"
 
 #alias ll='ls  -lFhN    --color --group-directories-first'
 #alias lla='ls -lFhN -A --color --group-directories-first'
@@ -113,6 +117,17 @@ man ()
 	LESS_TERMCAP_ZO=$(tput ssupm) \
 	LESS_TERMCAP_ZW=$(tput rsupm) \
 		man "$@"
+}
+
+bundle_init ()
+{
+  # Want local Gem installation
+  bundle init
+  mkdir -p .bundle
+  tee .bundle/config << EOF > /dev/null
+---
+BUNDLE_PATH: 'vendor/bundle'
+EOF
 }
 
 
@@ -183,15 +198,9 @@ bind 'set vi-cmd-mode-string "\1\e[32m\2(c)\1\e[0m\2"'
 
 shell_prompt_decoration="# "
 shell_depth=""
-if command -v pstree &> /dev/null; then
-  depth="$(pstree -s "$$" | grep bash- -o | tail +2 | wc -l)"
-  for (( i = 0; i < depth; i++ )); do
-    shell_depth+="$shell_prompt_decoration"
-  done
-else
-  # pstree not found, so output a single shell_prompt_decoration
-  shell_depth="$shell_prompt_decoration"
-fi
+for (( i = 0; i < ${SHLVL:-1}; i++ )); do
+  shell_depth+="$shell_prompt_decoration"
+done
 
 PROMPT_COMMAND="__git_prompt;"
 PS1_PREFIX=" $(__uc CYAN)\W$(__uc RESET) "

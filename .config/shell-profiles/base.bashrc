@@ -26,9 +26,24 @@ if command -v find &> /dev/null; then
   find "$XDG_CONFIG_HOME"/gnupg -type d -exec chmod 700 {} \;
 fi
 
-# git; limited environment variables in git config so this is done here
-# git config --global core.excludesfile "$XDG_CONFIG_HOME/git/gitignore_global"
-git config --file "$XDG_CONFIG_HOME/git/variable"  gpg.program $(which gpg2)
+# Git limits environment variables in git config so this is done here.
+
+# 1. Check un-aliased command is in path and strip all _irrelevant_ whitespace (e.g. somehow a
+#    whitespace-only response is captured from `command`). Note that this DOES NOT break paths
+#    which contain spaces, e.g. if the target binary is at `/home/foo/has spaces/` it WILL be
+#    preserved correctly and pass these tests.
+if ! gpg2_executable="$(command -v gpg2 2> /dev/null)" && [[ -z "${gpg2_executable//[[:space:]]}" ]]; then
+  printf '(dotfiles) COULD NOT FIND `gpg2` EXECUTABLE IN PATH!\n'
+fi
+
+# `gpg2_executable` is now (probably) a valid path.
+
+# 2. Check path represents an executable binary (that we also have permission to execute too).
+if [[ -x "${gpg2_executable}" ]]; then
+  git config --file "$XDG_CONFIG_HOME/git/variable"  gpg.program "$gpg2_executable"
+else
+  printf '(dotfiles) LACK OF PERMISSION OR `gpg2` AT PATH %s IS NOT EXECUTABLE\n' "$gpg2_executable"
+fi
 
 # TODO: check ~/.ssh/config only has permissions 600, else set it so
 

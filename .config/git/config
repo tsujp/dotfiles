@@ -2,18 +2,29 @@
 	signingkey = F84846C9349D247B
 	name = Jordan Ellis Coppard
 	email = jc+git@wz.ht
+
 [commit]
 	gpgsign = true
+
 [core]
-	editor = vim
+	# By default git will respect env vars VISUAL and EDITOR else fall back to
+	#   using `vi`, setting anything for `core.editor` will override those
+	#   env vars even if the configured executable is not found... so let's
+	#   just not set `core.editor` and use env vars instead.
+	# editor = vim
 	excludesfile = ~/.config/git/gitignore_global
+
 [include]
 	path = ~/.config/git/secret
 	path = ~/.config/git/variable
+
 [init]
+
 	defaultBranch = master
 [pull]
+
 	rebase = true
+
 [alias]
 	p = push
 	pu = push -u origin HEAD
@@ -29,5 +40,6 @@
 	sqd = rebase --interactive --autosquash
 	rsl = "!git fetch --all -Pp && git pull --rebase"
 	initsrht = ! srht_remote
+
 [pager]
 	log = less +G

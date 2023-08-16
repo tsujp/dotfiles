@@ -1,0 +1,19 @@
+{
+  "$schema" : "https:\/\/app.linearmouse.org\/schema\/0.7.4",
+  "schemes" : [
+    {
+      "pointer" : {
+        "speed" : 0.21,
+        "disableAcceleration" : false
+      },
+      "if" : {
+        "device" : {
+          "productName" : "Xtrfy M4",
+          "productID" : "0x2203",
+          "category" : "mouse",
+          "vendorID" : "0x2ea8"
+        }
+      }
+    }
+  ]
+}

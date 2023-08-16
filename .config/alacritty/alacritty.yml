@@ -1,0 +1,81 @@
+live_config_reload: true
+
+working_directory: ~
+
+window:
+  padding:
+    x: 10
+    y: 10
+  # TODO: Maybe startup_mode can be kept like that if the Y padding is
+  #       large enough to skip the notch when used on laptop screen?
+  # startup_mode: SimpleFullscreen
+
+cursor:
+  style:
+    shape: Block
+    blinking: Always
+  blink_interval: 500
+  blink_timeout: 0
+  unfocused_hollow: true
+
+font:
+  # Size in points.
+  # size: 16.0
+  size: 14.0
+
+  normal:
+    # family: Tamsyn8x16
+    family: 'Zed Mono'
+    style: 'Medium Extended'
+  bold:
+    family: 'Zed Mono'
+    style: 'Extrabold Extended'
+  italic:
+    family: 'Zed Mono'
+    style: 'Medium Extended Italic'
+  bold_italic:
+    family: 'Zed Mono'
+    style: 'Extrabold Extended Italic'
+
+  # So underline in Helix does not touch text.
+  glyph_offset:
+    x: 0
+    y: 1
+
+draw_bold_text_with_bright_colors: true
+
+colors:
+  primary:
+    foreground: '#FFF2F3'
+    background: '#2C2526'
+
+  cursor:
+    text: CellForeground
+    cursor: '#F9CC6C'
+
+  selection:
+    text: CellBackground
+    background: '#F9CC6C'
+
+  normal:
+    black: '#2C2425'
+    red: '#FD6783'
+    green: '#ADDA79'
+    yellow: '#F9CB6D'
+    blue: '#F38C71'
+    magenta: '#A9A8EC'
+    cyan: '#85DBCC'
+    white: '#FFF0F3'
+
+  bright:
+    black: '#70686A'
+    red: '#FD6682'
+    green: '#ADD97A'
+    yellow: '#F9CC6C'
+    blue: '#F48D71'
+    magenta: '#A9A9EB'
+    cyan: '#85DBCC'
+    white: '#FFF0F3'
+
+# key_bindings:
+#   - { key: P, mods: Super, chars: "\x1b\x5b\x32\x34\x3b\x33\x7e" }

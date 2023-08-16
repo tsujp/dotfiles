@@ -1,0 +1,2 @@
+Contains 3rd party code not managed by a package manager but which we still want
+to use and so have copy-pasted in manually.

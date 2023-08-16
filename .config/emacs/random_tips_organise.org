@@ -1,0 +1,29 @@
+* Put this in second-brain once ready to do so
+
+** Viewing commands and their keybindings as you use them
+Refer to package `keycast`. In a seperate window `keycast-log-mode` is quite useful.
+
+** Emacs and keybinding problems
+*** Keybinding does nothing even though still bound
+See if `keycast` shows the binding actually registering. If not then try `C-h k`
+and perform the kebinding. If nothing happens at all then Emacs isn't even
+receiving the keypresses (e.g. a window manager or keyboard daemon may be
+grabbing them before Emacs can see). Recently this happened with M-: after I
+installed and configured `skhd` (for usage with Yabai) to launch at startup. In
+such a case doing `emacs -Q` (which is a good idea for diagnosing issues) would
+not have helped since the issue was `skhd` grabbing that keybinding and not
+passing it though, hence it appearing to do nothing. `C-h k` helped in showing
+Emacs wasn't even receiving it versus it running the wrong command for example.
+
+
+* `use-package` keyword orders
+
+https://github.com/jwiegley/use-package
+
+- In general keep `:init` as short (and fast) as possible and put as much as possible into `:config` so that deferred loading can keep Emacs starrting quickly.
+
+`:init` executes _before_ a package is loaded.
+`:config` executes _after_ a package is loaded, even if package loading is deferred.
+`:custom` allows changing package-defined variables.
+
+Using `:custom` does not require `setq` and the only difference to writing the same form (except with `setq`) in `:config` is that `:custom` may execute sideeffects when they are executed. Also, `:custom` does not save the values into `custom-file`, if that functionality is needed use `M-x customize-option`.

@@ -1,0 +1,36 @@
+# [[language]]
+# name = "rust"
+
+# [language.config.check]
+# command = "clippy"
+# features = "all"
+
+# #[language.config.rustfmt]
+# #extraArgs = [ "+nightly" ]
+
+# # rust-analyzer.procMacro.attributes.enable 
+
+# [language.config.cargo]
+# sysrootSrc = "/opt/local/libexec/rust/src/rustc-1.70.0-src/library"
+
+# [language.config.procMacro]
+# enable = true
+# attributes.enable  = true
+
+
+
+
+# ----- Should work but doesn't. Does work in VSCodium.
+# [[language]]
+# name = "org"
+# scope = "source.org"
+# injection-regex = "org"
+# file-types = ["org"]
+# roots = []
+# indent = { tab-width = 2, unit = "  " }
+# language-server = { command = "lsp-org-mode", except-features = ["format", "workspace-command"] }
+
+# [[grammar]]
+# name = "org"
+# source = { git = "https://github.com/milisims/tree-sitter-org", rev = "698bb1a34331e68f83fc24bdd1b6f97016bb30de" }
+

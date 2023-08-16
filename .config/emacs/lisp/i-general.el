@@ -2,6 +2,9 @@
 
 ;;; General (and appearing first) emacs configuration.
 
+;;; TEMPORARY FIX WITH MACOS NATIVE COMP ERRORS UNTIL EMACS 28.3 OR 29
+(when (eq system-type 'darwin) (customize-set-variable 'native-comp-driver-options '("-Wl,-w")))
+
 ;;; Decent window frame upon startup.
     (if (display-graphic-p)
         (progn
@@ -19,13 +22,12 @@
 ;;      semibold instead when using LG monitor
 ;; TODO when on retina screen go back to medium for the weights? Do this
 ;;      programatically? Likely with hammerspoon sending a message to emacs?
-;       can emacs detect retina? ppi?
-(when (eq system-type 'darwin)
+;;      can emacs detect retina? ppi?
+(when (and (display-graphic-p) (eq system-type 'darwin)
   (set-face-attribute 'default nil
 		      :family "Zed Mono Extended"
                       :height 150
-                      :weight 'semibold))
-                     
+                      :weight 'semibold)))
 
 ;;; Defaults.
 (setq-default
@@ -44,7 +46,6 @@
      require-final-newline t                 ; add newline on buffer save
      display-line-numbers-type 'visual       ; set line numbers to relative
      display-line-numbers-grow-only t
-     show-paren-delay 0                      ; no matching paren show delay
      gc-cons-threshold 100000000             ; increase consing before gc runs
      read-process-output-max (* 1024 1024)   ; increase max bytes read per chunk
      display-raw-bytes-as-hex t              ;
@@ -58,8 +59,7 @@
     (prefer-coding-system 'utf-8-unix)       ; utf8
     (global-display-line-numbers-mode)       ; enable relative line numbers
     (global-hl-line-mode)                    ; enable hilight current line
-    (show-paren-mode 1)                      ; enable show matching parens
-    (scroll-bar-mode -1)                     ; hide scroll
+;    (scroll-bar-mode -1)                     ; hide scroll
     (menu-bar-mode -1)                       ; hide menu bar
     (tool-bar-mode -1)                       ; hide tool bar
     (fset 'yes-or-no-p 'y-or-n-p)            ; yes/no -> y/n
@@ -69,10 +69,10 @@
 (display-battery-mode t)
 
 ;;; Rule.
-  (setq display-fill-column-indicator-character ?\u2502) ; unused atm
-  (add-hook 'org-mode-hook #'display-fill-column-indicator-mode)
-  (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-  (add-hook 'markdown-mode-hook #'display-fill-column-indicator-mode)
+(setq display-fill-column-indicator-character ?\u2502) ; unused atm
+(add-hook 'org-mode-hook #'display-fill-column-indicator-mode)
+(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
+(add-hook 'markdown-mode-hook #'display-fill-column-indicator-mode)
 
 ;;; Scrolling.
 (setq

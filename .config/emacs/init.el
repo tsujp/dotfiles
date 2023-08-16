@@ -41,18 +41,34 @@
 (require 'i-header-line)
 (require 'i-mode-line)
 
+;; TODO: Wrapper function so as to not have to specify the `i` and such that the imported file automatically `provides` the same as it's file name.
+
 ;;; Third party packages.
 (require 'i-theme)
-(require 'i-evil) ; vim
-(require 'i-treesitter)
-(require 'i-project) ; project management
+(require 'i-evil) ; Vim.
+;; (require 'i-treesitter)
+(require 'i-ts)
+(require 'i-project) ; Project management.
 (require 'i-lsp)
-(require 'i-no-littering) ; no random files
-(require 'i-whitespace) ; show invisibles
-(require 'i-rainbow-delimiters) ; colourful brackets etc
-(require 'i-mini-frame) ; minibuffer at top (like sublime text's C-p)
-(require 'i-completions) ; completions frameworks et al.
+(require 'i-no-littering) ; No random files.
+(require 'i-whitespace) ; Show invisibles.
+(require 'i-delimiters) ; Parens, brackets, etc. matching and colouring.
+;; (require 'i-mini-frame) ; Minibuffer at top (like sublime text's C-p).
+(require 'i-completions) ; Completions frameworks et al.
 (require 'i-diminish)
 (require 'i-orderless)
+(require 'i-rss)
+;; TODO: Make programming language configuration easier? In one place I suppose?
+(require 'i-rust)
+; (require 'i-noir)
+;; TODO: Load and unload keycast on demand (e.g. keybinding), see it's file.
+(require 'i-keycast) ; Display current command and its keybinding.
+(require 'i-which-key) ; Display available keybindings in minibuffer after delay.
+                                        ;(require 'i-mu4e) ; Email client for Emacs using mu.
+
+;(use-package vterm)
+
+
+
 
 (provide 'init)

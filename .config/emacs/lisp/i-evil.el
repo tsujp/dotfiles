@@ -65,9 +65,10 @@
   :after (evil-leader catppuccin-theme) ; Using Catppuccin's colours below.
   :init
   (setq
-   global-visual-line-mode t ; turn it on everywhere so Evil can respect it.
-   evil-respect-visual-line-mode t ; movement commands move by visual, not logical, line.
+   global-visual-line-mode t ; Turn it on everywhere so Evil can respect it.
+   evil-respect-visual-line-mode t ; Movement commands move by visual, not logical, line.
    blink-cursor-mode nil ; Never blink cursor (0 for blink forever).
+   evil-want-minibuffer t ; Enable evil in minibuffer.
    ;; evil-normal-state-cursor (list 'box (catppuccin-get-color 'peach)) ; Normal mode.
    ;; evil-normal-state-cursor '(box "#F9CC6C") ; Normal mode.
    ;; evil-normal-state-cursor '(box "#CCFF00") ; Normal mode (fluro yellow).

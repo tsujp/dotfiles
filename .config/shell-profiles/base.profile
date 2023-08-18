@@ -25,9 +25,9 @@ export XDG_VIDEOS_DIR="$HOME/videos";
 : ${LC_ALL:="en_US.UTF-8"};   export LC_ALL
 
 # Editors.
+export EDITOR='hx'
+export VISUAL='hx'
 export ALTERNATE_EDITOR='vim'
-export EDITOR='vim'
-export VISUAL='vim'
 
 # Paging.
 export PAGER='less -SFw'

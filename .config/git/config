@@ -1,3 +1,5 @@
+# Git expands `~` to the value of `$HOME` so in this file consider them the same.
+
 [user]
 	signingkey = F84846C9349D247B
 	name = Jordan Ellis Coppard
@@ -12,7 +14,7 @@
 	#   env vars even if the configured executable is not found... so let's
 	#   just not set `core.editor` and use env vars instead.
 	# editor = vim
-	excludesfile = ~/.config/git/gitignore_global
+	excludesFile = ~/.config/git/gitignore_global
 
 [include]
 	path = ~/.config/git/secret

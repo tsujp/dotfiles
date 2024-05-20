@@ -1,11 +1,11 @@
 # theme = "tsukai"
-theme = "ayu_evolve"
+# theme = "ayu_evolve"
+theme = "tsuvendi"
 # theme = "catppuccin_mocha"
 # theme = "ayu_dark"
 # rose_pine_moon
 # wombat
 # hurtado
-
 
 [editor]
 line-number = "relative"
@@ -19,20 +19,28 @@ color-modes = true
 true-color = true
 undercurl = true
 
+[editor.whitespace.render]
+space = "all"
+tab = "all"
+nbsp = "none"
+nnbsp = "none"
+newline = "all"
+
 [editor.soft-wrap]
 enable = true
 
 [editor.cursor-shape]
-insert = "underline"
+insert = "bar"
 normal = "block"
-select = "bar"
+select = "hidden"
 
 [editor.file-picker]
 hidden = false
 
 [editor.indent-guides]
 # TODO: Pr to highlight indent level?
-character = "▏"
+# character = "▏"
+character = "┊"
 render = true
 skip-levels = 1
 
@@ -80,7 +88,7 @@ right = [
   "position",
   "separator",
   "total-line-numbers",
-] 
+]
 
 [keys.normal.space]
 "H" = ":toggle lsp.display-inlay-hints"
@@ -88,6 +96,8 @@ right = [
 [keys.normal]
 C-p = ["move_line_up", "scroll_up"]
 C-n = ["move_line_down", "scroll_down"]
+
+x = ["extend_line"] # Default is `extend_line_below`
 
 # Transpose lines (no need to select too).
 C-j = ["extend_to_line_bounds", "delete_selection", "paste_after"]

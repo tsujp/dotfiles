@@ -1,0 +1,5 @@
+inherits = "modus_vivendi"
+
+# "ui.virtual.jump-label" = "#FFFF00"
+"ui.virtual.jump-label" = { fg = "#FFFF00", modifiers = ["bold"] }
+

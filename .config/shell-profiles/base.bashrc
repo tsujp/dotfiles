@@ -13,8 +13,9 @@ shopt -s histappend    # Append to history; don't overwrite.
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## GUARDS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-[[ "$-" = *i* ]] || return     # if interactive shell, exit
-[[ "$TERM" = dumb ]] && return # in emacs TRAMP, exit
+#[[ "$-" = *i* ]] || return     # if interactive shell, exit
+[[ "$-" != *i* ]] && { return ; }  # if not interactive shell abort
+#[[ "$TERM" = dumb ]] && return # in emacs TRAMP, exit
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -167,6 +168,7 @@ _check_gnupg_working ()
 # * * * * * * * * * COLOURS
 declare -A __c=([BOLD]="$(tput bold)" [RESET]="$(tput sgr0)")
 
+# TODO: This without `tput`, use the raw escape codes instead. No subshell each time.
 # CONSTRUCT COLOURS
 if [ "$(tput colors)" -ge 8 ]; then
   __c+=(
@@ -198,14 +200,15 @@ __uc ()
 }
 
 # FILES AND DIRECTORIES
-# todo customise this further?
-# make a generator script for this?
+# TODO: customise this further?
+# TODO: make a generator script for this?
 export LS_COLORS="rs=0:fi=0:di=1;34:ln=95:mh=30;46:pi=40;38;5;11:so=95:do=95:bd=48;5;232;38;5;11:cd=48;5;232;38;5;3:or=95;40:mi=05;48;5;232;38;5;15:su=48;5;196;38;5;15:sg=48;5;11;38;5;16:ca=48;5;196;38;5;226:tw=48;5;10;38;5;16:ow=48;5;10;38;5;21:st=48;5;21;38;5;15:ex=93:*.tar=31:*.tgz=31:*.arc=31:*.arj=31:*.taz=31:*.lha=31:*.lz4=31:*.lzh=31:*.lzma=31:*.tlz=31:*.txz=31:*.tzo=31:*.t7z=31:*.zip=31:*.z=31:*.Z=31:*.dz=31:*.gz=31:*.lrz=31:*.lz=31:*.lzo=31:*.xz=31:*.bz2=31:*.bz=31:*.tbz=31:*.tbz2=31:*.tz=31:*.deb=31:*.rpm=31:*.jar=31:*.war=31:*.ear=31:*.sar=31:*.rar=31:*.alz=31:*.ace=31:*.zoo=31:*.cpio=31:*.7z=31:*.rz=31:*.cab=31:*.jpg=95:*.jpeg=95:*.gif=95:*.bmp=95:*.pbm=95:*.pgm=95:*.ppm=95:*.tga=95:*.xbm=95:*.xpm=95:*.tif=95:*.tiff=95:*.png=95:*.svg=95:*.svgz=95:*.mng=95:*.pcx=95:*.mov=95:*.mpg=95:*.mpeg=95:*.m2v=95:*.mkv=95:*.webm=95:*.ogm=95:*.mp4=95:*.m4v=95:*.mp4v=95:*.vob=95:*.qt=95:*.nuv=95:*.wmv=95:*.asf=95:*.rm=95:*.rmvb=95:*.flc=95:*.avi=95:*.fli=95:*.flv=95:*.gl=95:*.dl=95:*.xcf=95:*.xwd=95:*.yuv=95:*.cgm=95:*.emf=95:*.axv=95:*.anx=95:*.ogv=95:*.ogx=95:*.aac=36:*.au=36:*.flac=36:*.mid=36:*.midi=36:*.mka=36:*.mp3=36:*.mpc=36:*.ogg=36:*.ra=36:*.wav=36:*.axa=36:*.oga=36:*.spx=36:*.xspf=36"
 
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * PROMPT CONSTRUCTION
+# TODO: Custom prompt in Zig with some cool logic stuff.
 # INPUTRC COMMANDS WE'RE SETTING FROM BASHRC FOR CONVENIENCE
 bind 'set editing-mode vi'
 bind 'set show-mode-in-prompt on'
@@ -227,6 +230,7 @@ PS1_SUFFIX="$(__uc YELLOW)$shell_depth$(__uc RESET)"
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * GIT PROMPT INTERNAL AND HELPER FUNCTION
+# TODO: From zig using git api instead (faster).
 __git_prompt ()
 {
   local inside_worktree="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
@@ -302,6 +306,10 @@ __git_prompt ()
   fi
 }
 
+# TODO: Put this elsewhere, lang specific or something.
+. "$HOME/.cargo/env"
+
+export PATH="$PATH":/BLAHBLAHBLAH
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## NOTES - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

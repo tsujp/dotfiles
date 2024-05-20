@@ -22,12 +22,12 @@
 ;;;;   with Vertico).
 ;;;;
 ;;;; docs: https://github.com/minad/corfu
-;; (use-package corfu
-;;   :custom
-;;   (corfu-cycle t)
-;;   (corfu-auto t)
-;;   :config
-;;   (global-corfu-mode 1))
+(use-package corfu
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  :config
+  (global-corfu-mode 1))
 
 ;;;;; Uncomment to debug Corfu (from their docs).
 ;; (setq debug-on-error t)

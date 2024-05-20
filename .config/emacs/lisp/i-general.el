@@ -6,12 +6,12 @@
 (when (eq system-type 'darwin) (customize-set-variable 'native-comp-driver-options '("-Wl,-w")))
 
 ;;; Decent window frame upon startup.
-    (if (display-graphic-p)
-        (progn
-          (setq default-frame-alist
-                '(
-                  (width . 104)
-                  (height . 55)))))
+    ;; (if (display-graphic-p)
+    ;;     (Progn
+    ;;       (setq default-frame-alist
+    ;;             '(
+    ;;               (width . 104)
+    ;;               (height . 55)))))
 
 ;;; Thin window edges.
 (set-window-fringes nil 0 0)
@@ -25,9 +25,9 @@
 ;;      can emacs detect retina? ppi?
 (when (and (display-graphic-p) (eq system-type 'darwin)
   (set-face-attribute 'default nil
-		      :family "Zed Mono Extended"
-                      :height 150
-                      :weight 'semibold)))
+		      :family "Zed Mono"
+                      :height 160
+                      :weight 'medium)))
 
 ;;; Defaults.
 (setq-default
@@ -39,6 +39,7 @@
      sentence-end-double-space nil           ; single space after fullstop
      indent-tabs-mode nil                    ; sane whitespace, please
      initial-scratch-message ";; Scratch"    ; initial scratch message
+     initial-major-mode 'fundamental-mode    ; a "nothing" mode for scratch buf
      inhibit-splash-screen t                 ; hide welcome screen
      inhibit-startup-echo-area-message t     ; no echo area message
      buffer-file-coding-system 'utf-8-unix   ; utf8 encoding
@@ -46,11 +47,13 @@
      require-final-newline t                 ; add newline on buffer save
      display-line-numbers-type 'visual       ; set line numbers to relative
      display-line-numbers-grow-only t
+     display-line-numbers-width 3            ; default width
      gc-cons-threshold 100000000             ; increase consing before gc runs
      read-process-output-max (* 1024 1024)   ; increase max bytes read per chunk
      display-raw-bytes-as-hex t              ;
      tab-always-indent 'complete             ; indentation & completion with TAB
      completion-cycle-threshold 3            ; TAB wraps if completion list small
+     indicate-buffer-boundaries 'left        ; show buffer top/bottom in margin
      ;; hide commands in M-x not applicable to current mode
      read-extended-command-predicate #'command-completion-default-include-p
 )
@@ -64,9 +67,19 @@
     (tool-bar-mode -1)                       ; hide tool bar
     (fset 'yes-or-no-p 'y-or-n-p)            ; yes/no -> y/n
 (global-font-lock-mode 1)                ; force-enable font-face
-(display-time-mode -1) ; disable time in modeline
-(display-battery-mode -1) ; disable battery in modeline
+;; (display-time-mode -1) ; disable time in modeline
+;; (display-battery-mode -1) ; disable battery in modeline
 (display-battery-mode t)
+(savehist-mode) ; save minibuffer history
+
+;;; Make right-click show a context menu.
+(when (display-graphic-p)
+  (context-menu-mode))
+
+;;; Re-read file if it changes on disk.
+(setq auto-revert-interval 1)
+(setq auto-revert-check-vs-info t)
+(global-auto-revert-mode)
 
 ;;; Rule.
 (setq display-fill-column-indicator-character ?\u2502) ; unused atm

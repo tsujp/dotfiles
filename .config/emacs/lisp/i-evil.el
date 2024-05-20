@@ -62,7 +62,7 @@
 ;;;;
 ;;;; docs: https://github.com/emacs-evil/evil
 (use-package evil
-  :after (evil-leader catppuccin-theme) ; Using Catppuccin's colours below.
+ ;; :after (evil-leader catppuccin-theme) ; Using Catppuccin's colours below.
   :init
   (setq
    global-visual-line-mode t ; Turn it on everywhere so Evil can respect it.
@@ -146,12 +146,12 @@
 ;;;; 2-character motions move around text fast (like both vim-seek/vim-sneak).
 ;;;;
 ;;;; docs: https://github.com/hlissner/evil-snipe
-   (use-package evil-snipe
-    :after evil
-    :config
-    (setq evil-snipe-scope 'visible
-          evil-snipe-spillover-scope 'buffer)
-    (evil-snipe-mode))
+   ;; (use-package evil-snipe
+   ;;  :after evil
+   ;;  :config
+   ;;  (setq evil-snipe-scope 'visible
+   ;;        evil-snipe-spillover-scope 'buffer)
+   ;;  (evil-snipe-mode))
 
 ;;;; Evil Goggles
 ;;;; Flashes a colour when performing evil things.

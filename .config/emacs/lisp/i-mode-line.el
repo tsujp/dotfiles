@@ -18,12 +18,22 @@
 ;;       evil-emacs-state-tag    (propertize "EM" 'face '((:background "orange" :foreground "black")))
 ;;       evil-operator-state-tag (propertize "OP" 'face '((:background "purple")))))
 
-  
+
 ;; (setq-default mode-line-format
-;;   (list 
-               
-(setq mode-line-position-column-line-format (list "%l,%C"))
-(setq mode-line-percent-position (list "%o "))
+;;               (list
+;;                " "
+;;                "%l,%c"
+;;                " "
+;;                "%o"
+;;                " "
+;;                "%b"
+;;                " "
+;;                (when (boundp 'boon) boon-state-string)
+;;                ))
+;;(setq mode-line-position-column-line-format (list "%l,%c"))
+;;(setq mode-line-percent-position (list "%o "))
+
+
 
 
 

@@ -27,14 +27,14 @@
 (setq treesit-language-source-alist
       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
         (toml "https://github.com/tree-sitter/tree-sitter-toml")
-(css "https://github.com/tree-sitter/tree-sitter-css")
-(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-(json "https://github.com/tree-sitter/tree-sitter-json")
-(markdown "https://github.com/ikatyang/tree-sitter-markdown")
-(yaml "https://github.com/ikatyang/tree-sitter-yaml")
+        (css "https://github.com/tree-sitter/tree-sitter-css")
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        (yaml "https://github.com/ikatyang/tree-sitter-yaml")
         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-         ))
+        (noir "https://github.com/hhamud/tree-sitter-noir.git")))
 
 ;;;; TODO: In future change auto-mode-alist, interpreter-mode-alist instead.
 ;;;; Tree sitter major mode remapping

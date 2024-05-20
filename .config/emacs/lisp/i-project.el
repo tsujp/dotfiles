@@ -30,6 +30,24 @@
                                     :src-dir "src/"
                                     :compile "./do build"
                                     :run "bundle exec bake")
+  ;; {Java,Type}Script via Bun.
+  (projectile-register-project-type 'js-bun
+                                    '("package.json")
+                                    :project-file "package.json"
+                                    :src-dir "."
+                                    :compile "bun install"
+                                    :test "bun test"
+                                    :run "bun run")
+
+  ;; Noir via Nargo.
+  (projectile-register-project-type 'noir-nargo
+                                    '("Nargo.toml")
+                                    :project-file "nargo.toml"
+                                    :src-dir "."
+                                    :compile "nargo compile"
+                                    :test "nargo test"
+                                    :run "nargo")
+
   :bind (:map projectile-mode-map
               ("M-p" . projectile-command-map)
               ("C-c p" . projectile-command-map)))

@@ -1,104 +1,79 @@
-# * * * * * * * * * * * * * * * * * * * * * * * * macOS
-Applications/
-Desktop/
-Documents/
-Downloads/
-Library/
-Maildir/
-Movies/
-Music/
-Parallels/
-Pictures/
-Public/
+# Even though ignoring everything by default, will add tracked files here
+# for documentation (future me).
 
+# Ignore all by default.
+*
 
-# * * * * * * * * * * * * * * * * * * * * * * * * Adobe
-Creative Cloud Files/
+# Re-include common directories; this does not include all files below
+# them it just marks said directories as included for when a file I
+# do want is under it, otherwise such a file is ignored per the
+# gitignore docs.
+!.config/
+!.local/
 
+# wget
+!.config/wgetrc
 
-# * * * * * * * * * * * * * * * * * * * * * * * * Parallels
-Applications (Parallels)/
+# htop
+!.config/htop/
+!.config/htop/htoprc
 
+# ssh
+!.ssh/
+!.ssh/config
 
-# * * * * * * * * * * * * * * * * * * * * * * * * $HOME (General)
-.cache/
-.fly/
-.gnupg/
-.dotnet/
-.lldb/
-.bash_history
-.bash_sessions/
-.bundle/
-.local/share/
-.yarnrc
-.zshenv
-.viminfo
-.wine/
-.npm/
-.solargraph/
-.nuget/
-.parsec/
-.pnpm-state/
-.vim/
-.vnc/
-.hammerspoon/
-.docker/
-.swiftpm/
+# neovim (just in-case I have to use it)
+!.config/nvim/
+!.config/nvim/config.vim
 
-# * * $HOME/bin
-bin/*
+# LinearMouse
+!.config/linearmouse/
+!.config/linearmouse/linearmouse.json
+
+# tmux
+!.config/tmux/
+!.config/tmux/tmux.conf
+
+# X
+!.Xmodmap
+!.Xresources
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Emacs
+!.config/emacs/
+!.config/emacs/early-init.el
+!.config/emacs/init.el
+
+# * * * * * * * * * * * * * * * * * * * * * * * * WezTerm
+!.config/wezterm/
+!.config/wezterm/wezterm.lua
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Helix
+!.config/helix/
+!.config/helix/config.toml
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Shell configuration
+!.profile
+!.bashrc
+!.config/shell-profiles/
+!.config/shell-profiles/*.profile
+!.config/shell-profiles/*.bashrc
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Local share
+!.local/share/
+!.local/share/fonts/
+!.local/share/fonts/*.ttf
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Git meta
+!.gitignore
+!.gitmodules
+!.config/git/
+!.config/git/config
+!.config/git/gitignore_global
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Repo meta
+!/LICENSE
+!/README.md
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Misc
+# Old plans to add nice create-repo CLI, using Magit instead now.
 !bin/git_repo_config
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * Noir
-.nargo/
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * Rust
-.cargo/
-.rustup/
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * Ruby
-# * * IRB debug history
-.rdbg_history
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * Python
-# * * Interactive Python REPL history
-.python_history
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * Jetbrains
-# * * Rider
-RiderProjects/
-.templateengine/
-.fleet/
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * Golang
-go/
-
-
-# * * * * * * * * * * * * * * * * * * * * * * * * Personal information system
-oxsync/
-programming/
-prog/
-
-
-
-# TO ORGANISE
-photography/
-.vscode/
-.vscode-oss/
-.local/cache/
-.dotfiles.git/
-.config/emacs/data/
-.config/emacs/eln-cache/
-.config/emacs/elpa/
-.config/emacs/straight/
-
-
-.config/gnupg/
-.config/lnav/
-#.config/lnav/**/*.sample

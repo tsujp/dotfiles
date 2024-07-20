@@ -1,11 +1,13 @@
 -- Wezterm configuration is a Lua script expected to return a configuration table.
 
 local wezterm = require 'wezterm'
+local act = wezterm.action
 local config = {}
 
 -- List of pre-bundled themes: https://wezfurlong.org/wezterm/colorschemes/index.html
 -- config.color_scheme = 'Ayu Dark (Gogh)'
-config.color_scheme = 'Sonokai (Gogh)'
+-- config.color_scheme = 'Sonokai (Gogh)'
+config.color_scheme = 'Modus-Vivendi'
 
 -- Wezterm ships JetBrains Mono, Nerd Font Symbols, and Noto Color Emoji by default.
 -- When resolving text into glyphs Wezterm will consult the first font and if said
@@ -68,7 +70,7 @@ config.inactive_pane_hsb = {
 }
 
 config.tab_bar_at_bottom = true
-config.use_resize_incremenets = true
+config.use_resize_increments = true
 config.hide_mouse_cursor_when_typing = true
 
 -- TODO: Separate other line drawing content by making a PR, if I want thick undercurls
@@ -216,5 +218,17 @@ config.colors.tab_bar = {
   },
 }
 
+-- Pane selection
+-- https://wezfurlong.org/wezterm/config/lua/keyassignment/PaneSelect.html
+config.keys = {
+  { key = '0', mods = 'CMD', action = act.PaneSelect },
+  {
+    key = '8',
+    mods = 'CMD',
+    action = act.PaneSelect {
+      mode = 'SwapWithActive',
+    },
+  },
+}
 
 return config

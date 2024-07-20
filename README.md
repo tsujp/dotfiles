@@ -1,6 +1,11 @@
 # Dotfiles
 
-All my dotfiles, blah blah.
+```sh
+cd "$HOME" && git clone --bare git@github.com:tsujp/dotfiles.git "$HOME"/.dotfiles.git
+git --git-dir="$HOME"/.dotfiles.git/ --work-tree="$HOME" checkout
+```
+
+## TODO: Dungeon stuff below to update docs for.
 
 Includes a bunch of scripts under `meta-config/` to manage system-dependent
 tweaks. That menu system is done via `sontek` which you can find
@@ -9,10 +14,6 @@ tweaks. That menu system is done via `sontek` which you can find
 ## Install
 
 Run `make` at the root of this repo and follow bash prompts for additional config.
-
-```bash
-git clone --recurse-submodules git@git.sr.ht:~tsujp/dotfiles .
-```
 
 ## Configuration
 

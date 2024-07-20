@@ -1,1 +1,104 @@
-*
+# * * * * * * * * * * * * * * * * * * * * * * * * macOS
+Applications/
+Desktop/
+Documents/
+Downloads/
+Library/
+Maildir/
+Movies/
+Music/
+Parallels/
+Pictures/
+Public/
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Adobe
+Creative Cloud Files/
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Parallels
+Applications (Parallels)/
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * $HOME (General)
+.cache/
+.fly/
+.gnupg/
+.dotnet/
+.lldb/
+.bash_history
+.bash_sessions/
+.bundle/
+.local/share/
+.yarnrc
+.zshenv
+.viminfo
+.wine/
+.npm/
+.solargraph/
+.nuget/
+.parsec/
+.pnpm-state/
+.vim/
+.vnc/
+.hammerspoon/
+.docker/
+.swiftpm/
+
+# * * $HOME/bin
+bin/*
+!bin/git_repo_config
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Noir
+.nargo/
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Rust
+.cargo/
+.rustup/
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Ruby
+# * * IRB debug history
+.rdbg_history
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Python
+# * * Interactive Python REPL history
+.python_history
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Jetbrains
+# * * Rider
+RiderProjects/
+.templateengine/
+.fleet/
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Golang
+go/
+
+
+# * * * * * * * * * * * * * * * * * * * * * * * * Personal information system
+oxsync/
+programming/
+prog/
+
+
+
+# TO ORGANISE
+photography/
+.vscode/
+.vscode-oss/
+.local/cache/
+.dotfiles.git/
+.config/emacs/data/
+.config/emacs/eln-cache/
+.config/emacs/elpa/
+.config/emacs/straight/
+
+
+.config/gnupg/
+.config/lnav/
+#.config/lnav/**/*.sample

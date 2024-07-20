@@ -1,8 +1,9 @@
 # Dotfiles
 
 ```sh
-cd "$HOME" && git clone --bare git@github.com:tsujp/dotfiles.git "$HOME"/.dotfiles.git
+cd "$HOME" && git clone --bare https://github.com/tsujp/dotfiles.git "$HOME"/.dotfiles.git
 git --git-dir="$HOME"/.dotfiles.git/ --work-tree="$HOME" checkout
+git --git-dir="$HOME"/.dotfiles.git/ --work-tree="$HOME" remote set-url origin git@github.com:tsujp/dotfiles.git
 ```
 
 ## TODO: Dungeon stuff below to update docs for.

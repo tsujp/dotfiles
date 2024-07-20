@@ -38,6 +38,14 @@
 !.Xmodmap
 !.Xresources
 
+# * * * * * * * * * * * * * * * * * * * * * * * * GPG
+!.config/gnupg/
+!.config/gnupg/gpg.conf
+!.config/gnupg/gpg-agent.conf
+
+# Annoying required symlink for some programs that hard-code read here.
+!.gnupg
+
 # * * * * * * * * * * * * * * * * * * * * * * * * Emacs
 !.config/emacs/
 !.config/emacs/early-init.el

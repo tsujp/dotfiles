@@ -18,7 +18,7 @@
 
 ;; Mainly due to using LSPs which may or may not have verbose output (unfortunately); increase the maximum chunk-size of data we can read from these processes at a time.
 ;; (setq read-process-output-max (* 1024 1024))
-(setq read-process-output-max (* 4 1024 1024))
+(setq read-process-output-max (* 8 1024 1024))
 
 ;; Don't wait for more output to arrive, process it ASAP.
 (setq process-adaptive-read-buffering nil)

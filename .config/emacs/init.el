@@ -856,3 +856,10 @@
   :defer 1)
 
 ;; END TODO.
+(use-package keycast
+  :ensure
+  :defer 1)
+
+;; TODO: Devdocs package
+;; TODO: Kind icon: https://github.com/jdtsmith/kind-icon
+;; TODO: Indent bars: https://github.com/jdtsmith/indent-bars

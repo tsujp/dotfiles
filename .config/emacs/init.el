@@ -113,6 +113,30 @@
 ;; TODO: Place somewhere more appropriate, idk.
 (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
 
+;;;;; Parenthesis / Delimitiers
+
+
+;;;;; Whitespace
+
+;; Remove empty lines at start/end of file, trailing whitespace on lines, and ensure a newline at end of file.
+;; This happens BEFORE the file is saved; so use with external formatters won't bork things.
+(use-package emacs
+  :ensure nil
+  :hook
+  (prog-mode . whitespace-mode)
+  (text-mode . whitespace-mode)
+  ;; :Config
+  ;; (global-whitespace-mode)
+  ;; If using proportional font make it dimmer.
+  ;; :custom-face
+  ;; (whitespace-newline ((t (:foreground "#4C4C4C" :highlight nil))))
+  :custom
+  ;; newline newline-mark
+  (whitespace-style '(face empty trailing missing-newline-at-eof))
+  (whitespace-action '(cleanup auto-cleanup))
+  :config
+  (setq whitespace-display-mappings '((newline-mark ?\n [?⏎ ?\n] [?$ ?\n]))))
+
 ;; TODO: Have this only in one modeline, or is there a way to have global header bar above the tab bar?
 ;; TODO: If on a laptop (currently only do this for macos variant).
 (display-battery-mode t)

@@ -15,7 +15,11 @@ config.color_scheme = 'Modus-Vivendi'
 --   means no font-patching is required for Nerd Fonts since Wezterm ships it by
 --   default and when using fallback it'll... fallback to Nerd Font for symbols.
 
-config.font_size = 15
+-- If on laptop screen.
+-- config.font_size = 17
+
+-- If on 2560x1440 LG monitor.
+config.font_size = 16
 config.freetype_load_flags = 'NO_HINTING'
 config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 -- config.freetype_load_target = 'Light'
@@ -23,7 +27,8 @@ config.max_fps = 144
 
 config.font = wezterm.font_with_fallback {
   {
-    family = 'Zed Mono Medium Extended',
+    -- family = 'Iosevka SS03 Medium',
+    family = 'Zed Mono Medium',
   },
   'JetBrains Mono',
   'Noto Color Emoji',

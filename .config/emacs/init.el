@@ -390,9 +390,54 @@
 ;; Using the non-bundled modus-theme so we can get new updates outside of Emacs release cycle (if we were to use the bundled version).
 (use-package modus-themes
   :ensure
+  :custom
+  (modus-themes-bold-constructs t)
+  (modus-themes-italic-constructs t)
+  (modus-themes-common-palette-overrides
+      ;; '((border-mode-line-active bg-mode-line-active)
+   ;;   (border-mode-line-inactive bg-mode-line-inactive)
+   '(
+     ;; (bg-prose-block-contents bg-blue-nuanced)
+     ;; (bg-prose-block-delimiter bg-dim)
+     ;; (fg-prose-block-delimiter fg-dim)
+	(fringe unspecified)
+	;; (string green)
+	;; (bg-paren-match bg-magenta-intense)
+	(underline-paren-match fg-main)))
+  :custom-face
+  (region ((t :extend nil)))
   :config
-  (load-theme 'modus-vivendi :no-confirm))
+  (load-theme 'modus-vivendi :no-confirm)
+  (tsujp/modus-fill-column-face-style)
+  (tsujp/org-test-block-face))
 
+;; TODO: Rework into hook within use-package for modus above.
+(defun tsujp/modus-fill-column-face-style ()
+  (modus-themes-with-colors
+    (custom-set-faces
+     `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-inactive :background nil)))))))
+
+;; (defface org-info-block-face
+;;   '((t :background "red" :foreground "white" :extend t))
+;;   "Face for info block in org mode")
+
+(font-lock-add-keywords
+ 'org-mode '(("\\(^\s*#\\+begin_test\\(.*\n\\)*?\s*#\\+end_test\\)" 0 'org-test-block-face t)))
+
+(defun tsujp/org-test-block-face ()
+  (modus-themes-with-colors
+    (defface org-test-block-face
+      `((t :background ,bg-prose-block-contents :extend t))
+      "Face for test block in org mode.")))
+
+;; (defun my-modus-themes-custom-faces (&rest _)
+;;   (modus-themes-with-colors
+;;     (custom-set-faces
+;;      ;; Add "padding" to the mode lines
+;;      `(mode-line ((,c :box (:line-width 2 :color ,bg-mode-line-active))))
+;;      `(mode-line-inactive ((,c :box (:line-width 2 :color ,bg-mode-line-inactive)))))))
+
+;; (add-hook 'modus-themes-after-load-theme-hook #'my-modus-themes-custom-faces)
 ;;;;; Scrollbar in modeline
 
 ;; Scrollbars take up too much horizontal width, and especially when using macOS specifically with Emacs HEAD (i.e. Emacs' default NS integration) look terrible. If/when emacs-mac patches get merged we can think about using native scrollbars again.
@@ -964,7 +1009,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(meow-insert-cursor ((t (:background "#FFFFFF"))))
+ '(meow-normal-cursor ((t (:background "#FFFF00")))))
+
+;; TODO: Move above here; maybe.
+
 ;; TODO: Move this elsewhere.
 
 (defun tsujp/diff-hl-modus-faces ()

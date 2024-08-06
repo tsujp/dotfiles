@@ -9,7 +9,8 @@
 ;;;; Meta information
 
 ;; Compute these once instead of over-and-over at each callsite.
-;(defconst tsujp/custom-config-dir "tsujp")
+;;(defconst tsujp/custom-config-dir "tsujp")
+(defconst tsujp/dyn-mod-dir "tsujp_modules")
 (defconst tsujp/is-gui (display-graphic-p))
 (defconst tsujp/is-mac (eq system-type 'darwin))
 
@@ -31,6 +32,13 @@
 ;;  (lambda (string)
 ;;    (add-to-list 'load-path (locate-user-emacs-file (concat tsujp/custom-config-dir "/" string))))
 ;;  '("modules" "lisp"))
+
+;;;;; Dynamic modules
+
+;; Directory created (if necessary) and added to load-path.
+;; (add-to-list 'load-path (locate-user-emacs-file (concat tsujp/dyn-mod-dir "/")))
+(add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file  tsujp/dyn-mod-dir))))
+
 
 ;;;; Silence native compilation
 

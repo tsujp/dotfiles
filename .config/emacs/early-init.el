@@ -28,7 +28,8 @@
 ;;;; Garbage collection
 
 ;; Increase the amount of consing before garbage collection runs; this should result in the garbage collector interrupting us less often and a smoother Emacs experience.
-(setq gc-cons-threshold (* 1000 1000 8))
+(setq gc-cons-threshold (* 1000 1000 100))
+(setq gc-cons-percentage 0.3)
 
 
 ;;;; Use plists for LSP
@@ -76,4 +77,8 @@
 
 ;;;; Startup time
 
-(add-hook 'after-init-hook (lambda () (message "init done: %s" (emacs-init-time))))
+;; Avoiding inline lambdas in hooks hence a function (so hook can be removed without having to restart emacs).
+(defun tsujp/startup-time-printout ()
+  (message "init done: %s (gc time: %s)" (emacs-init-time) gc-elapsed))
+
+(add-hook 'after-init-hook #'tsujp/startup-time-printout)

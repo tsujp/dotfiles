@@ -63,10 +63,11 @@
   :config
   (setq-default
    fill-column 95
+   display-fill-column-indicator-character ?\u2506 ; fill column indicator
    delete-by-moving-to-trash t           ; delete by moving to trash
    select-enable-clipboard t             ; unify emacs and system clipboard
    sentence-end-double-space nil         ; single space after fullstop
-   indent-tabs-mode nil                  ; sane whitespace, please
+   indent-tabs-mode -1                   ; sane whitespace, please
    initial-scratch-message ";; Scratch"  ; initial scratch message
    initial-major-mode 'fundamental-mode  ; a "nothing" mode for scratch buf
    inhibit-splash-screen t               ; hide welcome screen
@@ -76,12 +77,12 @@
    require-final-newline t               ; add newline on buffer save
    display-line-numbers-type 'visual     ; set line numbers to relative
    display-line-numbers-grow-only t
-   display-line-numbers-width 3         ; default width
+   display-line-numbers-width 3          ; default width
    display-raw-bytes-as-hex t
    tab-always-indent 'complete           ; indentation & completion with TAB
    completion-cycle-threshold 3          ; TAB wraps if completion list small
    indicate-buffer-boundaries 'left      ; show buffer top/bottom in margin
-   ;; indicate-buffer-boundaries t          ; show buffer end in margin
+   ;; indicate-buffer-boundaries t       ; show buffer end in margin
    use-short-answers t                   ; yes/no -> y/n
    save-interprogram-paste-before-kill t ; do not overwrite existing clipboard text on kill
    kill-do-not-save-duplicates t
@@ -92,6 +93,10 @@
    ;; blink-matching-paren nil
    ;; hide commands in M-x not applicable to current mode
    read-extended-command-predicate #'command-completion-default-include-p
+   blink-cursor-mode nil ; do not blink cursor
+   show-paren-delay 0 ; show matching parenthesis quickly
+   ;; Help config TODO: Place elsewhere?
+   help-window-keep-selected t
    )
   (set-default-coding-systems 'utf-8-unix) ; utf8
   (prefer-coding-system 'utf-8-unix)	   ; utf8
@@ -99,14 +104,18 @@
   (column-number-mode)                     ; enable display of column number in minibuffer
   (global-hl-line-mode)                    ; enable highlight of current line
   (global-font-lock-mode 1)                ; force-enable font-face
+  (global-visual-line-mode)                ; visual-line-mode everywhere (TODO: This and below only in prog and text?)
+  (global-visual-wrap-prefix-mode)	   ; wrap with context-aware prefix everywhere
   (savehist-mode)                          ; save minibuffer history
   (fringe-mode '(2 . 6))
   )
 
-;; TODO: whitespace-mode to remove useless trailing whitespace.
+;; TODO: Place somewhere more appropriate, idk.
+(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
 
+;; TODO: Have this only in one modeline, or is there a way to have global header bar above the tab bar?
 ;; TODO: If on a laptop (currently only do this for macos variant).
-;; (display-battery-mode t)
+(display-battery-mode t)
 
 ;;;;; Font
 

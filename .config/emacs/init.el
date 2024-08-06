@@ -149,9 +149,12 @@
 ;; todo: iosevka comfy?
 (when tsujp/is-gui
   (set-face-attribute 'default nil
+		      ;; :family "Iosevka Fixed SS03"
+		      ;; :weight 'regular
+		      ;; applefontsmoothing -int 0 looks fine on 2560x1440 with these Zed settings.
 		      :family "Zed Mono"
-                      :height 160
-                      :weight 'medium))
+		      :height 160
+		      :weight 'medium))
 
 ;;;;; Mouse
 

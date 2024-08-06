@@ -47,6 +47,8 @@
 
 ;;;;; Emacs
 
+(setq-default fringes-outside-margins t)
+
 (use-package emacs
   :ensure nil
   :demand t
@@ -90,6 +92,7 @@
   (global-hl-line-mode)                    ; enable highlight of current line
   (global-font-lock-mode 1)                ; force-enable font-face
   (savehist-mode)                          ; save minibuffer history
+  (fringe-mode '(2 . 6))
   )
 
 ;; TODO: whitespace-mode to remove useless trailing whitespace.
@@ -160,7 +163,7 @@
 ;; (add-hook 'markdown-mode-hook #'display-fill-column-indicator-mode)
 
 ;; Thin window edges.
-;; (set-window-fringes nil 0 0)
+;; (set-window-fringes nil 1 nil)
 ;; (set-window-margins nil 0 0)
 
 ;; TODO: The repeat-mode stuff from Prot's config?
@@ -772,3 +775,31 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+;; TODO: Move this elsewhere.
+
+(defun tsujp/diff-hl-modus-faces ()
+  (modus-themes-with-colors
+    (custom-set-faces
+     `(diff-hl-insert ((,c (:foreground ,green :background nil))))
+     `(diff-hl-change ((,c (:foreground ,yellow-intense :background nil))))
+     `(diff-hl-delete ((,c (:foreground ,red-intense :background nil)))))))
+
+(use-package diff-hl
+  :ensure
+  :after modus-themes
+  :config
+  (define-fringe-bitmap 'tsujp/diff-hl-bitmap [224] nil nil '(center repeated))
+  (setq diff-hl-fringe-bmp-function (lambda (type pos) 'tsujp/diff-hl-bitmap))
+  (tsujp/diff-hl-modus-faces)
+  :hook
+    (prog-mode . diff-hl-mode)
+    (prog-mode . diff-hl-flydiff-mode))
+
+;; (let* ((width 2)
+;;        (bitmap (vector (1- (expt 2 width)))))
+;;   (define-fringe-bitmap 'my:diff-hl-bitmap bitmap 1 width '(top t)))
+;; (setq diff-hl-fringe-bmp-function (lambda (type pos) 'my:diff-hl-bitmap))
+
+;; (setq diff-hl-fringe-bmp-function (lambda (type pos) 'my:diff-hl-bitmap))
+
+;; END TODO.

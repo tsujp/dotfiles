@@ -87,7 +87,7 @@
    save-interprogram-paste-before-kill t ; do not overwrite existing clipboard text on kill
    kill-do-not-save-duplicates t
    delete-pair-blink-delay 0
-   ring-bell-function 'ignore            ; no beeping
+   ring-bell-function #'ignore            ; no beeping
    echo-keystrokes 0.01                  ; immediate feedback in echo area on unfinished commands
    bidi-display-reordering 'left-to-right ; disable bi-directional text rendering by default
    ;; blink-matching-paren nil
@@ -164,7 +164,7 @@
   :config
   (setq-default
    scroll-conservatively 101    ; scroll just enough to bring point back into view
-   scroll-margin 6              ; padding at top/bottom of window which counts as scroll region
+   scroll-margin 4              ; padding at top/bottom of window which counts as scroll region
    scroll-step 1                ; keyboard scroll one line at a time
    mouse-wheel-follow-mouse t   ; mouse wheel scrolls window mouse is hovering over
    mouse-wheel-progressive-speed nil    ; don't accelerate scrolling
@@ -346,7 +346,7 @@
   :ensure
   :init
   ;;(setq exec-path-from-shell-shell-name "bash")
-  (setq exec-path-from-shell-debug t)
+  ;; (setq exec-path-from-shell-debug t) ; When debugging uncomment.
   (setq exec-path-from-shell-arguments '("-l"))
   ;;(setq exec-path-from-shell-arguments nil)
   :config
@@ -415,7 +415,7 @@
 (defun tsujp/modus-fill-column-face-style ()
   (modus-themes-with-colors
     (custom-set-faces
-     `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-inactive :background nil)))))))
+     `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-inactive :background unspecified)))))))
 
 ;; (defface org-info-block-face
 ;;   '((t :background "red" :foreground "white" :extend t))
@@ -675,6 +675,7 @@
 ;; Specifically Vertico is for minibuffer completions and serves as a completion frontend.
 
 ;; TODO: Any extra vertico config?
+;; TODO: Config from karthinks video on vertico mode, interesting stuff.
 (use-package vertico
   :ensure
   :bind
@@ -727,7 +728,7 @@
 ;; TODO: Extra orderless config?
 (use-package orderless
   :ensure
-  :demand t
+  ;; :demand t
   :after minibuffer
   :bind
   ;; SPC should never complete, now it activates orderless.
@@ -942,7 +943,10 @@
   :ensure
   :bind
   ("C-x b" . consult-buffer) ; orig: switch-to-buffer
-  )
+  :config
+  (setq
+     consult--tofu-char #x100000
+	consult--tofu-range #x00fffe))
 ;; (dolist (src consult-buffer-sources)
 ;;   (unless (eq src 'consult--source-buffer)
 ;;     (set src (plist-put (symbol-value src) :hidden t))))
@@ -1019,9 +1023,9 @@
 (defun tsujp/diff-hl-modus-faces ()
   (modus-themes-with-colors
     (custom-set-faces
-     `(diff-hl-insert ((,c (:foreground ,green :background nil))))
-     `(diff-hl-change ((,c (:foreground ,yellow-intense :background nil))))
-     `(diff-hl-delete ((,c (:foreground ,red-intense :background nil)))))))
+     `(diff-hl-insert ((,c (:foreground ,green :background unspecified))))
+     `(diff-hl-change ((,c (:foreground ,yellow-intense :background unspecified))))
+     `(diff-hl-delete ((,c (:foreground ,red-intense :background unspecified)))))))
 
 (use-package diff-hl
   :ensure
@@ -1060,17 +1064,30 @@
 ;; https://github.com/axelf4/hotfuzz
 (use-package hotfuzz
   :ensure
-  :defer 1
-  :custom
-  ;; Use Supplementary Private Use Area-B codepoints as seperators with consult otherwise the hotfuzz dynamic module errors. Consult's default seperator is a codepoint outside of the valid unicode range which dynamic modules cannot access.
-  (consult--tofu-char #x100000)
-  (consult--tofu-range #x00fffe))
+  :defer 1)
+  ;; :after consult
+  ;; :config
+  ;; ;; Use Supplementary Private Use Area-B codepoints as seperators with consult otherwise the hotfuzz dynamic module errors. Consult's default seperator is a codepoint outside of the valid unicode range which dynamic modules cannot access.
+  ;; (setq consult--tofu-char #x100000
+  ;; 	consult--tofu-range #x00fffe))
 ;; --------
 
-(use-package keycast
-  :ensure
-  :defer 1)
+;; (use-package keycast
+;;   :ensure
+;;   :defer 1)
 
 ;; TODO: Devdocs package
 ;; TODO: Kind icon: https://github.com/jdtsmith/kind-icon
 ;; TODO: Indent bars: https://github.com/jdtsmith/indent-bars
+
+;; TODO: Place elsewhere.
+;; TODO: Also hide corfu popupinfo after too.
+(defun tsujp/re-maxi ()
+  (interactive)
+  (dotimes (_ 2)
+    (funcall-interactively #'toggle-frame-fullscreen))
+  (corfu-quit))
+
+(setq visible-bell t)
+
+;; (profiler-start 'cpu)

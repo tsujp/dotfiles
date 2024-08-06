@@ -48,7 +48,13 @@
 ;; Don't resize non-fullscreen frames when we change font size etc so as to keep same column/row dimensions.
 (setq frame-inhibit-implied-resize t)
 
-(setq frame-resize-pixelwise t)
+;; `ns-use-native-fullscreen` must be set here before default-frame-alist or terrible rendering issues happen on macOS.
+(setq ns-use-native-fullscreen nil)
+(setq frame-resize-pixelwise t
+      default-frame-alist '((fullscreen . maximized)
+                            (undecorated . t)
+                            (drag-internal-border . t)
+                            (internal-border-width . 5)))
       ;; default-frame-alist '((fullscreen . maximized)
       ;;                       (background-color . "#000000")
       ;;                       (ns-appearance . dark)

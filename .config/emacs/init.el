@@ -216,6 +216,11 @@
 ; If running graphically on macOS we want to re-enable the menu bar since that is displayed outside of the application window (Emacs frame).
 
 (when (and tsujp/is-gui tsujp/is-mac)
+  ;; (setq ns-use-native-fullscreen nil)   ; set in early-init.el, commented out here as weak documentation.
+  (set-frame-parameter nil 'undecorated t)
+  ;; (set-frame-parameter nil 'drag-internal-border t)
+  ;; (set-frame-parameter nil 'internal-border-width 20)
+  (set-frame-parameter nil 'fullscreen 'fullboth)
   (menu-bar-mode 1))
 
 ;;;;; Packaging

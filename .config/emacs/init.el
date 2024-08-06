@@ -198,7 +198,7 @@
 ;; TODO: Random stuff to organise.
 
 ;; Should be a rule. I think I wanted a light stipple so it's not too distracting.
-;; (setq display-fill-column-indicator-character ?\u2502) ; unused atm
+;; (setq display-fill-column-indicator-character ?\u2506) ; unused atm
 ;; (add-hook 'org-mode-hook #'display-fill-column-indicator-mode)
 ;; (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
 ;; (add-hook 'markdown-mode-hook #'display-fill-column-indicator-mode)
@@ -247,13 +247,14 @@
 ;; New settings after 12 Jul 2024 changes.
 (when tsujp/is-mac
   (setq mac-command-modifier 'meta
-        mac-option-modifier 'super))
+	mac-option-modifier 'super
+	mac-right-command-modifier 'hyper))
 
 ;; Original settings with older modifiers.
 ;; (when tsujp/is-mac
 ;;   (setq mac-command-modifier 'control
-;; 	mac-option-modifier 'super
-;; 	mac-control-modifier 'meta))
+;;	mac-option-modifier 'super
+;;	mac-control-modifier 'meta))
 
 ;;;;; macOS only
 
@@ -409,7 +410,74 @@
 ;;;;; Meow
 
 ;; TODO: Cursor styles based on mode, here or configured elsewhere?
-(defun tsujp/meow-cursor ())
+(defun tsujp/meow-cursor ()
+  (setq meow-cursor-type-insert '(bar . 2))
+  (setq meow-cursor-type-normal 'box)
+  (custom-set-faces
+   '(meow-insert-cursor ((t (:background "#FFFFFF"))))
+     '(meow-normal-cursor ((t (:background "#FFFF00"))))))
+
+(defun meow-smart-reverse ()
+  "Reverse selection or begin negative argument."
+  (interactive)
+  (if (use-region-p)
+      (meow-reverse)
+    (negative-argument nil)))
+
+(defun meow-word ()
+  "Expand word/symbol under cursor."
+  (interactive)
+  (if (and (use-region-p)
+	   (equal (car (region-bounds))
+		  (bounds-of-thing-at-point 'word)))
+      (meow-mark-symbol 1)
+    (progn
+      (when (and (mark)
+		 (equal (car (region-bounds))
+			(bounds-of-thing-at-point 'symbol)))
+	(meow-pop-selection))
+      (meow-mark-word 1))))
+
+;; TOOD: Put this where appropriate (and probably into fontaine)
+;(set-face-attribute 'meow-position-highlight-number-1 nil
+;                    :foreground "#FFFF00"
+;                    :background nil
+;                    :family "Iosevka SS03"
+;                    :weight 'heavy)
+
+;; TODO: Move avy to it's own place.
+(use-package avy
+  :ensure
+  :custom
+  (avy-timeout-seconds 0.3))
+  ;; :custom-face
+  ;; (avy-goto-char-timer-face ((t (:foreground "#FFFF00"))))
+  ;; (avy-lead-face ((t (:foreground "#FFFF00" :background nil :weight black))))
+  ;; (avy-lead-face-0 ((t (:foreground "#f78fe7" :background "#555" :weight black)))))
+
+(keymap-global-set "H-e" #'avy-goto-char-timer)
+
+;; Source: https://github.com/meow-edit/meow/issues/590
+;; Meow digit keys in normal mode act as universal argument without needing C-u prefix.
+;; e.g. for doing 10j to move down 10 lines instead of C-u 10 j
+;; TODO: Has a bug where if you do 10j and then type 5 to go another 5 lines it does 105; i.e. it's not clearing prior universal argument settings after invoking a movement. Could fix but probably better to use scroll commands or avy or goto-line instead rather than this now that I think about it.
+;; (defun tsujp/meow-smart-digit (digit)
+;;   (interactive)
+;;   (if (not (and meow--expand-nav-function
+;;                 (region-active-p)
+;;                 (meow--selection-type)))
+;;       (progn
+;;         (universal-argument)
+;;         (meow-digit-argument))
+;;     (meow-expand digit)))
+
+;; (defmacro tsujp/meow-hoc (fn-name meow-cmds-list)
+;;   "Creates an interactive function which interactively-calls each Meow command in the list."
+;;   `(defun ,fn-name ()
+;;      (interactive)
+;;      (mapc #'call-interactively ,meow-cmds-list)))
+
+;; (tsujp/meow-hoc tsujp/cancel-meow-secondary-selection '(meow--cancel-second-selection))
 
 ;; Based on: https://github.com/meow-edit/meow/issues/506
 (defun tsujp/meow-ergo-keys ()
@@ -427,12 +495,17 @@
     '("8" . meow-expand-8)
     '("9" . meow-expand-9)
 
-    '("'" . meow-reverse)
+    ;; '("'" . meow-reverse)
+    '("'" . meow-smart-reverse)
 
-    '("K" . meow-prev-expand)
-    '("L" . meow-right-expand)
-    '("J" . meow-next-expand)
-    '("H" . meow-left-expand)
+    ;; '("J" . meow-end-of-thing)
+    ;; '("K" . meow-beginning-of-thing)
+    ;; '("H" . meow-bounds-of-thing)
+    ;; '("L" . meow-inner-of-thing)
+    ;; '("K" . meow-prev-expand)
+    ;; '("L" . meow-right-expand)
+    ;; '("J" . meow-next-expand)
+    ;; '("H" . meow-left-expand)
 
     ;; Movement
     '("k" . meow-prev)
@@ -440,44 +513,92 @@
     '("j" . meow-next)
     '("h" . meow-left)
 
+    '("w" . avy-goto-char-timer)
+
+    '("/" . meow-visit)
+
     ;; Expansion
-    ;'("o" . meow-word)
+    '("x" . meow-word)
     '("n" . meow-cancel-selection)
-    '("s" . meow-line)
+    '("N" . meow-pop-selection)
+    '("s" . meow-visual-line)
+    ;; '("s" . meow-line-expand)
+
+    ;'("w" . meow-mark-word)
+
+    '("i" . meow-back-word)
+    '("I" . meow-back-symbol)
+    '("o" . meow-next-word)
+    '("O" . meow-next-symbol)
 
     ;; TODO: Command `meow-till-expand` is quite nice; work it in somewhere?
     ;; TODO: c for copy and x for paste?
+    ;; TODO: meow-delete by char instead of until the end of line by default.
 
     ;; Editing
     '("d" . meow-kill)
-    '("e" . meow-insert)
-    '("E" . meow-open-above)
+    '("c" . meow-change)
+
     '("r" . meow-append)
-    '("R" . meow-open-below)
+    '("R" . meow-insert)
+    '("e" . meow-open-below)
+    '("E" . meow-open-above)
+
+    ;; '("e" . meow-insert)
+    ;; '("E" . meow-open-above)
+    ;; '("r" . meow-append)
+    ;; '("R" . meow-open-below)
 
     '("u" . undo-only)
     '("U" . undo-redo)
 
-    '("v" . meow-end-of-thing)
-    '("V" . meow-beginning-of-thing)
+    '("v" . meow-right-expand)
+
+    ;; '("v" . meow-end-of-thing)
+    ;; '("V" . meow-beginning-of-thing)
 
     ;; Prefix ;
-    '(";c" . meow-comment)
-    '(";w" . save-buffer)
+    ;; '(";c" . meow-comment)
+    ;; '(";w" . save-buffer)
+    '(";c" . (lambda () (interactive) (meow--cancel-second-selection)))
+
+    ;; Prefix g
+    '("gd" . xref-find-definitions)
+    '("gj" . meow-end-of-thing)
+    '("gk" . meow-beginning-of-thing)
+    '("go" . meow-bounds-of-thing)
+    '("gi" . meow-inner-of-thing)
 
     ;; Ignore escape
     '("<escape>" . ignore)))
 
 (defun meow-setup ()
   (progn
-    (tsujp/meow-cursor)
     (tsujp/meow-ergo-keys)))
 
+
+;; TODO: To delete secondary selection overlay: (delete-overlay secondary-mouse-overlay)
+;; (add-hook 'meow-insert-exit-hook 'corfu-quit)
 (use-package meow
   :ensure
+  :custom
+  (meow-expand-hint-counts '((word . 3) (line . 3) (block . 3) (find . 3) (till . 3)))
   :config
   (meow-setup)
-  (meow-global-mode 1))
+  (setq meow-use-enhanced-selection-effect t)
+  ;; TODO: PR/Change to Meow so it's possible to enter "selection mode" like in Helix where we can extend by incremental amounts (e.g. a word/line/symbol) without breaking the old selecting as it currently would; as per Meow's design. I imagine probably not but there are current commands which are _kind of_ like that `meow-expand-line` which always expands a line but it's still limited to the line selection type IIRC. So perhaps this boils down to adding a new selection type of 'universal' alongside the existing ones: line, char, word, etc.
+  (setq meow-expand-selection-type 'expand)
+  (meow-leader-define-key
+   '("e" . "C-x b"))
+  (add-hook 'meow-insert-exit-hook #'corfu-quit)
+  (meow-global-mode 1)
+  ;; (add-to-list 'meow-expand-exclude-mode-list 'emacs-lisp-mode)
+  ;; Cursor customisation must be done afterwards.
+  (tsujp/meow-cursor))
+
+;; TODO: Limit computed repeat of the _functionality_ as well since expand-hint-counts only affects the visual indicator. I.e. I had set it to visually show up to 3, but typing 5 still works.
+;; Disable meow expand _hints_ (functionality still works) by overriding the function to nothing since there doesn't look like a nicer way to do that currently. TODO: PR for such functionality?
+;; (advice-add #'meow--maybe-highlight-num-positions :override (lambda ()))
 
 ;;;; Completion
 ;(tsujp/req 'completion)
@@ -737,7 +858,7 @@
   :ensure
   ;; :hook (after-init . tabspaces-mode)
   :custom
-  (tabspaces-keymap-prefix "<f16> p")
+  (tabspaces-keymap-prefix "H-p")
   (tabspaces-default-tab "Default")
   :config
   (tabspaces-mode))
@@ -769,9 +890,14 @@
   ;; TODO: Predicate for this to scope it to current project (if there is one) and (probably) do it silently without prompting us for each buffer.
   "W" #'save-some-buffers)
 
+;;;; Custom (Hyper) keybinds
+(keymap-global-set "H-w" #'save-buffer)
+(keymap-global-set "H-c" #'comment-dwim)
+
+;; TODO: Cool pattern here, perhaps useful for other things but obsolete now that using Karabiner to get better modifier behaviour.
 ;; Using as a general helper as modifier key real estate is limited.
-(keymap-set global-map "<f16>" muh-map)
-(keymap-set local-function-key-map "<f16>" 'event-apply-hyper-modifier)
+;; (keymap-set global-map "<f16>" muh-map)
+;; (keymap-set local-function-key-map "<f16>" 'event-apply-hyper-modifier)
 
 (use-package org-remark
   :ensure)
@@ -793,7 +919,7 @@
 ;; (keymap-set global-map "H-g" muh-map)
 ;; (keymap-set input-decode-map "<f16>" [16777319])
 ;; (keymap-set input-decode-map "<f16>" 'some-handler)
-;; (keymap-set special-event-map "<f16>" 'some-handler)
+;; (keymap-set special-event-map "<f6>" 'some-handler)
 ;; (event-convert-list '(hyper ?g))
 ;; (key-description [27])
 ;; Interesting, now double pressing f16 invokes f16 DEL

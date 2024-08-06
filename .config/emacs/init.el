@@ -839,9 +839,9 @@
   :preface
   ;; Define source of language grammars.
   (setq treesit-language-source-alist
-        '((typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
-          (json . ("https://github.com/tree-sitter/tree-sitter-json"))
-          (zig . ("https://github.com/maxxnino/tree-sitter-zig"))))
+	'((typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
+	  (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+	  (zig . ("https://github.com/maxxnino/tree-sitter-zig"))))
   :init
   ;; Compile language grammars; we cannot do this in `:config` because treesit may have loaded
   ;; in-built grammars by then and reloading them is currently (as of Emacs 30) not possible

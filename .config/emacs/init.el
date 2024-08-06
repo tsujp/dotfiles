@@ -9,15 +9,13 @@
 ;;;; Meta information
 
 ;; Compute these once instead of over-and-over at each callsite.
-;;(defconst tsujp/custom-config-dir "tsujp")
-(defconst tsujp/dyn-mod-dir "tsujp_modules")
+(defconst tsujp/modules-dir "modules")
 (defconst tsujp/is-gui (display-graphic-p))
 (defconst tsujp/is-mac (eq system-type 'darwin))
 
 ;;;; Subprocess performance tweaks
 
 ;; Mainly due to using LSPs which may or may not have verbose output (unfortunately); increase the maximum chunk-size of data we can read from these processes at a time.
-;; (setq read-process-output-max (* 1024 1024))
 (setq read-process-output-max (* 8 1024 1024))
 
 ;; Don't wait for more output to arrive, process it ASAP.
@@ -25,19 +23,8 @@
 
 ;;;; Load path
 
-;; Configured external packages are in `modules` and any custom lisp code (that isn't configuration) is under `lisp`.
-;; TODO: use dolist macro for this instead?
-;; TODO: Perhaps add back a directory (maybe) if/when lots of custom stuff, idk.
-;; (mapc
-;;  (lambda (string)
-;;    (add-to-list 'load-path (locate-user-emacs-file (concat tsujp/custom-config-dir "/" string))))
-;;  '("modules" "lisp"))
-
-;;;;; Dynamic modules
-
 ;; Directory created (if necessary) and added to load-path.
-;; (add-to-list 'load-path (locate-user-emacs-file (concat tsujp/dyn-mod-dir "/")))
-(add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file  tsujp/dyn-mod-dir))))
+(add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file tsujp/modules-dir))))
 
 
 ;;;; Silence native compilation
@@ -55,7 +42,7 @@
 
 ;;;;; Emacs
 
-(setq-default fringes-outside-margins t)
+;; (setq-default fringes-outside-margins t)
 
 (use-package emacs
   :ensure nil
@@ -64,6 +51,7 @@
   (setq-default
    fill-column 95
    display-fill-column-indicator-character ?\u2506 ; fill column indicator
+   fringes-outside-margins t
    delete-by-moving-to-trash t           ; delete by moving to trash
    select-enable-clipboard t             ; unify emacs and system clipboard
    sentence-end-double-space nil         ; single space after fullstop
@@ -72,8 +60,8 @@
    initial-major-mode 'fundamental-mode  ; a "nothing" mode for scratch buf
    inhibit-splash-screen t               ; hide welcome screen
    inhibit-startup-echo-area-message t   ; no echo area message
-   buffer-file-coding-system 'utf-8-unix ; utf8 encoding
-   locale-coding-system 'utf-8-unix      ; utf8 encoding
+   buffer-file-coding-system 'utf-8 ; utf8 encoding
+   locale-coding-system 'utf-8      ; utf8 encoding
    require-final-newline t               ; add newline on buffer save
    display-line-numbers-type 'visual     ; set line numbers to relative
    display-line-numbers-grow-only t
@@ -98,8 +86,8 @@
    ;; Help config TODO: Place elsewhere?
    help-window-keep-selected t
    )
-  (set-default-coding-systems 'utf-8-unix) ; utf8
-  (prefer-coding-system 'utf-8-unix)	   ; utf8
+  (set-default-coding-systems 'utf-8) ; utf8
+  (prefer-coding-system 'utf-8)	   ; utf8
   (global-display-line-numbers-mode)       ; enable display of line numbers at margin
   (column-number-mode)                     ; enable display of column number in minibuffer
   (global-hl-line-mode)                    ; enable highlight of current line
@@ -265,7 +253,7 @@
 
 (when (and tsujp/is-gui tsujp/is-mac)
   ;; (setq ns-use-native-fullscreen nil)   ; set in early-init.el, commented out here as weak documentation.
-  (set-frame-parameter nil 'undecorated t)
+  ;; (set-frame-parameter nil 'undecorated t)
   ;; (set-frame-parameter nil 'drag-internal-border t)
   ;; (set-frame-parameter nil 'internal-border-width 20)
   (set-frame-parameter nil 'fullscreen 'fullboth)
@@ -417,10 +405,6 @@
     (custom-set-faces
      `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-inactive :background unspecified)))))))
 
-;; (defface org-info-block-face
-;;   '((t :background "red" :foreground "white" :extend t))
-;;   "Face for info block in org mode")
-
 (font-lock-add-keywords
  'org-mode '(("\\(^\s*#\\+begin_test\\(.*\n\\)*?\s*#\\+end_test\\)" 0 'org-test-block-face t)))
 
@@ -442,7 +426,6 @@
 
 ;; Scrollbars take up too much horizontal width, and especially when using macOS specifically with Emacs HEAD (i.e. Emacs' default NS integration) look terrible. If/when emacs-mac patches get merged we can think about using native scrollbars again.
 
-;; TODO: Put this into a modeline configuration module instead?
 ;; TODO: This package useful or needed in modern emacs?: https://github.com/mrkkrp/cyphejor
 ;; TODO: Colours.
 ;; TODO: `after-init` hook.
@@ -454,7 +437,7 @@
 ;;;; Editing
 
 ;; Editing interface (e.g. modal editing) configuration.
-;(tsujp/req 'editing)
+
 ;;;;; Meow
 
 ;; TODO: Cursor styles based on mode, here or configured elsewhere?
@@ -504,6 +487,12 @@
   ;; (avy-lead-face-0 ((t (:foreground "#f78fe7" :background "#555" :weight black)))))
 
 (keymap-global-set "H-e" #'avy-goto-char-timer)
+
+;; (defun blah/blah ()
+  ;; (interactive)
+  ;; (message "the frame is: %s" (window-frame))
+  ;; (set-frame-parameter nil 'fullscreen nil))
+(keymap-global-set "H-`" #'toggle-frame-fullscreen)
 
 ;; Source: https://github.com/meow-edit/meow/issues/590
 ;; Meow digit keys in normal mode act as universal argument without needing C-u prefix.
@@ -944,9 +933,11 @@
   :bind
   ("C-x b" . consult-buffer) ; orig: switch-to-buffer
   :config
+  ;; Use Supplementary Private Use Area-B codepoints as seperators with consult otherwise the hotfuzz dynamic module errors. Consult's default seperator is a codepoint outside of the valid unicode range which dynamic modules cannot access.
   (setq
-     consult--tofu-char #x100000
-	consult--tofu-range #x00fffe))
+   consult--tofu-char #x100000
+   consult--tofu-range #x00fffe))
+
 ;; (dolist (src consult-buffer-sources)
 ;;   (unless (eq src 'consult--source-buffer)
 ;;     (set src (plist-put (symbol-value src) :hidden t))))
@@ -1061,20 +1052,15 @@
 
 ;; TODO: Place alongside orderless (completion style relavence)
 ;; TODO: Use the C module for MOAR SPEED?
+;; TODO: Autocompile that C module if not already done.
 ;; https://github.com/axelf4/hotfuzz
 (use-package hotfuzz
   :ensure
   :defer 1)
-  ;; :after consult
-  ;; :config
-  ;; ;; Use Supplementary Private Use Area-B codepoints as seperators with consult otherwise the hotfuzz dynamic module errors. Consult's default seperator is a codepoint outside of the valid unicode range which dynamic modules cannot access.
-  ;; (setq consult--tofu-char #x100000
-  ;; 	consult--tofu-range #x00fffe))
-;; --------
 
-;; (use-package keycast
-;;   :ensure
-;;   :defer 1)
+(use-package keycast
+  :ensure
+  :defer 1)
 
 ;; TODO: Devdocs package
 ;; TODO: Kind icon: https://github.com/jdtsmith/kind-icon
@@ -1082,12 +1068,8 @@
 
 ;; TODO: Place elsewhere.
 ;; TODO: Also hide corfu popupinfo after too.
-(defun tsujp/re-maxi ()
-  (interactive)
-  (dotimes (_ 2)
-    (funcall-interactively #'toggle-frame-fullscreen))
-  (corfu-quit))
-
-(setq visible-bell t)
-
-;; (profiler-start 'cpu)
+;; (defun tsujp/re-maxi ()
+;;   (interactive)
+;;   (dotimes (_ 2)
+;;     (funcall-interactively #'toggle-frame-fullscreen))
+;;   (corfu-quit))

@@ -844,3 +844,15 @@
 ;; (setq diff-hl-fringe-bmp-function (lambda (type pos) 'my:diff-hl-bitmap))
 
 ;; END TODO.
+
+;; TODO: Move elsehwere agian.
+
+(use-package inspector
+  :ensure
+  :defer 1)
+
+(use-package tree-inspector
+  :ensure
+  :defer 1)
+
+;; END TODO.

@@ -618,8 +618,11 @@
   :ensure nil
   :demand t
   :config
-  (setq minibuffer-visible-completions t
-        completion-styles '(basic substring initials flex orderless)))
+  (setq minibuffer-visible-completions t ; nil is default, I used to use t
+	completion-styles '(hotfuzz orderless basic)
+	;; Ensures above completion-styles are always respected by other packages.
+	completion-category-defaults nil
+	completion-category-overrides '((file (styles . (basic partial-completion hotfuzz orderless))))))
 
 ;;;;; Vertico
 
@@ -632,14 +635,16 @@
   :bind
   ;; Generally C-DEL runs `backward-kill-word`. Directories may have names not typically associated with words, e.g. `.config` in which case it only deletes back to `.`; `vertico-directory-delete-word` would delete everything while falling back to `backward-word` (not `backward-kill-word`) for similar functionality.
 ;; Specifically enabled on Vertico's keymap, i.e. when in minibuffer completions.
-;; ~vertico-directory-delete-word~ functions as a better 'go back current directory in completion' 
+;; ~vertico-directory-delete-word~ functions as a better 'go back current directory in completion'
   ;; The equivalent of this map binding using keymap-set would be:
   ;; (keymap-set vertico-map "C-<backspace>" #'vertico-directory-delete-word)
   ;; Although one would have to wait for vertico to be loaded, here use-package does that for us.
   (:map vertico-map
-        ("C-<backspace>" . #'vertico-directory-delete-word))
+	("C-<backspace>" . #'vertico-directory-delete-word))
   ;; TODO: Here and for other packages `:hook (after-init . vertico-mode)` isn't executing? The fuck? Why?
   ;; Because of that have to move to `:config` form.
+  :custom
+  (vertico-count 6) ; maximum number of candidates to show
   :config
   (vertico-mode))
 
@@ -648,8 +653,11 @@
 ;; Displays completion candidates for current point in a popup either below or above said point using Emacs' in-built completion facilities (so ties in with Vertico, and could be used without Vertico if desired).
 ;; Specifically Corfu is for buffer completions (e.g. identifiers when programming) and serves as a completion frontend.
 
+;; TODO: Corfu go back to previous help buffer window if it moved it during completion.
+
 ;; TODO: Extra corfu config?
 (use-package corfu
+  :defer 1
   :ensure
   :custom
   (corfu-auto 1)
@@ -659,13 +667,13 @@
   (corfu-popupinfo-mode 1) ; show documentation after `corfu-popupinfo-delay`
   :bind
   (:map corfu-map
-        ;; Stop corfu stealing the RET key when completing.
-        ("RET" . nil))
+	;; Stop corfu stealing the RET key when completing.
+	("RET" . nil))
   ;; ESC to close completion (maybe TODO).
   :config
   (global-corfu-mode))
   ;; TODO: Same as in Vertico.
-  ;:hook (after-init . global-corfu-mode))
+					;:hook (after-init . global-corfu-mode))
 
 ;;;;; Orderless
 
@@ -675,7 +683,17 @@
 (use-package orderless
   :ensure
   :demand t
-  :after minibuffer)
+  :after minibuffer
+  :bind
+  ;; SPC should never complete, now it activates orderless.
+  ;; ? is orderless' default dispatch for regexp (TODO: double check this)
+  (:map minibuffer-local-completion-map
+	("SPC" . nil)
+	("?" . nil))
+  :custom
+  ;; Default is `'(orderless-literal orderless-regexp)`. List of matching styles: https://github.com/oantolin/orderless?tab=readme-ov-file#component-matching-styles
+  ;; `orderless-prefixes` is more useful out of the box as we can use style dispatchers (https://github.com/oantolin/orderless?tab=readme-ov-file#style-dispatchers) to enforce a particular style as needed (rarely).
+  (orderless-matching-styles '(orderless-prefixes orderless-flex orderless-regexp)))
 
 ;;;;; Marginalia
 
@@ -683,6 +701,7 @@
 
 ;; TODO: Extra marginalia config?
 (use-package marginalia
+  :defer 1
   :ensure
   :config
   (marginalia-mode))
@@ -728,6 +747,7 @@
 ;;;;; Magit
 ;(tsujp/req 'magit)
 (use-package magit
+  :defer 1
   :ensure
   :config
   ;; prepare the arguments
@@ -985,6 +1005,19 @@
   :defer 1)
 
 ;; END TODO.
+
+;; TODO: Place alongside orderless (completion style relavence)
+;; TODO: Use the C module for MOAR SPEED?
+;; https://github.com/axelf4/hotfuzz
+(use-package hotfuzz
+  :ensure
+  :defer 1
+  :custom
+  ;; Use Supplementary Private Use Area-B codepoints as seperators with consult otherwise the hotfuzz dynamic module errors. Consult's default seperator is a codepoint outside of the valid unicode range which dynamic modules cannot access.
+  (consult--tofu-char #x100000)
+  (consult--tofu-range #x00fffe))
+;; --------
+
 (use-package keycast
   :ensure
   :defer 1)

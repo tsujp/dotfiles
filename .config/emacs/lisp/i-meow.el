@@ -90,7 +90,7 @@
            (equal (car (region-bounds))
                   (bounds-of-thing-at-point 'word)))
       (progn
-        (when (string-match-p 
+        (when (string-match-p
                (or (car regexp-search-ring) "")
                (buffer-substring (region-beginning) (region-end)))
           (pop regexp-search-ring))

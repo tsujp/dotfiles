@@ -112,7 +112,7 @@
 (defun tsujp/another-try (frame)
   (message "-- %s" msgxxx)
   (setq msgxxx (1+ msgxxx))
- 
+
   (message "  received arg: %s" frame)
   (message "  mini frame's frame: %s" mini-frame-frame)
   ;; (message "  active minibuffer window: %s" (active-minibuffer-window))
@@ -125,7 +125,7 @@
 
   ;; Can look at `buffer` property `selected`, when NOT selected it is
   ;;   (selected) and when selected it is (selected . t)
-  
+
   ;; (message "  window state get: %s" (window-state-get (active-minibuffer-window)))
 
   ;; We only care about frame events relating to Mini Frame's (MF) frame.
@@ -187,7 +187,7 @@
   ;; (when (eq mini-frame-frame frame) (eq mini-frame-frame (selected-frame))
   ;;      (message "  SOMETHING WITH MINIFRAME CHANGED"))
   ;;)
-  
+
   ;;(message "  eq?: %s" (eq mini-frame-frame (selected-frame)))
 
   (message "  frame-selected-window %s" frame)
@@ -213,7 +213,7 @@
   ;; (redraw-frame)
   ;; (force-mode-line-update)
   ;; (redisplay)
-  
+
   ;; works
   ;; (if (eq mini-frame-frame (selected-frame))
   ;;     (message "  foobar"))

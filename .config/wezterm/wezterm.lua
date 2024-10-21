@@ -27,8 +27,8 @@ config.max_fps = 144
 
 config.font = wezterm.font_with_fallback {
   {
-    -- family = 'Iosevka SS03 Medium',
-    family = 'Zed Mono Medium',
+    family = 'tsujp Medium',
+    -- family = 'Zed Mono Medium',
   },
   'JetBrains Mono',
   'Noto Color Emoji',

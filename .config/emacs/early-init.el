@@ -12,6 +12,7 @@
 
 ;; Disable default (in-built) package.el from loading packages. Using Elpaca for packages instead.
 (setq package-enable-at-startup nil)
+;; (setq use-package-compute-statistics t)
 
 
 ;;; Garbage collection
@@ -44,10 +45,10 @@
 (push '(width . 162) default-frame-alist)
 (push '(height . 60) default-frame-alist)
 (push '(internal-border-width . 5) default-frame-alist)
-      ;; default-frame-alist '((fullscreen . maximized)
-      ;;                       (background-color . "#000000")
-      ;;                       (ns-appearance . dark)
-      ;;                       (ns-transparent-titlebar . t))
+;; default-frame-alist '((fullscreen . maximized)
+;;                       (background-color . "#000000")
+;;                       (ns-appearance . dark)
+;;                       (ns-transparent-titlebar . t))
 
 ;; Disable certain graphical modes like showing toolbar icons as well as removing startup messages we don't care about.
 (setq inhibit-startup-echo-area-message user-login-name)
@@ -60,10 +61,19 @@
 ;; TODO: Change 'native-comp-eln-load-path to XDG_CACHE location (eln-cache).
 
 
+
 ;;; Startup time
 
 ;; Avoiding inline lambdas in hooks hence a function (so hook can be removed without having to restart emacs).
 (defun tsujp/startup-time-printout ()
+  ;; (with-current-buffer (get-buffer-create "*scratch*")
+  ;;   (insert (format
+  ;; ";; Loaded in: %s (%s)
+  ;; ;; Packages: %s
+  ;; "
+  ;;            (emacs-init-time)
+  ;;            gc-elapsed
+  ;;            (number-to-string (length package-activated-list))))))
   (message "init done: %s (gc time: %s)" (emacs-init-time) gc-elapsed))
 
 (add-hook 'after-init-hook #'tsujp/startup-time-printout)

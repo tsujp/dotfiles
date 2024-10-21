@@ -115,7 +115,7 @@ alias chk-gpg=_check_gnupg_working
 # complete -F __start_kubectl k
 
 
-## - - - - - - - - - - - - - - - - - - 
+## - - - - - - - - - - - - - - - - - -
 ## FUNCTION ALIASES  - - - - - - - - -
 
 man ()
@@ -149,7 +149,7 @@ EOF
 }
 
 
-## - - - - - - - - - - - - - - - - - - 
+## - - - - - - - - - - - - - - - - - -
 ## FUNCTION HELPERS  - - - - - - - - -
 
 _reload_shell ()
@@ -346,4 +346,3 @@ export PATH="$PATH":/BLAHBLAHBLAH
 #            +----------------+-----------+-----------+------+
 #            |~/.bash_logout  |    C      |           |      |
 #            +----------------+-----------+-----------+------+
-

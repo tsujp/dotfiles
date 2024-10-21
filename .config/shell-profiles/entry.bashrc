@@ -23,3 +23,5 @@ export PATH="$PNPM_HOME:$PATH"
 export NARGO_HOME="/Users/tsujp/.nargo"
 
 export PATH="$PATH:$NARGO_HOME/bin"
+# TODO: Put this elsewhere.
+export PATH="/Users/tsujp/.local/cache/.bun/bin:$PATH"

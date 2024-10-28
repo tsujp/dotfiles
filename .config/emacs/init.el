@@ -8,6 +8,15 @@
 
 ;;;; Meta information
 
+;; TODO: Probably better to just inspect the output of emacs-report-bug or whatever that command is as that generates a whole lot of diagnostic data.
+(defun tsujp/emacs-builinfo ()
+  (interactive)
+  "Show compilation information for this Emacs"
+  (message "-> CONFIGURATION OPTIONS:\n%s" system-configuration-options)
+  (message "-> CONFIGURATION FEATURES:\n%s" system-configuration-features)
+  (message "-> VERSION:\n%s" emacs-version)
+  (message "-> TREESITTER?: %s" (treesit-available-p)))
+
 ;; Compute these once instead of over-and-over at each callsite.
 (defconst tsujp/modules-dir "modules")
 (defconst tsujp/is-gui (display-graphic-p))
@@ -26,15 +35,14 @@
 ;; Directory created (if necessary) and added to load-path.
 (add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file tsujp/modules-dir))))
 
-
 ;;;; Silence native compilation
 
 ;; Useful when developing a package, annoying (as by default it's verbose) when consuming packages which output warnings when natively compiled.
 
 ;; Make native compilation silent and prune its cache.
 (when (native-comp-available-p)
-  (setq native-comp-async-report-warnings-errors 'silent)
-  (setq native-compile-prune-cache t))
+  (setq native-comp-async-report-warnings-errors 'silent))
+										;(native-compile-prune-cache))
 
 ;;;; General (built-in)
 
@@ -43,15 +51,15 @@
 ;;;;; Emacs
 
 ;; (setq-default fringes-outside-margins t)
-
 (use-package emacs
   :ensure nil
   :demand t
   :config
   (setq-default
    fill-column 95
-   display-fill-column-indicator-character ?\u2506 ; fill column indicator
-   fringes-outside-margins t
+   display-fill-column-indicator-character ?\u250A ; fill column indicator (2506 or 250A).
+   fringes-outside-margins nil
+   left-margin-width 1
    delete-by-moving-to-trash t           ; delete by moving to trash
    select-enable-clipboard t             ; unify emacs and system clipboard
    sentence-end-double-space nil         ; single space after fullstop
@@ -103,10 +111,11 @@
   ;; in prog and text?)
   (global-visual-wrap-prefix-mode)	   ; wrap with context-aware prefix everywhere
   (savehist-mode)                          ; save minibuffer history
-  (fringe-mode '(2 . 6))
+  (fringe-mode '(5 . 6))
   ;; (winner-mode)                         ; window layout tracking (incase we need to undo)
   (recentf-mode)                        ; remember recently opened files, for easy re-visiting
   (save-place-mode)                     ; when re-visiting, point starts from where it was last time (instead of at the start of the file)
+  (show-paren-mode)
   )
 
 ;; TODO: Place somewhere more appropriate, idk.
@@ -210,7 +219,7 @@
   :config
   (setq-default
    scroll-conservatively 101    ; scroll just enough to bring point back into view
-   scroll-margin 4              ; padding at top/bottom of window which counts as scroll region
+   scroll-margin 2              ; padding at top/bottom of window which counts as scroll region
    scroll-step 1                ; keyboard scroll one line at a time
    mouse-wheel-follow-mouse t   ; mouse wheel scrolls window mouse is hovering over
    mouse-wheel-progressive-speed nil    ; don't accelerate scrolling
@@ -489,7 +498,7 @@
 (defun tsujp/modus-fill-column-face-style ()
   (modus-themes-with-colors
     (custom-set-faces
-     `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-inactive :background unspecified)))))))
+     `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-dim :background unspecified)))))))
 
 (font-lock-add-keywords
  'org-mode '(("\\(^\s*#\\+begin_test\\(.*\n\\)*?\s*#\\+end_test\\)" 0 'org-test-block-face t)))
@@ -1145,16 +1154,16 @@
 
 ;; TODO: diff-hl-mode is DESTROYING emacs scrolling performance in buffers... why?
 ;; TODO: So for now it's disabled.
-;; (use-package diff-hl
-;;   :ensure
-;;   :after modus-themes
-;;   :config
-;;   (define-fringe-bitmap 'tsujp/diff-hl-bitmap [224] nil nil '(center repeated))
-;;   (setq diff-hl-fringe-bmp-function (lambda (type pos) 'tsujp/diff-hl-bitmap))
-;;   (tsujp/diff-hl-modus-faces)
-;;   :hook
-;;   (prog-mode . diff-hl-mode)
-;;   (prog-mode . diff-hl-flydiff-mode))
+(use-package diff-hl
+  :ensure
+  :after modus-themes
+  :config
+  (define-fringe-bitmap 'tsujp/diff-hl-bitmap [224] nil 1 '(center repeated))
+  (setq diff-hl-fringe-bmp-function (lambda (type pos) 'tsujp/diff-hl-bitmap))
+  (tsujp/diff-hl-modus-faces)
+  :hook
+  (prog-mode . diff-hl-mode)
+  (prog-mode . diff-hl-flydiff-mode))
 
 ;; (let* ((width 2)
 ;;        (bitmap (vector (1- (expt 2 width)))))
@@ -1325,6 +1334,16 @@
   :defer 1)
 ;; END TEMPORARY
 
+
+;; TODO: Move elsewhere as appropriate.
+(use-package flymake
+  :ensure nil
+  :custom
+  (flymake-indicator-type 'margins)
+  (flymake-autoresize-margins nil)
+  (flymake-margin-indicators-string '((error "\u2045" compilation-error) (warning "\u2E2E" compilation-warning) (note "\u2E31" compilation-info))))
+;; END TODO.
+
 (use-package org
   :ensure nil
   :defer 1
@@ -1404,15 +1423,189 @@ test file."
 ;;   :defer 1)
 
 ;; Until the bug with polluting nonsense symbols in completion is fixed used te older function definition
-(defun help-definition-prefixes ()
-  "Return the up-to-date radix-tree form of `definition-prefixes'."
-  (when (> (hash-table-count definition-prefixes) 0)
-    (maphash (lambda (prefix files)
-               (let ((old (radix-tree-lookup help-definition-prefixes prefix)))
-                 (setq help-definition-prefixes
-                       (radix-tree-insert help-definition-prefixes
-                                          prefix (append old files)))))
-             definition-prefixes)
-    (clrhash definition-prefixes))
-  help-definition-prefixes)
+;; (defun help-definition-prefixes ()
+;;   "Return the up-to-date radix-tree form of `definition-prefixes'."
+;;   (when (> (hash-table-count definition-prefixes) 0)
+;;     (maphash (lambda (prefix files)
+;;                (let ((old (radix-tree-lookup help-definition-prefixes prefix)))
+;;                  (setq help-definition-prefixes
+;;                        (radix-tree-insert help-definition-prefixes
+;;                                           prefix (append old files)))))
+;;              definition-prefixes)
+;;     (clrhash definition-prefixes))
+;;   help-definition-prefixes)
 ;; (help-definition-prefixes)
+
+
+;; TODO: Put elsewhere.
+(require 'org-id)
+
+;; Original idea:
+;; <https://writequit.org/articles/emacs-org-mode-generate-ids.html>.
+(defun prot-org--id-get ()
+  "Get the CUSTOM_ID of the current entry.
+If the entry already has a CUSTOM_ID, return it as-is, else
+create a new one."
+  (let* ((pos (point))
+         (id (org-entry-get pos "CUSTOM_ID")))
+    (if (and id (stringp id) (string-match-p "\\S-" id))
+        id
+      (setq id (org-id-new "h"))
+      (org-entry-put pos "CUSTOM_ID" id)
+      id)))
+
+(declare-function org-map-entries "org")
+
+;;;###autoload
+(defun prot-org-id-headlines ()
+  "Add missing CUSTOM_ID to all headlines in current file."
+  (interactive)
+  (org-map-entries
+   (lambda () (prot-org--id-get))))
+
+;;;###autoload
+(defun prot-org-id-headline ()
+  "Add missing CUSTOM_ID to headline at point."
+  (interactive)
+  (prot-org--id-get))
+
+
+;; TODO: Works in theory but where-to-insert cannot be interactive when called from org-capture because it passes no arguments.
+(defun where-to-insert (blah)
+  (interactive "rRegion: ")
+  (message "what? %s" blah))
+
+(defun get-me-region (f)
+  (with-current-buffer (org-capture-get :original-buffer)
+	(format "%s-%s" (line-number-at-pos (region-beginning)) (line-number-at-pos (region-end)))))
+
+(setq org-capture-templates
+	  '(("t" "Transclusion" plain (function where-to-insert) "\n+transclude: :lines %(get-me-region \"%F\")\n%:file")))
+;; END TODO.
+
+;; TODO: Per 4533 in consult.el set recentf-filename-handlers to nil?
+
+
+;; Interesting, but when cloing the buffer and displaying it skips around a bit. Is there a way to stop that?
+;; (defun slurpy-wurpy (yeah-nah)
+;;   ;; (interactive (consult-buffer '(consult--source-buffer consult--source-project-buffer-hidden)))
+;;   (interactive
+;;    (let* ((consult--buffer-display #'switch-to-buffer-other-window)
+;; 		  (selected (consult--multi '(consult--source-buffer
+;; 									  consult--source-project-buffer-hidden)
+;; 									:require-match (confirm-nonexistent-file-or-buffer)
+;; 									:prompt "Transclude to: "
+;; 									:history 'consult--buffer-history
+;; 									:sort nil
+;; 									:initial (buffer-name
+;; 											  (other-buffer (current-buffer) t)))))
+;; 	 ;; (message "selected buffer: %s" selected)
+;; 	 (unless (plist-get (cdr selected) :match)
+;; 	   (user-error "Invalid buffer"))
+;; 	 (list (car selected))))
+;;   (let ((cloned (make-indirect-buffer yeah-nah "da-cloney" t t)))
+;; 	(switch-to-buffer cloned)
+;; 	(message "select point to transpose to")
+;; 	;; (setq-local transient-mark-mode 'lambda) ; TODO: Better temporary enable/disable logic.
+;; 	(catch 'exit
+;; 	  (recursive-edit)
+;; 	  (message "recursive edit done %s" (line-number-at-pos (region-beginning)))
+;; 	  (kill-buffer cloned))))
+;; END interesting
+
+
+
+(defun tsujp/region-to-transclusion (f &optional project-base)
+  ;; (interactive)
+  "Given a file F return a formatted org-transclusion property. If
+optional argument PROJECT-BASE is non-nil file F's path is relative
+to the project root that contains it (if any)."
+  (with-current-buffer (find-buffer-visiting f)
+	(if (use-region-p)
+		(let ((proj-root (car (last (project-current nil f)))))
+		  (format "#+transclude: [[file:%s][foobar]] :lines %s-%s :src foo"
+				  ;; `project-current' calls down to `project-try-vc' which (looks like) it will only return a single list of 3 items, the last being the project root directory.
+				  (if (and project-base proj-root)
+					  (file-relative-name f proj-root)
+					f)
+				  ;; TODO: Automatically determine `:src LANG', perhaps from `org-src-lang-modes'?
+				  ;; (org-src-mode (replace-regexp-in-string "-mode" "" (format "%s" major-mode)))
+				  (line-number-at-pos (region-beginning)) (line-number-at-pos (region-end))))
+	  (user-error "No region active in %s" f))))
+
+
+(tsujp/region-to-transclusion "~/prog/tree_sitter_noir/noir/compiler/noirc_frontend/src/parser/parser.rs" t)
+(tsujp/region-to-transclusion "~/prog/tree_sitter_noir/grammar.js" t)
+(tsujp/region-to-transclusion "/Applications/MacPorts/Emacs.app/Contents/Resources/lisp/window.el.gz")
+
+
+;; If region not active in buffer whence this was invoked, call this.
+(defun tsujp/transclude-to-here (from-buff))
+
+;; Region active in buffer, where are we putting this tranclusion (elsewhere)?
+(defun tsujp/transclude-to-there ())
+
+(defun tsujp/do-transclusion ()
+  (interactive)
+  (let ((orig-window (selected-window)))
+	(with-selected-window (other-window-for-scrolling)
+	  (message "Select region to transpose and C-M-c to confirm, C-] to abort")
+	  (catch 'exit
+		(recursive-edit)
+		(message "got: %s" (tsujp/region-to-transclusion (buffer-file-name) t))))))
+
+;; (if (use-region-p)
+;; 	  (tsujp/transclude-to-there)
+;; 	(tsujp/transclude-to-here)))
+
+
+(defun slurpy-wurpy (curr-buff other-buff)
+  (interactive
+   (let* ((consult--buffer-display #'switch-to-buffer-other-window)
+		  (selected (consult--multi '(consult--source-buffer
+									  consult--source-project-buffer-hidden)
+									:require-match (confirm-nonexistent-file-or-buffer)
+									:prompt "Transclude to: "
+									:history 'consult--buffer-history
+									:sort 'visibility
+									:initial (buffer-name
+											  (other-buffer (current-buffer) t)))))
+	 (unless (plist-get (cdr selected) :match)
+	   (user-error "Invalid buffer"))
+	 (list (other-buffer (current-buffer) t) (car selected))))
+  (message "buffers: %s and %s" curr-buff other-buff)
+  (message "select point to transpose to")
+  (catch 'exit
+	(recursive-edit)
+	(switch-to-buffer-other-window curr-buff)
+	(with-current-buffer other-buff
+	  (message "recursive edit done %s" (line-number-at-pos (region-beginning))))))
+
+
+;; Prompt for buffer, swap to it and mark a region in it, swap back to where we came from with the transclusion string.
+;; (defun slurpy-wurpy (curr-buff other-buff)
+;;   (interactive
+;;    (let* ((consult--buffer-display #'switch-to-buffer-other-window)
+;; 		  (selected (consult--multi '(consult--source-buffer
+;; 									  consult--source-project-buffer-hidden)
+;; 									:require-match (confirm-nonexistent-file-or-buffer)
+;; 									:prompt "Transclude to: "
+;; 									:history 'consult--buffer-history
+;; 									:sort 'visibility
+;; 									:initial (buffer-name
+;; 											  (other-buffer (current-buffer) t)))))
+;; 	 (unless (plist-get (cdr selected) :match)
+;; 	   (user-error "Invalid buffer"))
+;; 	 (list (other-buffer (current-buffer) t) (car selected))))
+;;   (message "buffers: %s and %s" curr-buff other-buff)
+;;   (message "select point to transpose to")
+;;   (catch 'exit
+;; 	(recursive-edit)
+;; 	(switch-to-buffer-other-window curr-buff)
+;; 	(with-current-buffer other-buff
+;; 	  (message "recursive edit done %s" (line-number-at-pos (region-beginning))))))
+
+;; (message "received: %s" yeah-nah))
+;; '(selected)))
+
+;; (switch-to-buffer yeah-nah))

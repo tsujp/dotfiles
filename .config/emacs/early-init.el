@@ -15,6 +15,12 @@
 ;; (setq use-package-compute-statistics t)
 
 
+;; TODO: Put elsewhere.
+(setq-default left-margin-width 1)
+
+;; TODO: Maybe this helps maybe it doesn't. It's from an email.
+(setopt text-mode-ispell-word-completion nil)
+
 ;;; Garbage collection
 
 ;; Increase the amount of consing before garbage collection runs; this should result in the garbage collector interrupting us less often and a smoother Emacs experience.

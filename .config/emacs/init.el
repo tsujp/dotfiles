@@ -1485,36 +1485,6 @@ create a new one."
 
 ;; TODO: Per 4533 in consult.el set recentf-filename-handlers to nil?
 
-
-;; Interesting, but when cloing the buffer and displaying it skips around a bit. Is there a way to stop that?
-;; (defun slurpy-wurpy (yeah-nah)
-;;   ;; (interactive (consult-buffer '(consult--source-buffer consult--source-project-buffer-hidden)))
-;;   (interactive
-;;    (let* ((consult--buffer-display #'switch-to-buffer-other-window)
-;; 		  (selected (consult--multi '(consult--source-buffer
-;; 									  consult--source-project-buffer-hidden)
-;; 									:require-match (confirm-nonexistent-file-or-buffer)
-;; 									:prompt "Transclude to: "
-;; 									:history 'consult--buffer-history
-;; 									:sort nil
-;; 									:initial (buffer-name
-;; 											  (other-buffer (current-buffer) t)))))
-;; 	 ;; (message "selected buffer: %s" selected)
-;; 	 (unless (plist-get (cdr selected) :match)
-;; 	   (user-error "Invalid buffer"))
-;; 	 (list (car selected))))
-;;   (let ((cloned (make-indirect-buffer yeah-nah "da-cloney" t t)))
-;; 	(switch-to-buffer cloned)
-;; 	(message "select point to transpose to")
-;; 	;; (setq-local transient-mark-mode 'lambda) ; TODO: Better temporary enable/disable logic.
-;; 	(catch 'exit
-;; 	  (recursive-edit)
-;; 	  (message "recursive edit done %s" (line-number-at-pos (region-beginning)))
-;; 	  (kill-buffer cloned))))
-;; END interesting
-
-
-
 (defun tsujp/region-to-transclusion (f &optional project-base)
   ;; (interactive)
   "Given a file F return a formatted org-transclusion property. If
@@ -1534,16 +1504,9 @@ to the project root that contains it (if any)."
 	  (user-error "No region active in %s" f))))
 
 
-(tsujp/region-to-transclusion "~/prog/tree_sitter_noir/noir/compiler/noirc_frontend/src/parser/parser.rs" t)
-(tsujp/region-to-transclusion "~/prog/tree_sitter_noir/grammar.js" t)
-(tsujp/region-to-transclusion "/Applications/MacPorts/Emacs.app/Contents/Resources/lisp/window.el.gz")
-
-
-;; If region not active in buffer whence this was invoked, call this.
-(defun tsujp/transclude-to-here (from-buff))
-
-;; Region active in buffer, where are we putting this tranclusion (elsewhere)?
-(defun tsujp/transclude-to-there ())
+;; (tsujp/region-to-transclusion "~/prog/tree_sitter_noir/noir/compiler/noirc_frontend/src/parser/parser.rs" t)
+;; (tsujp/region-to-transclusion "~/prog/tree_sitter_noir/grammar.js" t)
+;; (tsujp/region-to-transclusion "/Applications/MacPorts/Emacs.app/Contents/Resources/lisp/window.el.gz")
 
 (defun tsujp/do-transclusion ()
   (interactive)
@@ -1553,59 +1516,3 @@ to the project root that contains it (if any)."
 	  (catch 'exit
 		(recursive-edit)
 		(message "got: %s" (tsujp/region-to-transclusion (buffer-file-name) t))))))
-
-;; (if (use-region-p)
-;; 	  (tsujp/transclude-to-there)
-;; 	(tsujp/transclude-to-here)))
-
-
-(defun slurpy-wurpy (curr-buff other-buff)
-  (interactive
-   (let* ((consult--buffer-display #'switch-to-buffer-other-window)
-		  (selected (consult--multi '(consult--source-buffer
-									  consult--source-project-buffer-hidden)
-									:require-match (confirm-nonexistent-file-or-buffer)
-									:prompt "Transclude to: "
-									:history 'consult--buffer-history
-									:sort 'visibility
-									:initial (buffer-name
-											  (other-buffer (current-buffer) t)))))
-	 (unless (plist-get (cdr selected) :match)
-	   (user-error "Invalid buffer"))
-	 (list (other-buffer (current-buffer) t) (car selected))))
-  (message "buffers: %s and %s" curr-buff other-buff)
-  (message "select point to transpose to")
-  (catch 'exit
-	(recursive-edit)
-	(switch-to-buffer-other-window curr-buff)
-	(with-current-buffer other-buff
-	  (message "recursive edit done %s" (line-number-at-pos (region-beginning))))))
-
-
-;; Prompt for buffer, swap to it and mark a region in it, swap back to where we came from with the transclusion string.
-;; (defun slurpy-wurpy (curr-buff other-buff)
-;;   (interactive
-;;    (let* ((consult--buffer-display #'switch-to-buffer-other-window)
-;; 		  (selected (consult--multi '(consult--source-buffer
-;; 									  consult--source-project-buffer-hidden)
-;; 									:require-match (confirm-nonexistent-file-or-buffer)
-;; 									:prompt "Transclude to: "
-;; 									:history 'consult--buffer-history
-;; 									:sort 'visibility
-;; 									:initial (buffer-name
-;; 											  (other-buffer (current-buffer) t)))))
-;; 	 (unless (plist-get (cdr selected) :match)
-;; 	   (user-error "Invalid buffer"))
-;; 	 (list (other-buffer (current-buffer) t) (car selected))))
-;;   (message "buffers: %s and %s" curr-buff other-buff)
-;;   (message "select point to transpose to")
-;;   (catch 'exit
-;; 	(recursive-edit)
-;; 	(switch-to-buffer-other-window curr-buff)
-;; 	(with-current-buffer other-buff
-;; 	  (message "recursive edit done %s" (line-number-at-pos (region-beginning))))))
-
-;; (message "received: %s" yeah-nah))
-;; '(selected)))
-
-;; (switch-to-buffer yeah-nah))

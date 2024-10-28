@@ -1469,20 +1469,6 @@ create a new one."
   (interactive)
   (prot-org--id-get))
 
-
-;; TODO: Works in theory but where-to-insert cannot be interactive when called from org-capture because it passes no arguments.
-(defun where-to-insert (blah)
-  (interactive "rRegion: ")
-  (message "what? %s" blah))
-
-(defun get-me-region (f)
-  (with-current-buffer (org-capture-get :original-buffer)
-	(format "%s-%s" (line-number-at-pos (region-beginning)) (line-number-at-pos (region-end)))))
-
-(setq org-capture-templates
-	  '(("t" "Transclusion" plain (function where-to-insert) "\n+transclude: :lines %(get-me-region \"%F\")\n%:file")))
-;; END TODO.
-
 ;; TODO: Per 4533 in consult.el set recentf-filename-handlers to nil?
 
 (defun tsujp/region-to-transclusion (f &optional project-base)
@@ -1493,6 +1479,7 @@ to the project root that contains it (if any)."
   (with-current-buffer (find-buffer-visiting f)
 	(if (use-region-p)
 		(let ((proj-root (car (last (project-current nil f)))))
+		  ;; TODO: Way to place cursor so foobar can be named more nicely, or integrate into org-capture somehow for that logic.
 		  (format "#+transclude: [[file:%s][foobar]] :lines %s-%s :src foo"
 				  ;; `project-current' calls down to `project-try-vc' which (looks like) it will only return a single list of 3 items, the last being the project root directory.
 				  (if (and project-base proj-root)

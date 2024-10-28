@@ -1510,9 +1510,11 @@ to the project root that contains it (if any)."
 
 (defun tsujp/do-transclusion ()
   (interactive)
-  (let ((orig-window (selected-window)))
+  (let ((transclude-prop))
 	(with-selected-window (other-window-for-scrolling)
 	  (message "Select region to transpose and C-M-c to confirm, C-] to abort")
 	  (catch 'exit
 		(recursive-edit)
-		(message "got: %s" (tsujp/region-to-transclusion (buffer-file-name) t))))))
+		(setq transclude-prop (tsujp/region-to-transclusion (buffer-file-name) t))))
+	(insert transclude-prop)))
+;; (message "got: %s" (tsujp/region-to-transclusion (buffer-file-name) t))))))

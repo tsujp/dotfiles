@@ -8,6 +8,7 @@
 
 ;;;; Meta information
 
+;; TODO: Shorten my acronym to `tjp` since tsujp is a little too long (only within the context of M-x typing commands lol).
 ;; TODO: Probably better to just inspect the output of emacs-report-bug or whatever that command is as that generates a whole lot of diagnostic data.
 (defun tsujp/emacs-builinfo ()
   (interactive)
@@ -16,6 +17,8 @@
   (message "-> CONFIGURATION FEATURES:\n%s" system-configuration-features)
   (message "-> VERSION:\n%s" emacs-version)
   (message "-> TREESITTER?: %s" (treesit-available-p)))
+;; TODO: Call the parts of emacs-build-description myself since it doesn't play nice when called as below.
+;; (message "-> BUILD DESCRIPTION: %s\n" (emacs-build-description)))
 
 ;; Compute these once instead of over-and-over at each callsite.
 (defconst tsujp/modules-dir "modules")
@@ -64,7 +67,7 @@
    select-enable-clipboard t             ; unify emacs and system clipboard
    sentence-end-double-space nil         ; single space after fullstop
    indent-tabs-mode -1                   ; sane whitespace, please
-   tab-width 4				 ; Smoller than 8
+   tab-width 4							 ; Smoller than 8
    initial-scratch-message ";; Scratch"  ; initial scratch message
    initial-major-mode 'fundamental-mode  ; a "nothing" mode for scratch buf
    inhibit-splash-screen t               ; hide welcome screen
@@ -90,6 +93,7 @@
    ;; echo-keystrokes 0.01                  ; immediate feedback in echo area on unfinished commands
    echo-keystrokes 0.1
    bidi-display-reordering 'left-to-right ; disable bi-directional text rendering by default
+   bidi-paragraph-direction 'left-to-right ; also required
    ;; blink-matching-paren nil
    ;; hide commands in M-x not applicable to current mode
    read-extended-command-predicate #'command-completion-default-include-p
@@ -229,7 +233,11 @@
    )
   (when tsujp/is-gui
     (context-menu-mode))                ; right-click to show context menu
-  )
+  (when (and tsujp/is-gui tsujp/is-mac)
+	(setq-default
+	 ns-use-mwheel-momentum nil ; No momentum scrolling.
+	 ns-mwheel-line-height 10 ; Higher = more sensitive, lower = less.
+	 )))
 
 ;;;;; Auto revert
 
@@ -359,14 +367,14 @@
 
 ;; The following code was copied from Elpaca's installation instructions README.md on 2024/07/01 commit b8ed514119df6aa0e065dfdf8c4fa75f0b8802ca.
 
-(defvar elpaca-installer-version 0.7)
+(defvar elpaca-installer-version 0.8)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-							  :ref nil :depth 1
-							  :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-							  :build (:not elpaca--activate-package)))
+                              :ref nil :depth 1
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
@@ -376,20 +384,20 @@
     (make-directory repo t)
     (when (< emacs-major-version 28) (require 'subr-x))
     (condition-case-unless-debug err
-		(if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-				 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-												 ,@(when-let ((depth (plist-get order :depth)))
-													 (list (format "--depth=%d" depth) "--no-single-branch"))
-												 ,(plist-get order :repo) ,repo))))
-				 ((zerop (call-process "git" nil buffer t "checkout"
-									   (or (plist-get order :ref) "--"))))
-				 (emacs (concat invocation-directory invocation-name))
-				 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-									   "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-				 ((require 'elpaca))
-				 ((elpaca-generate-autoloads "elpaca" repo)))
-			(progn (message "%s" (buffer-string)) (kill-buffer buffer))
-		  (error "%s" (with-current-buffer buffer (buffer-string))))
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
       ((error) (warn "%s" err) (delete-directory repo 'recursive))))
   (unless (require 'elpaca-autoloads nil t)
     (require 'elpaca)
@@ -500,8 +508,30 @@
     (custom-set-faces
      `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-dim :background unspecified)))))))
 
-(font-lock-add-keywords
- 'org-mode '(("\\(^\s*#\\+begin_test\\(.*\n\\)*?\s*#\\+end_test\\)" 0 'org-test-block-face t)))
+;; TODO: Save this little proof of concept somewhere.
+
+;; Creates a custom special block `begin_grammar' which is hardcoded to use javascript syntax, and it works! It's not a real org src block though so nothing else like mode specific indentation works however.
+;; (defun do-it-kid (limit)
+;;   "Try to apply custom grammar block fontification."
+;;   (message "I HAVE BEEN CALLED! %s" limit)
+;;   (let ((case-fold-search t))
+;; 	(while (re-search-forward "^\s*#\\+begin_grammar\\(?:.*\n\\)\\(\\(?:.*\n\\)*?\\)\s*#\\+end_grammar" limit)
+;; 	  (let ((beg (match-beginning 1))
+;; 			(end (match-end 1)))
+;; 		(message "================================================================================> MATCHES ARE: %s %s" beg end)
+;; 		(if org-src-fontify-natively
+;; 			(save-match-data (org-src-font-lock-fontify-block "js" beg end)))))
+;; 	t))
+
+;; (font-lock-add-keywords
+;;  'org-mode '(("\\(^\s*#\\+begin_test\\(.*\n\\)*?\s*#\\+end_test\\)" 0 'org-test-block-face t)))
+
+;; (font-lock-add-keywords
+;;  'org-mode
+;;  '((do-it-kid))
+;;  t)
+;; END: little proof of concept.
+
 
 (defun tsujp/org-test-block-face ()
   (modus-themes-with-colors
@@ -752,12 +782,13 @@
   :config
   (setq minibuffer-visible-completions t ; nil is default, I used to use t
 		;; completion-styles '(hotfuzz orderless basic)
-        completion-styles '(hotfuzz orderless)
-		;; completion-styles '(orderless basic)
+        ;; completion-styles '(hotfuzz orderless)
+		completion-styles '(orderless basic)
         ;; completion-styles '(hotfuzz)
 		;; Ensures above completion-styles are always respected by other packages.
 		completion-category-defaults nil
-		completion-category-overrides '((file (styles . (basic partial-completion hotfuzz orderless))))))
+		;; completion-category-overrides '((file (styles . (basic partial-completion hotfuzz orderless))))))
+		completion-category-overrides '((file (styles . (basic partial-completion orderless))))))
 ;; completion-category-overrides '((file (styles . (basic partial-completion orderless))))))
 ;; completion-category-overrides '((file (styles . (hotfuzz))))))
 
@@ -961,10 +992,11 @@
   ;; (dolist (source treesit-language-source-alist)
   ;;   (treesit-install-language-grammar (car source)))
   :config
-  ;; TODO: This automatically and unified with grammar definition source above.
+  ;; todo: This automatically and unified with grammar definition source above.
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode)))
+  (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode)))
 
 ;;;; Terminal
 										;(tsujp/req 'terminal)
@@ -985,7 +1017,10 @@
   :config
   ;; Clear commands eshell considers visual by default.
   (setq eshell-visual-commands '())
-  (setq eat-minimum-latency 0.002))
+  (setq eat-minimum-latency 0.002)
+  ;; Let `eat' know to run Bash when connected to a remote "podman".
+  (add-to-list 'eat-tramp-shells '("podman" . "/bin/bash"))
+  (add-to-list 'eat-tramp-shells '("ssh" . "/bin/bash")))
 ;; (add-hook 'eat-mode-hook #'disable-local-global-hl-line)
 ;; (eat-eshell-mode))
 
@@ -1084,6 +1119,12 @@
 (keymap-global-set "H-c" #'comment-dwim)
 (keymap-global-set "H-j" #'scroll-up-line)
 (keymap-global-set "H-k" #'scroll-down-line)
+
+;; move-to-window-line-top-bottom
+;; recenter-top-bottom
+;; scroll-up-command
+;; scroll-down-command
+
 
 
 ;; TODO: Cool pattern here, perhaps useful for other things but obsolete now that using Karabiner to get better modifier behaviour.
@@ -1190,8 +1231,9 @@
 ;; TODO: Use the C module for MOAR SPEED?
 ;; TODO: Autocompile that C module if not already done.
 ;; https://github.com/axelf4/hotfuzz
-(use-package hotfuzz
-  :ensure)
+;; (use-package hotfuzz
+;;   :ensure)
+;; (require 'hotfuzz-module)
 ;; :defer 1)
 
 (use-package keycast
@@ -1372,6 +1414,11 @@
 have after-save-hook events to export the rendered tree-sitter
 test file."
   (load-file (expand-file-name "ox-tst.el"))
+  (load-file (expand-file-name "ox-ngd.el"))
+  ;; TODO: Only want this for the noir submodule directory and downwards however.
+  ;; TODO: Are project-local variables a thing?
+  (setq-local lsp-enable-file-watchers nil)
+  ;; TODO: Only add this hook in test.org file. See and re-read docs for dir-locals-set-directory-class and dir-locals-set-class-variables both.
   (add-hook 'after-save-hook #'tst-export-current))
 
 (use-package files
@@ -1382,6 +1429,8 @@ test file."
   ;;  '(safe-local-variable-directories '("/Users/tsujp/prog/tree_sitter_noir/")))
   ;; TODO: It would be better if this kind of thing was unified into project.el or something instead of being a hap-hazard hack. Perhaps contribute this to emacs when you have time?
   ;; Based on this: https://www.reddit.com/r/emacs/comments/yhs5zp/a_new_approach_for_me_for_project_wide_variables/
+  ;; 2024/11/21: I am setting safe-local-variable-directories manually here since I don't want to use the customize interface.
+  (setq safe-local-variable-directories '("/Users/tsujp/prog/tree_sitter_noir/"))
   (dir-locals-set-class-variables 'org-tree-sitter-test '((org-mode . ((eval . (tsujp/project-tree-sitter-test-org-export))))))
   (dir-locals-set-directory-class "~/prog/tree_sitter_noir" 'org-tree-sitter-test))
 
@@ -1394,7 +1443,8 @@ test file."
 (require 'org-inlinetask)
 
 (use-package dap-mode
-  :ensure)
+  :ensure
+  :defer 1)
 
 (setq org-indent-indentation-per-level 1)
 
@@ -1412,6 +1462,7 @@ test file."
   :init
   (setq popper-reference-buffers
 		'("\\*Messages\\*"
+		  "\\*Warnings\\*"
 		  "^\\*eat\\*$" eat-mode ; eat shell as a popup
 		  help-mode
 		  compilation-mode))
@@ -1450,9 +1501,9 @@ create a new one."
          (id (org-entry-get pos "CUSTOM_ID")))
     (if (and id (stringp id) (string-match-p "\\S-" id))
         id
-      (setq id (org-id-new "h"))
-      (org-entry-put pos "CUSTOM_ID" id)
-      id)))
+	  (setq id (org-id-new "h"))
+	  (org-entry-put pos "CUSTOM_ID" id)
+	  id)))
 
 (declare-function org-map-entries "org")
 
@@ -1469,13 +1520,16 @@ create a new one."
   (interactive)
   (prot-org--id-get))
 
+(setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+
 ;; TODO: Per 4533 in consult.el set recentf-filename-handlers to nil?
 
+;; TODO: Make it generic? i.e. it returns alist of properties for the return and user supplies a formatting function for that.
 (defun tsujp/region-to-transclusion (f &optional project-base)
   ;; (interactive)
-  "Given a file F return a formatted org-transclusion property. If
-optional argument PROJECT-BASE is non-nil file F's path is relative
-to the project root that contains it (if any)."
+  "Given a file F with an active region, return a formatted org-transclusion
+property. If optional argument PROJECT-BASE is non-nil file F's path is
+relative to the project root that contains it (if any)."
   (with-current-buffer (find-buffer-visiting f)
 	(if (use-region-p)
 		(let ((proj-root (car (last (project-current nil f)))))
@@ -1505,3 +1559,131 @@ to the project root that contains it (if any)."
 		(setq transclude-prop (tsujp/region-to-transclusion (buffer-file-name) t))))
 	(insert transclude-prop)))
 ;; (message "got: %s" (tsujp/region-to-transclusion (buffer-file-name) t))))))
+
+;; No initial indentation in org source blocks.
+(setq org-edit-src-content-indentation 0)
+(add-to-list 'org-src-lang-modes '("js" . js-ts))
+(add-to-list 'org-src-lang-modes '("rust" . rust-ts))
+
+;; TODO: Organise blah blah.
+(use-package embark
+  :ensure
+  :defer 1
+
+  :bind
+  (("C-." . embark-act)))
+
+(use-package embark-consult
+  :ensure
+  :defer 1
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+;; END TODO.
+
+;; TODO: Organise alongside everything else.
+;; Hilarious hack to give me dummy bindings for commands I want to invoke in kmacro without having the macro literally do M-x f o o RET (comparatively very slow). Ultimately would be good if Emacs could execute commands in macros without having to pollute entire global binding space with rubbish.
+;; Much funny hacking with mekeor on #emacs 2024-11-03 ~9-10 AM KST.
+;; TODO: Emacs mailing list macros invoking commands as a feature request?
+(define-key (current-global-map) [tsujp org-store-link] #'org-store-link)
+(define-key (current-global-map) [tsujp org-insert-link] #'org-insert-link)
+
+;; Change final `j' count for moving to the next function, or chop that stuff off entirely and use I O at the front to simple suck the current function point is inside the name of.
+(defalias 'noirc_functions_to_checklist_repeatable
+  (kmacro "C-e i C-M-b M-w g d C-M-b o C-M-f C-M-f <tsujp> <org-store-link> n C-x o M-<return> r [ SPC ] SPC <tsujp> <org-insert-link> RET C-y ( ) RET <escape> C-x o M-, j j j j"))
+
+(defalias 'noirc_function_to_link
+  (kmacro "C-e i C-M-b M-w g d C-M-b o C-M-f C-M-f <tsujp> <org-store-link> n C-x o M-<return> r [ SPC ] SPC <tsujp> <org-insert-link> RET C-y ( ) RET <escape> C-x o M-, j j j j"))
+
+(use-package htmlize
+  :ensure
+  :defer 1)
+
+;; XXX: Might have to ask on IRC for this one, I don't see anything in project.el or files.el
+;; TODO: Have project.el or some .dir-locals.el logic to mark a directory (and all it's children) as read-only? Or just do this via file system attributes (i.e. outside of Emacs?). Would prefer inside since it's not really applicable to elsewhere, just want to avoid constantly being prompted in emacs when accidental edits are made. Specifically I want to mark the entire noir submodule for the treesitter project as read-only.
+
+;; TODO: Tramp in it's own little area.
+;; TODO: Place elsewhere
+;; (tramp-enable-method "toolbox")
+
+;; TODO: Place elsewhere.
+;; TODO: Fork this package and stop it using `reformatter' for formatting.
+(use-package zig-mode
+  :ensure
+  :defer 1)
+
+;; TODO: Custom TRAMP dev box connection method thing ------------------------
+(setq jam--devbox
+	  '("jam"
+		(tramp-login-program "podman")
+		;; The machine ssh -- toolbox enter thing.
+		(tramp-login-args (("machine")
+						   ("ssh")
+						   ;; TODO: How to have podman-machine-default as default name here unless otherwise specified?
+						   ("podman-machine-default")
+						   ;; ))
+						   ("-t")
+						   ("--")
+						   ("toolbox")
+						   ("enter")
+						   ("%h")
+						   ))
+		(tramp-direct-async ("/bin/sh" "-c"))
+		;; (tramp-remote-shell ("toolbox" "enter" "%h"))
+		(tramp-remote-shell "/bin/bash")
+		(tramp-remote-shell-login ("-l"))
+		(tramp-remote-shell-args ("-i" "-c"))))
+;; (tramp-remote-shell-args ("-i" "-c"))))
+
+;; (add-to-list 'eat-tramp-shells '("jam" . "/bin/bash"))
+;; (add-to-list 'vterm-tramp-shells '("jam" "/bin/bash"))
+;; (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+
+;; TODO: Add marginalia annotator to show the container image, associated project, and other information.
+(defun jam--completion-function (method)
+  (tramp-skeleton-completion-function method
+	(when-let* ((raw-list
+				 (shell-command-to-string
+				  (concat program " ps -a --filter 'label=com.github.containers.toolbox' --format '{{.ID}}\t{{.Names}}'")))
+				(lines (split-string raw-list "\n" 'omit))
+				(names
+				 (tramp-compat-seq-keep
+				  (lambda (line)
+					(when (string-match
+						   (rx bol (group (1+ nonl))
+							   "\t" (? (group (1+ nonl))) eol)
+						   line)
+					  (or (match-string 2 line) (match-string 1 line))))
+				  lines)))
+	  (mapcar (lambda (name) (list nil name)) names))))
+
+(tramp-set-completion-function "jam" `((jam--completion-function "jam")))
+
+(defun zzz--update-jam-tramp-method ()
+  (interactive)
+  (if (string-equal (caar tramp-methods) "jam")
+	  ;; Redefine
+	  (setq tramp-methods (cons jam--devbox (cdr tramp-methods)))
+	;; Not in list, add.
+	(add-to-list 'tramp-methods jam--devbox)))
+
+;; (add-to-list 'tramp-methods jam--devbox)
+
+;; (setq tramp-verbose 5)
+(setq tramp-debug-command-messages t)
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
+;; ---------------------------------------------------------------------------
+
+(defun tjp/gimme-the-eln-cache-hash ()
+  (interactive)
+  (message "-> ELN CACHE DIR: %s" (md5 (concat "6" (concat emacs-version system-configuration system-configuration-options) (mapconcat #'comp--subr-signature comp-subr-list "")))))
+
+;; TODO: If emacs freezes when opening a file that Org is involved with it's likely (at the time of writing this comment Wed 18 Dec 2024) an org-cache issue. To more easily clear the cache from within Emacs for that specific file without having to open it (thus crashing Emacs) execute the following (found from reading org-element-cache-reset source):
+;;
+;; (org-persist-unregister 'org-element--headline-cache "/Users/tsujp/prog/~wzht/infra/NOTES.org")
+;; (org-persist-unregister 'org-element--cache "/Users/tsujp/prog/~wzht/infra/NOTES.org")
+;;
+;; Unsure if this removes all caching in the future or not, can check org-element--cache-active-p when current buffer is the file in question.
+;; TODO: Should report this as a bug and help solve it since it's been going on for a while (month or two).

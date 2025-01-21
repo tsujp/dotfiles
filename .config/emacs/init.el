@@ -2,124 +2,165 @@
 
 ;;; Commentary
 
-;; This is the main initialisation point for Emacs; default packages are available now so any (using default packages) shared configuration is done here (e.g. a macro). We then load individual package modules which include their configurations.
+;; This is the main initialisation point for Emacs; default packages are available now so any
+;; (using default packages) shared configuration is done here (e.g. a macro). We then load
+;; individual package modules which include their configurations.
 
 ;;; Code
 
 ;;;; Meta information
 
-;; TODO: Shorten my acronym to `tjp` since tsujp is a little too long (only within the context of M-x typing commands lol).
-;; TODO: Probably better to just inspect the output of emacs-report-bug or whatever that command is as that generates a whole lot of diagnostic data.
-(defun tsujp/emacs-builinfo ()
-  (interactive)
-  "Show compilation information for this Emacs"
-  (message "-> CONFIGURATION OPTIONS:\n%s" system-configuration-options)
-  (message "-> CONFIGURATION FEATURES:\n%s" system-configuration-features)
-  (message "-> VERSION:\n%s" emacs-version)
-  (message "-> TREESITTER?: %s" (treesit-available-p)))
-;; TODO: Call the parts of emacs-build-description myself since it doesn't play nice when called as below.
-;; (message "-> BUILD DESCRIPTION: %s\n" (emacs-build-description)))
-
 ;; Compute these once instead of over-and-over at each callsite.
 (defconst tsujp/modules-dir "modules")
+(defconst tjp/sitelisp-dir "site_lisp")
 (defconst tsujp/is-gui (display-graphic-p))
 (defconst tsujp/is-mac (eq system-type 'darwin))
-
-;;;; Subprocess performance tweaks
-
-;; Mainly due to using LSPs which may or may not have verbose output (unfortunately); increase the maximum chunk-size of data we can read from these processes at a time.
-(setq read-process-output-max (* 8 1024 1024))
-
-;; Don't wait for more output to arrive, process it ASAP.
-(setq process-adaptive-read-buffering nil)
 
 ;;;; Load path
 
 ;; Directory created (if necessary) and added to load-path.
 (add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file tsujp/modules-dir))))
-
-;;;; Silence native compilation
-
-;; Useful when developing a package, annoying (as by default it's verbose) when consuming packages which output warnings when natively compiled.
-
-;; Make native compilation silent and prune its cache.
-(when (native-comp-available-p)
-  (setq native-comp-async-report-warnings-errors 'silent))
-										;(native-compile-prune-cache))
+(add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file tjp/sitelisp-dir))))
 
 ;;;; General (built-in)
 
-;; General Emacs configuration concerning in-built packages only.
-
 ;;;;; Emacs
 
-;; (setq-default fringes-outside-margins t)
+;; Baseline configuration, anything more specific goes into it's own area even if it also uses
+;; the emacs package because that way adding :disabled can be used to easily selectively
+;; disable areas of configuration.
+
 (use-package emacs
   :ensure nil
   :demand t
+  :custom
+  ;; No second case-insensitive pass over `auto-mode-alist'.
+  (auto-mode-case-fold nil)
   :config
   (setq-default
+   ;; Subprocesses -------------------------------------------------------------
+   read-process-output-max (* 8 1024 1024) ; increase max-size we can read at a time
+   process-adaptive-read-buffering nil	   ; process output ASAP instead of waiting for more
+
+   ;; Fill column --------------------------------------------------------------
    fill-column 95
-   display-fill-column-indicator-character ?\u250A ; fill column indicator (2506 or 250A).
+   display-fill-column-indicator-character ?\u250A ; 2506 or 250A
+
+   ;; Fringes, margins, and associates -----------------------------------------
    fringes-outside-margins nil
    left-margin-width 1
-   delete-by-moving-to-trash t           ; delete by moving to trash
-   select-enable-clipboard t             ; unify emacs and system clipboard
-   sentence-end-double-space nil         ; single space after fullstop
-   indent-tabs-mode -1                   ; sane whitespace, please
-   tab-width 4							 ; Smoller than 8
-   initial-scratch-message ";; Scratch"  ; initial scratch message
-   initial-major-mode 'fundamental-mode  ; a "nothing" mode for scratch buf
-   inhibit-splash-screen t               ; hide welcome screen
-   inhibit-startup-echo-area-message t   ; no echo area message
-   buffer-file-coding-system 'utf-8 ; utf8 encoding
-   locale-coding-system 'utf-8      ; utf8 encoding
-   require-final-newline t               ; add newline on buffer save
-   ;; display-line-numbers-type 'visual     ; set line numbers to relative
-   display-line-numbers-type t 			; absolute line numbers
+   display-line-numbers-type t 		   	; absolute line numbers
    display-line-numbers-grow-only t
-   display-line-numbers-width 3          ; default width
+   display-line-numbers-width 3      	; default width of line numbers
+   indicate-buffer-boundaries 'left     ; show buffer top/bottom in margin
+   ;; indicate-buffer-boundaries t			; show buffer end in margin
+
+   ;; Host system integration --------------------------------------------------
+   select-enable-clipboard t			; unify emacs and system clipboard
+   use-dialog-box nil					; prompt in minibuffer instead of system dialog
+   use-file-dialog nil					; ditto for file dialogs
+
+   ;; Indentation and completion -----------------------------------------------
+   indent-tabs-mode nil					; sane whitespace, please
+   ;; TODO: Why was -1 not setting for indent-tabs-mode?
+   tab-width 4							; smoller than 8
+   tab-always-indent 'complete			; indentation & completion with TAB
+   ;; TODO: See tab-first-completion (from doc string of tab-always-indent)
+   completion-cycle-threshold 3			; TAB wraps if completion list small
+
+   ;; General buffer, and file handling ----------------------------------------
+   delete-by-moving-to-trash t
+   sentence-end-double-space nil		; single space after fullstop
+   require-final-newline t				; add newline on buffer save
+   ;; display-line-numbers-type 'visual     ; set line numbers to relative
    display-raw-bytes-as-hex t
-   tab-always-indent 'complete           ; indentation & completion with TAB
-   completion-cycle-threshold 3          ; TAB wraps if completion list small
-   indicate-buffer-boundaries 'left      ; show buffer top/bottom in margin
-   ;; indicate-buffer-boundaries t       ; show buffer end in margin
+   create-lockfiles nil					; here there be dragons
+   help-window-keep-selected t			; re-use current help buffer if viewing more help
+
+   ;; Fontification ------------------------------------------------------------
+   fast-but-imprecise-scrolling t		   ; redraw immediately when scrolling vertically
+   redisplay-skip-fontification-on-input t ; user input always interrupts fontification
+   treesit-font-lock-level 4			   ; max fontification
+
+   ;; Parentheses and pairs ----------------------------------------------------
+   delete-pair-blink-delay 0
+   show-paren-delay 0					; show matching parenthesis quickly
+   ;; blink-matching-paren nil
+
+   ;; Scratch buffer defaults --------------------------------------------------
+   initial-scratch-message ";; Scratch" ; initial scratch message
+   initial-major-mode 'fundamental-mode ; a "nothing" mode for scratch buf
+
+   ;; Bidirectionality ---------------------------------------------------------
+   bidi-display-reordering 'left-to-right  ; disable bi-directional text rendering by default
+   bidi-paragraph-direction 'left-to-right ; also required
+   bidi-inhibit-bpa t					   ; no bidirectional paren searching
+
+   ;; Misc ---------------------------------------------------------------------
+   blink-cursor-mode nil				 ; do not blink cursor
    use-short-answers t                   ; yes/no -> y/n
    save-interprogram-paste-before-kill t ; do not overwrite existing clipboard text on kill
    kill-do-not-save-duplicates t
-   load-prefer-newer t 					; Load newer bytecode over old
-   delete-pair-blink-delay 0
-   ring-bell-function #'ignore            ; no beeping
-   ;; echo-keystrokes 0.01                  ; immediate feedback in echo area on unfinished commands
-   echo-keystrokes 0.1
-   bidi-display-reordering 'left-to-right ; disable bi-directional text rendering by default
-   bidi-paragraph-direction 'left-to-right ; also required
-   ;; blink-matching-paren nil
+   load-prefer-newer t 					; load newer bytecode over old
+   echo-keystrokes 0.1 					; immediately echo unfinished commands (feedback)
+   ring-bell-function #'ignore			; no beeping
+
    ;; hide commands in M-x not applicable to current mode
    read-extended-command-predicate #'command-completion-default-include-p
-   blink-cursor-mode nil ; do not blink cursor
-   show-paren-delay 0 ; show matching parenthesis quickly
-   ;; Help config TODO: Place elsewhere?
-   help-window-keep-selected t
-   create-lockfiles nil ; no file locking please
-   use-dialog-box nil ; prompt in minibuffer instead of dialog box (for the small commands that do so)
-   treesit-font-lock-level 4 ; maximum fontification (hopefully not too skittle-like)
-   )
-  (set-default-coding-systems 'utf-8) ; utf8
-  (prefer-coding-system 'utf-8)	   ; utf8
-  ;; (global-display-line-numbers-mode)       ; enable display of line numbers at margin
-  (column-number-mode)                     ; enable display of column number in minibuffer
-  (global-hl-line-mode)                    ; enable highlight of current line
-  (global-font-lock-mode 1)                ; force-enable font-face
+   ) ; setq-default closed here.
+
+  ;; Native compilation --------------------------------------------------------
+  (if (and (featurep 'native-compile)
+		   (fboundp 'native-comp-available-p)
+		   (native-comp-available-p))
+	  ;; Make sure native compilation is on, and immediately native-compile packages upon their
+	  ;; installation instead of when they are first used.
+	  (setq native-comp-jit-compilation t
+			package-native-compile t
+			;; Silent native compilation please.
+			native-comp-async-report-warnings-errors 'silent))
+
+  ;; Coding system -------------------------------------------------------------
+  (setq-default  buffer-file-coding-system 'utf-8 ; utf8
+				 locale-coding-system 'utf-8)	  ; utf8
+  (set-default-coding-systems 'utf-8)			  ; utf8
+  (prefer-coding-system 'utf-8)					  ; utf8
+
+  ;; Show matching parentheses and pairs
+  (show-paren-mode)
+
+  ;; Highlight current line in buffer
+  (global-hl-line-mode)
+
+  ;; Force enable font-face
+  (global-font-lock-mode 1)
+
+  ;; Display column number in minibuffer
+  (column-number-mode)
+
+  ;; Visual wrap with context-aware prefix everywhere
+  (global-visual-wrap-prefix-mode)
+
+  ;; Set default appearance of fringes on frames (left/right pixel widths)
+  (fringe-mode '(5 . 6))
+
+  ;; History
+  (savehist-mode) 						; minibuffer command history
+  ;; (save-place-mode)						; location of point in visited files
+  ;; (recentf-mode)						; list of recently opened files
+
+  ;; TODO: Have this only in one modeline, or is there a way to have global header bar above the tab bar?
+  ;; TODO: If on a laptop (currently only do this for macos variant).
+  (display-battery-mode t)
+
+  ;; Be normal and delete selected text when inserting further characters
+  (delete-selection-mode)
+
   ;; (global-visual-line-mode)                ; visual-line-mode everywhere (TODO: This and below only
   ;; in prog and text?)
-  (global-visual-wrap-prefix-mode)	   ; wrap with context-aware prefix everywhere
-  (savehist-mode)                          ; save minibuffer history
-  (fringe-mode '(5 . 6))
+  ;; (global-display-line-numbers-mode)       ; enable display of line numbers at margin
   ;; (winner-mode)                         ; window layout tracking (incase we need to undo)
-  (recentf-mode)                        ; remember recently opened files, for easy re-visiting
-  (save-place-mode)                     ; when re-visiting, point starts from where it was last time (instead of at the start of the file)
-  (show-paren-mode)
+  ;; TODO: Reenable later after bug report #75730 is resolved.
   )
 
 ;; TODO: Place somewhere more appropriate, idk.
@@ -131,65 +172,28 @@
 
 ;;;;; Parenthesis / Delimitiers
 
-
 ;;;;; Whitespace
 
-;; TODO: This is breaking fontification at the end of a buffer somehow. I've reported the bug by sending an email to the bug list on Wed 18 Sep 2024.
 ;; Remove empty lines at start/end of file, trailing whitespace on lines, and ensure a newline at end of file.
 ;; This happens BEFORE the file is saved; so use with external formatters won't bork things.
+
 (use-package emacs
   :ensure nil
   :hook
   (prog-mode . whitespace-mode)
   (text-mode . whitespace-mode)
-  ;; :Config
-  ;; (global-whitespace-mode)
-  ;; If using proportional font make it dimmer.
-  ;; :custom-face
-  ;; (whitespace-newline ((t (:foreground "#4C4C4C" :highlight nil))))
   :custom
-  ;; newline newline-mark
   (whitespace-style '(face empty trailing missing-newline-at-eof))
   (whitespace-action '(cleanup auto-cleanup))
   :config
+  ;; newline or newline-mark
   (setq whitespace-display-mappings '((newline-mark ?\n [?⏎ ?\n] [?$ ?\n]))))
-
-;; TODO: Have this only in one modeline, or is there a way to have global header bar above the tab bar?
-;; TODO: If on a laptop (currently only do this for macos variant).
-(display-battery-mode t)
 
 ;;;;; Font
 
 ;; TODO: Can this _sanely_ go into a use-package? Or maybe I don't bother as I end up using Fontaine.
 ;; TODO: If on macOS and gui AND on a display below retina ppi use a font weight of medium (at time of writing) if the defaults value AppleFontSmoothing is 0, otherwise use (whatever it needs to be) if it's 1. Then the same logic for if using a display above retina ppi (i.e. the laptops display). Because font weights shift around and it's all fucky.
 ;; defaults write org.gnu.emacs applefontsmoothing -int 0
-;; todo: iosevka comfy?
-
-;;(font-at (point))#<font-object "-*-Zed Mono-medium-normal-normal-*-14-*-*-*-m-0-iso10646-1">
-;;(font-at (point))#<font-object "-*-Iosevka Fixed SS03-regular-normal-normal-*-14-*-*-*-m-0-iso10646-1">
-
-;; (font-spec
-;;  :name "foo"
-;;  :family "Zed Mono"
-;;  :height 140
-;;  :weight 'medium)
-
-;; (create-fontset-from-fontset-spec "-*-Iosevka Fixed SS03-regular-normal-normal-*-14-*-*-*-m-0-fontset-if3")
-
-;;#x2026
-;;8230
-;; (create-fontset-from-fontset-spec
-;;  "-*-Zed Mono-medium-normal-normal-*-14-*-*-*-m-0-fontset-zm")
-
-;; (set-fontset-font "fontset-zm" ?… (create-fontset-from-fontset-spec "-*-Iosevka Fixed SS03-regular-normal-normal-*-14-*-*-*-m-0-fontset-if3"))
-;; (set-fontset-font t 'unicode "fontset-zm")
-;; (set-fontset-font "fontset-default" 8230 "Iosevka Fixed SS03" nil 'prepend)
-
-;;(set-face-attribute 'default nil :font "fontset-zm")
-
-;; (set-face-attribute 'default nil :family "Iosevka Term SS01" :height 130)
-;; (set-face-attribute 'default nil :family "Iosevka Term SS02" :height 130) ; prefer underline and * placeent on this
-;; (set-face-attribute 'default nil :family "Iosevka Term SS05" :height 130) ; 1
 
 (when tsujp/is-gui
   (set-face-attribute 'default nil
@@ -197,90 +201,66 @@
 					  :family "tsujp"
 					  :weight 'medium
 					  ;; :height 140 ; On that 1080p samsung display.
-					  :height 150 ; or 160 on mac display.
+					  :height 160 ; 150 or 160 on mac display.
 					  ;; :family "Zed Mono"
 					  ;; :family "Zed Mono"
 					  ;; :height 140
 					  ;; :weight 'medium
 					  ;; :font "fontset-zm"
 					  ))
-;; (set-frame-font "fontset-zm" t t)
-;; (set-fontset-font "fontset-zm" 'unicode "Zed Mono")
-;; (set-fontset-font "fontset-zm" ?… "Iosevka Fixed SS03")
-;; (set-fontset-font "fontset-default" '(#x2026 . #x2027) "Iosevka Fixed SS03" nil 'prepend)
-;; (set-fontset-font "fontset-zm" ?… (font-spec :script 'symbol) nil 'append)
-
-;; applefontsmoothing -int 0 looks fine on 2560x1440 with these Zed settings.
-;; :family "Zed Mono"
-;; :height 140
-;; :weight 'medium))
 
 ;;;;; Mouse
 
 (use-package mouse
   :ensure nil
-  :hook (after-init . mouse-wheel-mode)
+  :hook
+  (after-init . mouse-wheel-mode)
   :config
   (setq-default
    scroll-conservatively 101    ; scroll just enough to bring point back into view
-   scroll-margin 2              ; padding at top/bottom of window which counts as scroll region
+   scroll-margin 1              ; padding at top/bottom of window which counts as scroll region
    scroll-step 1                ; keyboard scroll one line at a time
    mouse-wheel-follow-mouse t   ; mouse wheel scrolls window mouse is hovering over
    mouse-wheel-progressive-speed nil    ; don't accelerate scrolling
    ;; mouse-wheel-scroll-amount '(1 ((shift) . 1))
-   ;; fast-but-imprecise-scrolling t ; redraw immediately when scrolling (v)
    ;; jit-lock-defer-time 0
    )
+
   (when tsujp/is-gui
     (context-menu-mode))                ; right-click to show context menu
+
   (when (and tsujp/is-gui tsujp/is-mac)
 	(setq-default
-	 ns-use-mwheel-momentum nil ; No momentum scrolling.
-	 ns-mwheel-line-height 10 ; Higher = more sensitive, lower = less.
-	 )))
+	 ns-use-mwheel-momentum nil			; no momentum scrolling (extra required on macOS)
+	 ns-mwheel-line-height 10)))		; higher = more sensitive, lower = less
 
 ;;;;; Auto revert
 
-;; When the file backing a buffer changes (perhaps edited by an external program e.g. git pull) auto-revert-mode can automatically refresh the buffers contents to match. This refresh is called a revert.
+;; When the file backing a buffer changes (perhaps edited by an external program e.g. git pull)
+;; auto-revert-mode can automatically refresh the buffers contents to match. This refresh is
+;; called a revert.
 
 (use-package autorevert
   :ensure nil
-  :hook (after-init . global-auto-revert-mode)
-  :config
-  (setq-default
-   ;; TODO: Maybe want to set `global-auto-revert-non-file-buffers' to `t' but maybe not. Could lead to a lot of revert spamming, look into that later.
-   ;; auto-revert-interval 1
-   ;; auto-revert updates version control (vc) info already, however only if there are vc changes to the backing file directly (e.g. editing the file's contents externally); if a vc update occurs without editing the backing files contents directly auto-revert may miss this information. For example if you fetch and pull new commits which change other files that a buffer doesn't care about. Here vc info has changed (head commit) and unless auto-revert-check-vc-info is non-nil said vc info changes will be ignored.
-   auto-revert-check-vc-info t
-   ))
-
-;;;;; Delete selection
-
-;; Make Emacs normal and delete the selected region (if any) upon insertion of new text.
-
-(use-package delsel
-  :ensure nil
-  :hook (after-init . delete-selection-mode))
-
-;; TODO: Random stuff to organise.
-
-;; Should be a rule. I think I wanted a light stipple so it's not too distracting.
-;; (setq display-fill-column-indicator-character ?\u2506) ; unused atm
-;; (add-hook 'org-mode-hook #'display-fill-column-indicator-mode)
-;; (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-;; (add-hook 'markdown-mode-hook #'display-fill-column-indicator-mode)
-
-;; Thin window edges.
-;; (set-window-fringes nil 1 nil)
-;; (set-window-margins nil 0 0)
-
-;; TODO: The repeat-mode stuff from Prot's config?
-
-;; TODO: The current modes under the emacs config at the start of this file into their own use-package which is deferred?
+  ;; JORDAN TODO: It seems enabling global-auto-revert-mode has a race condition with tramp.
+  :hook
+  (after-init . global-auto-revert-mode)
+  :custom
+  (auto-revert-check-vc-info t)
+  (auto-revert-remote-files t)
+  (auto-revert-avoid-polling t))
+  ;; :config
+  ;; (setq-default
+  ;;  ;; TODO: Maybe want to set `global-auto-revert-non-file-buffers' to `t' but maybe not. Could lead to a lot of revert spamming, look into that later.
+  ;;  ;; auto-revert-interval 1
+  ;;  ;; auto-revert updates version control (vc) info already, however only if there are vc changes to the backing file directly (e.g. editing the file's contents externally); if a vc update occurs without editing the backing files contents directly auto-revert may miss this information. For example if you fetch and pull new commits which change other files that a buffer doesn't care about. Here vc info has changed (head commit) and unless auto-revert-check-vc-info is non-nil said vc info changes will be ignored.
+  ;;  auto-revert-check-vc-info t
+   ;; ))
 
 ;;;;; Unique buffer names
 
-;; If two buffers have the same name, differentiate them by setting their respective names equal to whatever is left after the common-prefix between them is removed.
+;; If two buffers have the same name, differentiate them by setting their respective names
+;; equal to whatever is left after the common-prefix between them is removed.
 
 (use-package uniquify
   :ensure nil
@@ -297,65 +277,38 @@
   :custom
   (ispell-dictionary "en_GB"))
 
-
 ;;;; Search
 
 (use-package isearch
   :ensure nil
   :defer t
   :config
-  (setq isearch-lazy-count t)           ; show match counts (current and total) in search prompt
+  (setq isearch-lazy-count t)          ; show match counts (current and total) in search prompt
   ;; TODO: `lazy-count-prefix-format'.
   )
 
 ;;;; Operating system
 
-;; Host operating-system-specific settings.
+;; TODO: Worth it to check in Emacs init that keys are laid out as I expect them to?
 
-;;;;; Keyboard modifier layout
+(use-package emacs
+  :ensure nil
+  :config
+  ;; macOS...
+  (when tsujp/is-mac
+    ;; Keyboard modifier layout
+    (setq mac-command-modifier 'meta
+		  mac-option-modifier 'super
+		  mac-right-command-modifier 'hyper)
 
-;; TODO: Update docs for this when configured karabiner-elements for tap/hold stuff.
-
-;; I remap modifier keys on macOS and Linux to make them more ergonomic. The default ANSI keyboard layout has the following keys at the bottom-left of the keyboard, ordered left to right:
-;;   |  Control  |  Super  |  Alt  |  Space  | ...
-
-;; Note that Super is the neutral name for the Command key on Apple products, and the Windows key elsewhere.
-
-;; I remap (using the host operating systems facilities) these to:
-;;   |  Nothing  |  Alt  |  Control  |  Spacee  | ...
-
-;; And then replace Caps Lock with Super for that platform. If on Linux I typically use Hyper instead as Linux doesn't discriminate between Control as a system-key like macOS does with Command. Unfortunately Linux decided to copy that choice from Windows. Think C-c being both copy _and_ SIGINT in a terminal; so dumb.
-
-;; This section checks that modifier keys are adjusted accordingly so there are no surprises within Emacs.
-										; TODO: Actually make that check comprehensive based on scancodes or keycodes or whatever; right now its assumed the host os has them set up correctly and they are translated into emacs properly.
-
-;; TODO: Modifier usage above now out of date, as of 12 Jul 2024 moving back to caps lock as ctrl, and command/option remain as they are.
-
-;; New settings after 12 Jul 2024 changes.
-(when tsujp/is-mac
-  (setq mac-command-modifier 'meta
-		mac-option-modifier 'super
-		mac-right-command-modifier 'hyper))
-
-;; Original settings with older modifiers.
-;; (when tsujp/is-mac
-;;   (setq mac-command-modifier 'control
-;;	mac-option-modifier 'super
-;;	mac-control-modifier 'meta))
-
-
-
-;;;;; macOS only
-
-										; If running graphically on macOS we want to re-enable the menu bar since that is displayed outside of the application window (Emacs frame).
-
-(when (and tsujp/is-gui tsujp/is-mac)
-  ;; (setq ns-use-native-fullscreen nil)   ; set in early-init.el, commented out here as weak documentation.
-  ;; (set-frame-parameter nil 'undecorated t)
-  ;; (set-frame-parameter nil 'drag-internal-border t)
-  ;; (set-frame-parameter nil 'internal-border-width 20)
-  (set-frame-parameter nil 'fullscreen 'fullboth)
-  (menu-bar-mode 1))
+    ;; macOS and GUI...
+    (when tsujp/is-gui
+      ;; Re-enable menu bar since that's outside of the application window (Emacs frame).
+      (menu-bar-mode 1)
+      ;; Also set Emacs to be fullscreen by default. ns-use-native-fullscreen nil already set
+      ;; in early-init.el
+      ;; TODO: Double check that is what this does
+      (set-frame-parameter nil 'fullscreen 'fullboth))))
 
 ;;;;; Packaging
 
@@ -365,14 +318,15 @@
 
 ;;;;;; Bootstrap
 
-;; The following code was copied from Elpaca's installation instructions README.md on 2024/07/01 commit b8ed514119df6aa0e065dfdf8c4fa75f0b8802ca.
+;; The following code was copied from Elpaca's installation instructions README.md on
+;; 2025/02/07 commit 141b2f59406e94c61478dca7779efd800d59258f
 
-(defvar elpaca-installer-version 0.8)
+(defvar elpaca-installer-version 0.9)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil :depth 1
+                              :ref nil :depth 1 :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
@@ -409,33 +363,25 @@
 ;;;;;; Enable use-package support
 
 ;; use-package is amazing for configuring packages, this makes sure Elpaca has integration.
-
-(elpaca elpaca-use-package ; Install package `elpaca-use-package`.
-  (elpaca-use-package-mode)) ; Enable support for use-package's `:ensure`.
+(elpaca elpaca-use-package              ; install package `elpaca-use-package`
+  (elpaca-use-package-mode))            ; enable support for use-package's `:ensure`
 
 ;;;;;; Wait for Elpaca to bootstrap (if appropriate)
 
 (elpaca-wait)
 
-										;(tsujp/req 'general)
-										;(tsujp/req 'os)
-										;(tsujp/req 'packaging)
-
 ;;;; Env vars
 
 ;; Set environment variables in Emacs by sourcing them from a proper shell session.
 
-;; TODO: Put this elsewhere, or better yet remove it and hardcode with something else (or make it faster idk) when krunvm stuff is possible.
-;;; TODO: Put this in it's own file that needs to run as close to startup (after a package manager has been installed) as possible.
-;;; Make Emacs use $PATH from users' shell.
+;; Make Emacs use $PATH from users' shell.
 (use-package exec-path-from-shell
   :ensure
   :init
-  ;;(setq exec-path-from-shell-shell-name "bash")
   ;; (setq exec-path-from-shell-debug t) ; When debugging uncomment.
   (setq exec-path-from-shell-arguments '("-l"))
-  ;;(setq exec-path-from-shell-arguments nil)
   :config
+  ;; Only take the following environment variables into Emacs.
   (dolist (var '("SSH_AUTH_SOCK" "LANG" "LC_CTYPE" "GNUPGHOME" "XDG_DATA_HOME" "XDG_CONFIG_HOME" "XDG_VIDEOS_DIR" "XDG_PICTURES_DIR" "XDG_DOWNLOAD_DIR" "XDG_MUSIC_DIR" "XDG_CACHE_HOME" "XDG_DESKTOP_DIR" "XDG_DOCUMENTS_DIR"))
 	(add-to-list 'exec-path-from-shell-variables var))
   (exec-path-from-shell-initialize))
@@ -444,36 +390,25 @@
 
 ;; Autosaved files are surrounded by pounds (#) by default, whereas backup files are suffixed with tilde (~).
 
-;; TODO: Place elsewhere?
-;; backup versioned files (we don't commit on every save so back it up!)
 (use-package emacs
   :ensure nil
   :after xdg
   :custom
-  (auto-save-interval 300) ; keystroke-count between autosaves.
-  (auto-save-timeout 60) ; seconds of idle time between autosaves.
-  (backup-by-copying t) ; don't clobber symlinks.
-  (make-backup-files t) ; backup file the first time it is saved.
-  (version-control t) ; use version numbers on backups.
-  (delete-old-versions t) ; silently (without confirmation prompt) delete old versions.
-  (delete-by-moving-to-trash t)
-  (kept-new-versions 10) ; count of newest versions to keep.
+  (auto-save-interval 300)         ; keystroke-count between autosaves
+  (auto-save-timeout 60)           ; seconds of idle time between autosaves
+  (backup-by-copying t)            ; don't clobber symlinks
+  (make-backup-files t)            ; backup file the first time it is saved
+  (version-control t)              ; use version numbers on backups
+  (delete-old-versions t)          ; silently (without confirmation prompt) delete old versions
+  (kept-new-versions 10)           ; count of newest versions to keep
   (kept-old-versions 0) ; count of oldest versions to keep (keeping old versions clobbers new versions), see bottom of: https://www.emacswiki.org/emacs/ForceBackups
   (backup-directory-alist
    `(("." . ,(concat (xdg-cache-home) "/emacs/backups"))))
   ;; TODO: Auto saves still polluting, read docs for auto-save-file-name-transforms and test this config out to get this stuff to stop polluting. Perhaps use the hash thing too for long dirs and what not, in which ase a nice mapping file additionally?
   (auto-save-file-name-transforms `((".*" ,(concat (xdg-cache-home) "/emacs/autosaves") t))))
-(setq vc-make-backup-files t)
-
-
-;; make sure gpg-agent.conf contains line `allow-loopback-pinentry'.
-;; make sure gpg.conf contains line `pinentry-mode loopback` (not sure if this one is required, test later TODO).
-;; TODO: Emacs won't read the XDG location I've specified i.e. ~/.config/gnupg and instead defaults to ~/.gnupg (or gpg is creating this trash folder, also ignoring my XDG config). In either case Emacs reads said trash folder which has no keys and fails to sign. Deleting said folder and adding a manual symlink to the correct one: `ln -s ~/.config/gnupg .gnupg` fixes the issue. That sucks, who is at fault here?
-;; TODO: Put this elsewhere as appropriate.
-(setq-default epg-pinentry-mode 'loopback)
 
 ;;;; Theme
-;; (tsujp/req 'theme)
+
 ;;;;; Modus theme
 
 ;; Using the non-bundled modus-theme so we can get new updates outside of Emacs release cycle (if we were to use the bundled version).
@@ -663,6 +598,8 @@
     ;; '("'" . meow-reverse)
     '("'" . meow-smart-reverse)
 
+	'("H-q" . meow-grab)
+
     ;; '("J" . meow-end-of-thing)
     ;; '("K" . meow-beginning-of-thing)
     ;; '("H" . meow-bounds-of-thing)
@@ -746,8 +683,9 @@
 ;; (add-hook 'meow-insert-exit-hook 'corfu-quit)
 (use-package meow
   :ensure
-  :custom
-  (meow-expand-hint-counts '((word . 3) (line . 3) (block . 3) (find . 3) (till . 3)))
+  ;; :custom
+  ;; TODO: How to disable these, or perhaps only show them while a key combo is being pressed (i.e. not toggle, but while holding).
+  ;; (meow-expand-hint-counts '((word . 3) (line . 3) (block . 3) (find . 3) (till . 3)))
   :config
   (meow-setup)
   (setq meow-use-enhanced-selection-effect t)
@@ -788,6 +726,7 @@
 		;; Ensures above completion-styles are always respected by other packages.
 		completion-category-defaults nil
 		;; completion-category-overrides '((file (styles . (basic partial-completion hotfuzz orderless))))))
+		;; TODO: Since Vertico update is `basic' here of any value? It's not needed for the workaround anymore so if it isn't then nuke it.
 		completion-category-overrides '((file (styles . (basic partial-completion orderless))))))
 ;; completion-category-overrides '((file (styles . (basic partial-completion orderless))))))
 ;; completion-category-overrides '((file (styles . (hotfuzz))))))
@@ -863,7 +802,8 @@
   :ensure
   :hook (elpaca-after-init . global-corfu-mode)
   :custom
-  (corfu-auto 1)
+  ;; TODO: Maybe not automatic? See corfu-auto-prefix or something like that.
+  ;; (corfu-auto 1)
   (corfu-preview-current nil)
   (corfu-min-width 20)
   (corfu-popupinfo-delay '(1.25 . 0.5))
@@ -932,7 +872,7 @@
 										;(tsujp/req 'magit)
 
 (use-package magit
-  ;; :defer 1
+  :defer 0.5
   :ensure
   :config
   ;; prepare the arguments
@@ -999,30 +939,136 @@
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode)))
 
 ;;;; Terminal
-										;(tsujp/req 'terminal)
+
 ;; Eat seems to be fast enough when paired with certain optimisations like setting `process-adaptive-read-buffering` to nil as mentioned here: https://www.reddit.com/r/emacs/comments/17nl7cw/shout_out_to_the_eat_terminal_emulator_package/#k7tmgz0
 ;; If eat is ever legitimately too slow, perhaps consider using vterm for eshell visual commands via: https://github.com/iostapyshyn/eshell-vterm/blob/master/eshell-vterm.el
 ;; However because eat by itself offers great Emacs integration and an eshell mode I'll use eat for now.
+;; TODO: Instead of libvterm use ghosttylib with emacs as an xwidget?
 
 ;; global-hl-line-mode and hl-line-mode do not interact (the single exception being the latter if invoked interactively). So, to disable hl-line-mode in a buffer when global-hl-line-mode was earlier called the self-same local variable must be set to nil.
 (defun disable-local-global-hl-line ()
   (setq-local global-hl-line-mode nil))
 
-;; TODO: after-init hook.
+;; TODO: `eat-kill-process' redefine and use signal instead of delete-process
 (use-package eat
   :ensure
   :hook (elpaca-after-init . eat-eshell-mode)
   :init
   (add-hook 'eat-mode-hook #'disable-local-global-hl-line)
+  (add-hook 'eat-exec-hook #'tjp/eat--integrate)
   :config
   ;; Clear commands eshell considers visual by default.
   (setq eshell-visual-commands '())
   (setq eat-minimum-latency 0.002)
+  ;; Shell/Emacs integration niceties.
+  (setq eat-enable-directory-tracking t)
+  (setq eat-enable-shell-prompt-annotation t)
+  ;; Our own custom automatic eat setup when creating shells.
+  (defconst tjp/eat--terminfo-dir "eat-terminfo") ; name to use for terminfo dir on remote
+  (defconst tjp/eat--terminfo-dir-c "e") ; man 5 term => @TERMINFO@/c/name
+  (defconst tjp/eat--script-name "eat-bash.sh") ; name to use for integration script on remote
+  (defconst tjp/eat--source-script
+	(concat (file-name-as-directory eat-term-shell-integration-directory) "bash"))
+
+
+  (cl-defun tjp/eat--get-digests (script-filename terminfo-dir &optional (shasum-cmd "shasum"))
+	"Given SCRIPT-FILENAME and TERMINFO-DIR compute the SHA1 hash of the script, and
+directory contents of terminfo and return these as a list of two elements. Optional
+SHASUM-CMD can specify local shasum-like command for hash computation.
+
+TERMINFO-DIR should include the single-character prefix as described in term(5)."
+	;; XXX: Is setq the right thing to use here? It feels cleaner wrt conditionally applying a change to the given function parameters. Also the appending with tjp/eat--terminfo-dir-c.
+	(setq terminfo-dir (concat (file-name-as-directory terminfo-dir) tjp/eat--terminfo-dir-c))
+	(when (file-remote-p default-directory)
+	  (setq script-filename (tramp-file-local-name script-filename))
+	  (setq terminfo-dir (tramp-file-local-name terminfo-dir)))
+	(let ((the-cmd
+		   (concat
+			;; Eat shell integration script.
+			(format "{ %s %s 2>/dev/null || printf 'NO_HASH '; } | cut -d' ' -f1 | tr '\n' ' '"
+					shasum-cmd
+					(shell-quote-argument script-filename))
+			";"
+			;; Eat compiled terminfo contents.
+			(format "__digests=\"$(find %s -type f -print0 2> /dev/null | sort -z | xargs -0 -r %2$s | cut -d' ' -f1)\"; if [ -z \"$__digests\" ]; then printf 'NO_HASH'; else %2$s <<< \"$__digests\" | cut -d' ' -f1 | tr -d '\n'; fi"
+					(shell-quote-argument terminfo-dir)
+					shasum-cmd))))
+	  ;; (message "[tjp/eat] DEBUG getting digests with: %s" the-cmd) ; poor man's debug
+	  (split-string (shell-command-to-string the-cmd) " ")))
+
+
+  (defun tjp/eat--integrate (eat-proc)
+	(let ((shell-setup-cmd
+		   (when-let* (((file-remote-p default-directory))
+					   (remote-temp-dir (file-name-as-directory (tramp-handle-temporary-file-directory)))
+					   ;; Remote eat integration locations.
+					   (remote-eat-script (concat remote-temp-dir tjp/eat--script-name))
+					   (remote-eat-terminfo (concat remote-temp-dir (file-name-as-directory tjp/eat--terminfo-dir)))
+					   ;; Get remote digests.
+					   (digests (tjp/eat--get-digests remote-eat-script remote-eat-terminfo "sha1sum")))
+			 ;; (message "[tjp/eat] DEBUG: remote digests %s" digests) ; poor man's debug
+			 ;; (message "eat terminal %s" eat--t-term)
+
+			 ;; Check integration script digests match.
+			 (unless (string-equal (nth 0 digests) (nth 0 tjp/eat--master-digests))
+			   (message "[tjp]: eat integration script digest mismatch want (%s) got (%s)" (nth 0 tjp/eat--master-digests) (nth 0 digests))
+			   ;; Copy integration script to remote.
+			   (copy-file tjp/eat--source-script remote-eat-script t))
+
+			 ;; Check terminfo script digests match.
+			 (unless (string-equal (nth 1 digests) (nth 1 tjp/eat--master-digests))
+			   (message "[tjp]: eat terminfo digest mismatch want (%s) got (%s)" (nth 1 tjp/eat--master-digests) (nth 1 digests))
+			   ;; copy-directory doesn't have an overwrite flag so we will delete the remote directory (without following symlinks) before copying to prevent errors in this function.
+			   ;; TODO / BUG: Tramp cannot delete the remote directory, im guessing something to do with the shell its setting up to run the command perhaps? Investigate later.
+			   (delete-directory remote-eat-terminfo t t)
+			   ;; Never create DIRECTORY (see `copy-directory') as a symlink on the remote.
+			   (let ((copy-directory-create-symlink nil))
+				 (copy-directory
+				  (concat (file-name-as-directory eat-term-terminfo-directory) tjp/eat--terminfo-dir-c)
+				  (concat (file-name-as-directory remote-eat-terminfo) tjp/eat--terminfo-dir-c))))
+
+			 ;; List of extra shell commands specific to a remote host.
+			 (list
+			  (format "export TERMINFO=%s" (tramp-file-local-name remote-eat-terminfo))
+			  (format "source %s" (tramp-file-local-name remote-eat-script))))))
+
+	  ;; XXX: Calling eat-reset or variants like eat--t-reset doesn't work since it looks like we send these strings so fast eat hasn't "set up" yet (for lack of a better word) but these strings (commands) are actually being enacted. Weird to explain basically: don't try "optimise" this.
+
+	  (message "[tjp/eat] DEBUG: shell command remote base: %s" shell-setup-cmd) ; poor man's debug
+
+	  ;; TODO: Perhaps this final command construction logic could be better, or maybe this is idiomatic elisp idk. Already spent WAYYYYYYYY too much time doing this and it works correctly as-is.
+
+	  ;; No remote setup cmd, add sourcing of local eat integration script.
+	  (unless shell-setup-cmd
+		(push (format "source %s" tjp/eat--source-script) shell-setup-cmd))
+
+	  (push "unset EAT_SHELL_INTEGRATION_DIR" shell-setup-cmd)
+	  (push "clear\n" shell-setup-cmd)
+
+	  (setq shell-setup-cmd (mapconcat #'identity (nreverse shell-setup-cmd) " && "))
+
+	  (message "[tjp/eat] DEBUG: shell command final: %s" shell-setup-cmd) ; poor man's debug
+
+	  ;; XXX: Functions `tramp-send-command-and-read', `tramp-send-command-and-check', or the various internal eat functions that send a string directly to the eat process don't work here; only `eat--send-string'. Also `eat--send-string' hardcoded but should be replaced by getting the input method of the current `eat-terminal' if this is ever NOT the input method. If you log `eat-proc' you'll see `input-fn' (as far as I can tell always `eat--send-string') hence the hardcoding.
+
+	  ;; Interactively (from shell's perspective) execute commands to integrate eat into established shell session.
+	  (eat--send-string
+	   eat-proc
+	   shell-setup-cmd)))
+
+
+  ;; Compute master eat digests from local running Emacs' `eat' files.
+  (setq tjp/eat--master-digests (tjp/eat--get-digests
+								 tjp/eat--source-script
+								 eat-term-terminfo-directory))
+
+  ;; (add-hook 'eat-mode-hook #'disable-local-global-hl-line)
+  ;; (add-hook 'eat-exec #'tjp/eat--integrate)
+
   ;; Let `eat' know to run Bash when connected to a remote "podman".
   (add-to-list 'eat-tramp-shells '("podman" . "/bin/bash"))
-  (add-to-list 'eat-tramp-shells '("ssh" . "/bin/bash")))
-;; (add-hook 'eat-mode-hook #'disable-local-global-hl-line)
-;; (eat-eshell-mode))
+  (add-to-list 'eat-tramp-shells '("ssh" . "/bin/bash"))
+  (add-to-list 'eat-tramp-shells '("jam" . "/bin/bash")))
 
 ;;;; Projects
 										;(tsujp/req 'projects)
@@ -1043,7 +1089,8 @@
 ;; Provides an interface to driving justfiles from Emacs.
 ;; TODO: determine executable without hardcoding?
 (use-package justl
-  :ensure)
+  :ensure
+  :after tramp)
 ;; Looks like it asks for this in-case $PATH problems, so if we set a valid $PATH we should be fine.
 ;; :custom
 ;; (justl-executable "/opt/local/bin/just"))
@@ -1119,6 +1166,15 @@
 (keymap-global-set "H-c" #'comment-dwim)
 (keymap-global-set "H-j" #'scroll-up-line)
 (keymap-global-set "H-k" #'scroll-down-line)
+(keymap-global-set "H-t" #'tramp-cleanup-connection)
+
+;; Shortcuts to profiler start/stop/report
+(defvar-keymap tjp/profiler-keymap
+  :doc "TODO: profiler keymap (default cpu)"
+  "q" #'profiler-start
+  "w" #'profiler-stop
+  "e" #'profiler-report)
+(keymap-global-set "H-=" tjp/profiler-keymap)
 
 ;; move-to-window-line-top-bottom
 ;; recenter-top-bottom
@@ -1132,11 +1188,17 @@
 ;; (keymap-set global-map "<f16>" muh-map)
 ;; (keymap-set local-function-key-map "<f16>" 'event-apply-hyper-modifier)
 
+;; (use-package org-inlinetask
+;;   :ensure
+;;   :defer t)
+
 (use-package org-remark
-  :ensure)
+  :ensure
+  :defer t)
 
 (use-package org-transclusion
-  :ensure)
+  :ensure
+  :defer t)
 
 ;;; ------ Experimental stuff.
 ;; (defun some-handler ()
@@ -1288,6 +1350,7 @@
 ;;   )
 
 (use-package lsp-mode
+  :disabled t
   :ensure
   :defer 1
   :init
@@ -1299,7 +1362,7 @@
   :custom
   ;; (lsp-auto-configure nil) ; nah mate, we'll configure ourselves (lsp-mode has A LOT of bloat).
 
-  (lsp-log-io nil) ; set to `t' to troubleshoot LSP server problems (shows communication logs).
+  (lsp-log-io t) ; set to `t' to troubleshoot LSP server problems (shows communication logs).
   (lsp-keep-workspace-alive nil) ; kill LSP server if all project buffers are killed.
 
   ;; Core
@@ -1352,17 +1415,204 @@
 
 ;; TODO: Configure programming languages.
 
+
 ;; https://github.com/radian-software/apheleia#user-guide
 (use-package apheleia
+  :disabled t
   :ensure
   ;; :defer 1
   :hook (elpaca-after-init . apheleia-global-mode)
+  :custom
+  (apheleia-remote-algorithm 'remote)
+  ;; Debugging
+  ;; (apheleia-log-only-errors nil)
+  ;; (apheleia-log-debug-info t)
   :config
   ;; TODO: For other programming languages also.
   ;; Change formatter for JavaScript files to Biome.
   (add-to-list 'apheleia-formatters '(biome "biome" "check" "--apply" "--stdin-file-path" filepath))
   (add-to-list 'apheleia-mode-alist '(typescript-ts-mode . biome))
-  (add-to-list 'apheleia-mode-alist '(js-ts-mode . biome)))
+  (add-to-list 'apheleia-mode-alist '(js-ts-mode . biome))
+
+  (cl-defun apheleia--call-process
+      (&key name stdin stdout stderr command
+			remote noquery connection-type callback)
+	"Helper to synchronously run a formatter process.
+This function essentially runs COMMAND synchronously passing STDIN
+as standard input and saving output to the STDOUT and STDERR buffers.
+Once the process is finished CALLBACK will be invoked with the exit
+code (see `process-exit-status') of the process.
+
+This function accepts all the same arguments as `apheleia--make-process'
+for simplicity, however some may not be used. This includes: NAME,
+NO-QUERY, and CONNECTION-TYPE."
+	(ignore name noquery connection-type)
+	(let* ((run-on-remote (and (eq apheleia-remote-algorithm 'remote)
+                               remote))
+           (stderr-file (apheleia--make-temp-file run-on-remote "apheleia"))
+           (args
+			(append
+			 (list
+              ;; argv[0]
+              (car command)
+              ;; If stdin we don't delete the STDIN buffer text with
+              ;; `call-process-region'. Otherwise we send no INFILE
+              ;; argument to `call-process'.
+              (not stdin)
+              ;; stdout buffer and stderr file. `call-process' cannot
+              ;; capture stderr into a separate buffer, the best we can
+              ;; do is save and read from a file.
+              `(,stdout ,stderr-file)
+              ;; Do not re/display stdout as output is received.
+              nil)
+			 ;; argv[1:]
+			 (cdr command))))
+      (apheleia--log
+       'process "Sending stderr for process %s to tempfile %s"
+       name stderr-file)
+	  ;; (message "---> %s" (buffer-file-name))
+      (unwind-protect
+          (let ((exit-status
+				 (cl-letf* ((message (symbol-function #'message))
+							((symbol-function #'message)
+							 (lambda (format-string &rest args)
+                               (unless (string-prefix-p "Renaming" (car args))
+								 (apply message format-string args)))))
+                   (cond
+					((and run-on-remote stdin)
+					 ;; There's no call-process variant for this, we'll have to
+					 ;; copy STDIN to a remote temporary file, create a subshell
+					 ;; on the remote that runs the formatter and passes the temp
+					 ;; file as stdin and then deletes it.
+					 (let* ((remote-stdin
+							 (apheleia--make-temp-file
+                              run-on-remote "apheleia-stdin"))
+							;; WARN: This assumes a POSIX compatible shell.
+							;; (shell
+							;;  (or (bound-and-true-p tramp-default-remote-shell)
+							;; 	 "sh"))
+							;; (shell (tramp-get-method-parameter vec 'tramp-remote-shell))
+							;; JORDAN: PATCHED HERE.
+							(shell (tramp-get-method-parameter (tramp-dissect-file-name default-directory) 'tramp-remote-shell "sh"))
+							(shell-command
+							 (concat
+                              (mapconcat #'shell-quote-argument command " ")
+                              " < "
+                              (shell-quote-argument
+                               (apheleia-formatters-local-buffer-file-name
+								remote-stdin)))))
+                       (unwind-protect
+                           (progn
+							 (with-current-buffer stdin
+                               (apheleia--write-region-silently
+								nil nil remote-stdin))
+							 (apheleia--log
+                              'process
+                              "Using process-file to create process %s with %S"
+                              name (list shell "-c" shell-command))
+							 (process-file
+                              shell nil (nth 2 args) nil "-c" shell-command))
+						 (delete-file remote-stdin))))
+					(stdin
+					 (apheleia--log
+                      'process
+                      "Using call-process-region to create process %s with %S"
+                      name command)
+					 (with-current-buffer stdin
+                       (apply #'call-process-region
+                              (point-min) (point-max) args)))
+					(run-on-remote
+					 (apheleia--log
+                      'process
+                      "Using process-file to create process %s with %S"
+                      name command)
+					 (apply #'process-file args))
+					(t
+					 (apheleia--log
+                      'process
+                      "Using process-file to create process %s with %S"
+                      name command)
+					 (apply #'call-process args))))))
+			;; Save stderr from STDERR-FILE back into the STDERR buffer.
+			(with-current-buffer stderr
+              (insert-file-contents stderr-file))
+			;; I don't think it's possible to get here if the process
+			;; was interrupted, since we were running it synchronously,
+			;; so it should be ok to assume we pass nil to the callback.
+			(funcall callback exit-status nil)
+			;; We return nil because there's no live process that can be
+			;; returned.
+			nil)
+		(delete-file stderr-file))))
+
+
+
+
+
+  (defun apheleia--run-formatter-process
+      (command buffer remote callback stdin formatter)
+	"Run a formatter using a shell command.
+COMMAND should be a list of string or symbols for the formatter that
+will format the current buffer. See `apheleia--run-formatters' for a
+description of COMMAND, BUFFER, CALLBACK, REMOTE, and STDIN. FORMATTER
+is the symbol of the current formatter being run, for diagnostic
+purposes."
+	;; NOTE: We switch to the original buffer both to format the command
+	;; correctly and also to ensure any buffer local variables correctly
+	;; resolve for the whole formatting process (for example
+	;; `apheleia--current-process').
+	(with-current-buffer buffer
+      (when-let* ((script-dir (expand-file-name
+                               "scripts/formatters"
+                               (file-name-directory
+								(file-truename
+								 ;; Borrowed with love from Magit
+								 (let ((load-suffixes '(".el")))
+                                   (locate-library "apheleia"))))))
+                  ;; Gotta set both `exec-path' and the PATH env-var,
+                  ;; the former is for Emacs itself while the latter is
+                  ;; for subprocesses of the proc we start.
+				  ;; JORDAN: Patched here.
+                  ;; (exec-path (cons script-dir exec-path))
+                  ;; (process-environment
+                  ;;  (cons (concat "PATH=" script-dir ":" (getenv "PATH"))
+				  ;; 		 process-environment))
+                  (ctx
+                   (apheleia--formatter-context formatter command remote stdin)))
+		(if (executable-find (apheleia-formatter--arg1 ctx)
+							 (eq apheleia-remote-algorithm 'remote))
+			(apheleia--execute-formatter-process
+			 :ctx ctx
+			 :callback
+			 (lambda (err stdout)
+               (if err
+                   (funcall callback err stdout)
+				 (when-let
+					 ((output-fname (apheleia-formatter--output-fname ctx)))
+                   ;; Load output-fname contents into the stdout buffer.
+                   (with-current-buffer stdout
+					 (erase-buffer)
+					 (insert-file-contents-literally output-fname)))
+				 (funcall callback nil stdout)))
+			 :ensure
+			 (lambda ()
+               (dolist (fname (list (apheleia-formatter--input-fname ctx)
+									(apheleia-formatter--output-fname ctx)))
+				 (when fname
+                   (ignore-errors (delete-file fname))))))
+          (let ((errmsg
+				 (format
+                  "Could not find executable for formatter %s, skipping"
+                  formatter)))
+			(apheleia--log 'process "%s" errmsg)
+			(funcall callback (cons 'error errmsg) nil))))))
+
+
+
+
+  )
+;; TODO: Patch apheleia's bad behaviour regarding tramp: https://github.com/radian-software/apheleia/issues/347
+;; (require 'apheleia-patch))
 ;; (apheleia-global-mode))
 
 ;; END programming language configuration.
@@ -1424,6 +1674,8 @@ test file."
 (use-package files
   :ensure nil
   ;; :defer 1
+  :custom
+  (enable-remote-dir-locals t)
   :config
   ;; This asks if you'd like to mark local variables for a directory as always safe (answer with plus sign: +) and it stores that answer above in custom-set-variables. Snippet copied here for understanding.
   ;;  '(safe-local-variable-directories '("/Users/tsujp/prog/tree_sitter_noir/")))
@@ -1440,7 +1692,7 @@ test file."
 ;;             (lambda (orig &rest args)
 ;;               (shut-up (apply orig args))))
 
-(require 'org-inlinetask)
+;; (require 'org-inlinetask)
 
 (use-package dap-mode
   :ensure
@@ -1449,8 +1701,8 @@ test file."
 (setq org-indent-indentation-per-level 1)
 
 ;; Trying out to see if scrolling less laggy feeling with these.
-(setq fast-but-imprecise-scrolling t)
-(setq redisplay-skip-fontification-on-input t)
+;; (setq fast-but-imprecise-scrolling t)
+;; (setq redisplay-skip-fontification-on-input t)
 
 ;; TODO: Move as appropriate.
 (electric-pair-mode 1)
@@ -1609,71 +1861,176 @@ relative to the project root that contains it (if any)."
 ;; TODO: Fork this package and stop it using `reformatter' for formatting.
 (use-package zig-mode
   :ensure
+  :custom
+  ;; Disable since this uses `reformatter' and results in double-format attempts as I use Apheleia instead.
+  (zig-format-on-save nil)
   :defer 1)
 
 ;; TODO: Custom TRAMP dev box connection method thing ------------------------
-(setq jam--devbox
-	  '("jam"
-		(tramp-login-program "podman")
-		;; The machine ssh -- toolbox enter thing.
-		(tramp-login-args (("machine")
-						   ("ssh")
-						   ;; TODO: How to have podman-machine-default as default name here unless otherwise specified?
-						   ("podman-machine-default")
-						   ;; ))
-						   ("-t")
-						   ("--")
-						   ("toolbox")
-						   ("enter")
-						   ("%h")
-						   ))
-		(tramp-direct-async ("/bin/sh" "-c"))
-		;; (tramp-remote-shell ("toolbox" "enter" "%h"))
-		(tramp-remote-shell "/bin/bash")
-		(tramp-remote-shell-login ("-l"))
-		(tramp-remote-shell-args ("-i" "-c"))))
-;; (tramp-remote-shell-args ("-i" "-c"))))
+;; ;; Look at the rsync method for inspiration of a custom method thing, it uses a lot of TRAMPs cli options.
+;; (setq jam--devbox
+;; 	  '("jam"
+;; 		(tramp-login-program "podman")
+;; 		;; The machine ssh -- toolbox enter thing.
+;; 		(tramp-login-args (("machine")
+;; 						   ("ssh")
+;; 						   ;; TODO: How to have podman-machine-default as default name here unless otherwise specified?
+;; 						   ("podman-machine-default")
+;; 						   ;; ))
+;; 						   ("-t")
+;; 						   ("--")
+;; 						   ("toolbox")
+;; 						   ("enter")
+;; 						   ("%h")
+;; 						   ))
+;; 		(tramp-direct-async ("/bin/sh" "-c"))
+;; 		;; (tramp-remote-shell ("toolbox" "enter" "%h"))
+;; 		(tramp-remote-shell "/bin/bash")
+;; 		(tramp-remote-shell-login ("-l"))
+;; 		(tramp-remote-shell-args ("-i" "-c"))))
+;; ;; (tramp-remote-shell-args ("-i" "-c"))))
 
 ;; (add-to-list 'eat-tramp-shells '("jam" . "/bin/bash"))
 ;; (add-to-list 'vterm-tramp-shells '("jam" "/bin/bash"))
 ;; (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 
 ;; TODO: Add marginalia annotator to show the container image, associated project, and other information.
-(defun jam--completion-function (method)
-  (tramp-skeleton-completion-function method
-	(when-let* ((raw-list
-				 (shell-command-to-string
-				  (concat program " ps -a --filter 'label=com.github.containers.toolbox' --format '{{.ID}}\t{{.Names}}'")))
-				(lines (split-string raw-list "\n" 'omit))
-				(names
-				 (tramp-compat-seq-keep
-				  (lambda (line)
-					(when (string-match
-						   (rx bol (group (1+ nonl))
-							   "\t" (? (group (1+ nonl))) eol)
-						   line)
-					  (or (match-string 2 line) (match-string 1 line))))
-				  lines)))
-	  (mapcar (lambda (name) (list nil name)) names))))
+;; (defun jam--completion-function (method)
+;;   (tramp-skeleton-completion-function method
+;; 	(when-let* ((raw-list
+;; 				 (shell-command-to-string
+;; 				  (concat program " ps -a --filter 'label=com.github.containers.toolbox' --format '{{.ID}}\t{{.Names}}'")))
+;; 				(lines (split-string raw-list "\n" 'omit))
+;; 				(names
+;; 				 (tramp-compat-seq-keep
+;; 				  (lambda (line)
+;; 					(when (string-match
+;; 						   (rx bol (group (1+ nonl))
+;; 							   "\t" (? (group (1+ nonl))) eol)
+;; 						   line)
+;; 					  (or (match-string 2 line) (match-string 1 line))))
+;; 				  lines)))
+;; 	  (mapcar (lambda (name) (list nil name)) names))))
 
-(tramp-set-completion-function "jam" `((jam--completion-function "jam")))
+;; (tramp-set-completion-function "jam" `((jam--completion-function "jam")))
 
-(defun zzz--update-jam-tramp-method ()
-  (interactive)
-  (if (string-equal (caar tramp-methods) "jam")
-	  ;; Redefine
-	  (setq tramp-methods (cons jam--devbox (cdr tramp-methods)))
-	;; Not in list, add.
-	(add-to-list 'tramp-methods jam--devbox)))
+;; (defun zzz--update-jam-tramp-method ()
+;;   (interactive)
+;;   (if (string-equal (caar tramp-methods) "jam")
+;; 	  ;; Redefine
+;; 	  (setq tramp-methods (cons jam--devbox (cdr tramp-methods)))
+;; 	;; Not in list, add.
+;; 	(add-to-list 'tramp-methods jam--devbox)))
 
 ;; (add-to-list 'tramp-methods jam--devbox)
 
-;; (setq tramp-verbose 5)
-(setq tramp-debug-command-messages t)
-(setq vc-ignore-dir-regexp
-      (format "\\(%s\\)\\|\\(%s\\)"
-              vc-ignore-dir-regexp
-              tramp-file-name-regexp))
+;; (defun tramp-get-debug-file-name (vec)
+;;   "Get the debug file name for VEC."
+;;   (declare (tramp-suppress-trace t))
+;;   ;; (shell-quote-argument
+;;   (expand-file-name
+;;    (concat (string-replace " " "-" (string-replace "*" "" (string-replace "/" " " (tramp-debug-buffer-name vec)))) ".txt")
+;;    tramp-compat-temporary-file-directory))
+
+;; For TRAMP debugging.
+;; (setopt tramp-verbose 6)
+;; ;; (setopt tramp-debug-command-messages t)
+;; (setopt tramp-debug-to-file t)
+
+
+;; START TEMP REDEFINITION UNTIL UPSTREAM TRAMP IS PATCHED.
+(defun tramp-cleanup-all-connections ()
+  "Flush all Tramp internal objects.
+This includes password cache, file cache, connection cache, buffers."
+  (declare (completion tramp-active-command-completion-p))
+  (interactive)
+
+  ;; Flush password cache.
+  (password-reset)
+
+  ;; Flush file and connection cache.
+  (clrhash tramp-cache-data)
+
+  ;; Initialize the cache version.
+  (tramp-set-connection-property
+   tramp-cache-version "tramp-version" tramp-version)
+
+  ;; Remove ad-hoc proxies.
+  (let ((proxies tramp-default-proxies-alist))
+    (while proxies
+      (if (ignore-errors
+			(get-text-property 0 'tramp-ad-hoc (nth 2 (car proxies))))
+		  (setq tramp-default-proxies-alist
+				(delete (car proxies) tramp-default-proxies-alist)
+				proxies tramp-default-proxies-alist)
+		(setq proxies (cdr proxies)))))
+  (when (and tramp-default-proxies-alist tramp-save-ad-hoc-proxies)
+    (customize-save-variable
+     'tramp-default-proxies-alist tramp-default-proxies-alist))
+
+  ;; Cancel timers.
+  (cancel-function-timers 'tramp-timeout-session)
+
+  ;; Remove processes and buffers.
+  (dolist (name (tramp-list-tramp-buffers))
+    (when (processp (get-buffer-process name)) (signal-process name 'SIGTERM)) ; JORDAN: I changed this single line.
+    (when (bufferp (get-buffer name)) (kill-buffer name)))
+
+  ;; The end.
+  (run-hooks 'tramp-cleanup-all-connections-hook))
+;; END TEMP UNTIL TRAMP UPSTREAM FIXES THIS FUNCTION BY NOT USING delete-process.
+
+
+;; TODO: Also need to patch tramp-cleanup-connection to stop using delete-process
+
+
+;; Disables vc for all remotes. Could alter it to disable for all except a whitelisted tramp method e.g. "jam" or "podmancp" in the event there's trouble.
+;; (setq vc-ignore-dir-regexp
+;;       (format "\\(%s\\)\\|\\(%s\\)"
+;;               vc-ignore-dir-regexp
+;;               tramp-file-name-regexp))
+
+;; - ssh agent forwarding
+;; - what about remote host config with a forwarded agent, and does git read my config too?
+;; - gpg-agent for both
+
+;; Temporarily set extremely low to force TRAMP to use external methods.
+;; (setq tramp-copy-size-limit 100)
+
+;; TODO: Perhaps do the same on project-prompter? i.e. `project-prompt-project-dir'
+;; TODO: Message emacs devel and/or tramp, it looks like this code path skips non-essential which has been considered in other parts of project.el so it's strange this thing doesn't have logic for that resulting in me needing this hacky fix.
+(defun project-forget-project (project-root)
+  "Remove directory PROJECT-ROOT from the project list.
+PROJECT-ROOT is the root directory of a known project listed in
+the project list."
+  (interactive (list (funcall project-prompter)))
+  (let ((non-essential t)) ; JORDAN: My single change, rest is verbatim from project.el sources.
+	(project--remove-from-project-list
+	 project-root "Project `%s' removed from known projects")))
+
+;; TODO: Transient menu for TRAMP connections and their statuses so they can be viewed more easily and what not?
+;; TODO: Tramp shell history per container so it's not all shared (i.e. for these podman dev containers).
+
+;; Setting recentf-filename-handlers to nil still causes TRAMP to establish a connection when C-n or C-p through list of completions regarding consult; MIGHT still be useful if recentf itself is explicitly used later on so keep commented here for now.
+;; (setq recentf-filename-handlers nil)
+
+;; This function constructs the list, its when you preview it (by C-n or C-p ing through the list) that the TRAMP connection is established, which does make sense honestly.. probably do want the preview. The trouble is if there's a slow host it could take a while to get that preview and it feels like during that time Emacs is blocked.
+;; XXX: Come back to this. Probably need logic in consult--file-state or the preview handler, idk.
+;; TODO: Well also it doesn't appear to be able to preview the remote file anyway so perhaps it should just be disabled since it's not being useful.
+;; TODO: Could have it preview from the local file cache (if it's available) TRAMP stores that at ~/.cache/emacs/tramp.FOO where FOO is some garbled name of the file. Then, if no local preview is available just perhaps show a buffer with a message "<no preview>" or something idk. Best of both worlds in terms of connection opening. Perhaps then also an embark option to forcefully open a connection in order to get a preview?
+;; consult--source-recent-file
+
+;; XXX: Useful snippets for approaching benchmarking remote commands (could be applied to TRAMP): https://emacs.stackexchange.com/questions/451/efficiently-call-remote-processes?rq=1
+
+;; (defun non-essential-prompter (&optional prompt)
+;;   (let ((non-essential t))
+;; 	(project-prompt-project-dir prompt)))
+;; (use-package project
+;;   :ensure nil
+;;   :config
+;;   (setopt project-prompter (cl-letf ((non-essential t)) #'project-prompt-project-dir)))
+;; (setopt project-prompter #'non-essential-prompter))
+;; (setopt project-prompter (let ((non-essential t)) (message "hi"))))
 ;; ---------------------------------------------------------------------------
 
 (defun tjp/gimme-the-eln-cache-hash ()
@@ -1687,3 +2044,374 @@ relative to the project root that contains it (if any)."
 ;;
 ;; Unsure if this removes all caching in the future or not, can check org-element--cache-active-p when current buffer is the file in question.
 ;; TODO: Should report this as a bug and help solve it since it's been going on for a while (month or two).
+
+;; TODO: Put this somewhere better.
+;; TRAMP DEV CONTAINER CUSTOMISATIONS -------------------------
+(setq remote-file-name-inhibit-locks t) ; disable file locks for remote files
+
+(setq remote-file-name-access-timeout 10) ; timeout after N seconds when trying to access remote files
+
+
+;; TODO: Have container names SUFFIXED with jam instead of prefixed.
+;; TODO: Do the custom completion function.
+;; TODO: Pass the workdir by overriding.
+;; TODO: Override will be based on a method with the regexp "/podmancp:jammy@" since that's my replacement.
+
+;; (defun tjp/abbrev-no-expand-char ()
+;; (setq-local tramp-completion-use-cache nil)
+;; (setq-local tramp-)
+;; (tramp-set-completion-function "podmancp" '((tjp/jam--tramp-completion-function "podmancp")))
+;; (setq-local tramp-get-completion-function (lambda (method)
+;; 											  (message ">>> %s" (tramp-get-completion-methods "podmancp"))
+;; 											  (message "IVE BEEN CALLED %s" method)
+;; 											  (list tjp/jam--tramp-completion-function)))
+;; (defun tjp/abbrev-no-expand-char () t)
+;; (put 'tjp/abbrev-no-expand-char 'no-self-insert t)
+
+;; ;; TODO: Rename this table tjp/jam--tramp-abbrev-table
+;; (define-abbrev-table 'my-tramp-abbrev-table
+;;   '(("jam" "/podmancp:jammy@" tjp/abbrev-no-expand-char)))
+
+;; (add-hook
+;;  'minibuffer-setup-hook
+;;  (lambda ()
+;;    (abbrev-mode 1)
+;;    (setq local-abbrev-table my-tramp-abbrev-table)))
+
+;; (advice-add 'minibuffer-complete
+;; 			:before 'expand-abbrev)
+
+;; tramp-use-auth-sources
+;; (defun tjp/jam--tramp-completion-function (method)
+;;   (tramp-skeleton-completion-function method
+;; 	(when-let* ((raw-list
+;; 				 (shell-command-to-string
+;; 				  (concat program " ps -a --filter 'label=sh.jammy.box' --format '{{.ID}}\t{{.Names}}'")))
+;; 				(lines (split-string raw-list "\n" 'omit))
+;; 				(names
+;; 				 (tramp-compat-seq-keep
+;; 				  (lambda (line)
+;; 					(when (string-match
+;; 						   (rx bol (group (1+ nonl))
+;; 							   ;; Could remove prefix if Tramp connection login args add it back e.g. jam-%h. Maybe Emacs completion backend has annotated values which could do this also but the jam prefix is intended to be a very "hardcoded" value and not fluid. Jam containers are dev environments.
+;; 							   "\t" (? "jam-") (? (group (1+ nonl))) eol)
+;; 						   ;; "\t" (? (group (1+ nonl))) eol)
+;; 						   line)
+;; 					  (or (match-string 2 line) (match-string 1 line))))
+;; 				  lines)))
+;; 	  (mapcar (lambda (name) (list nil name)) names))))
+
+;; (tramp-set-completion-function "podmancp" '((tjp/jam--tramp-completion-function "podmancp")))
+
+;; (defconst bingbong ((tramp-set-completion-function "podmancp" '((tjp/jam--tramp-completion-function "podmancp")))))
+;; (defconst bingbong (list '(tramp-completion-use-auth-sources nil) '(tramp-completion-use-cache t)))
+;; (defconst bingbong (list '(tramp-completion-use-auth-sources t) '(tramp-completion-use-cache nil)))
+
+;; (setq tramp-completion-use-cache t)
+;; (setq tramp-completion-use-auth-sources t)
+
+;; (connection-local-set-profile-variables
+;;  'bingbong-prof
+;;  bingbong)
+
+;; (connection-local-set-profiles
+;;  `(:application tramp :protocol "podmancp" :user "jammy")
+;;  'bingbong-prof)
+
+;; TRAMP CONFIG (TODO: place somewhere better)
+
+;; (defun tjp/jam--tramp-method ()
+;; 	  `("jam"
+;; 		(tramp-login-program tramp-podman-method) ; tramp-podman-method
+;;         (tramp-login-args (("exec")
+;;                            ("-it")
+;;                            ("-u" "jammy") ; default user `jammy'
+;; 						   ("--workdir" "/home/jammy/project")
+;;                            ("jam-%h") ; add `jam-' prefix to container name %h
+;; 						   ("%l")))
+;; 		(tramp-direct-async (,tramp-default-remote-shell "-c"))
+;;         (tramp-remote-shell ,tramp-default-remote-shell)
+;;         (tramp-remote-shell-login ("-l"))
+;;         (tramp-remote-shell-args ("-i" "-c"))
+;; 		(tramp-copy-program ,tramp-podman-method)
+;; 		(tramp-copy-args (("cp")))
+;; 		(tramp-copy-file-name (("%h" ":") ("%f")))
+;;         (tramp-copy-recursive t)))
+
+;; (tramp-set-completion-function "jam" `((tjp/jam--tramp-completion-function "jam")))
+
+;; (add-to-list 'tramp-methods jam--devbox)
+
+(use-package ansi-color
+  :ensure nil
+  :hook (compilation-filter . ansi-color-compilation-filter))
+;;  (setq compilation-environment '("TERM=dumb")) ;; Seems to be ignored, but if xterm-256color seems to be respected so patched at podmancp level.
+
+(use-package tramp
+  :ensure nil
+  :config
+  ;; Debug
+  (setq tramp-verbose 0)
+
+  ;; If debugging stuff.
+  ;; (setq tramp-verbose 6)
+  ;; (trace-function 'compilation-filter)
+  ;; (trace-function 'compilation-sentinel)
+  ;; (trace-function 'compilation-handle-exit)
+  ;; (trace-function 'compilation-filter)
+  ;; (trace-function 'compilation-parse-errors)
+  ;; (trace-function 'compilation--ensure-parse)
+  ;; (trace-function 'compilation--parse-region)
+
+  ;; XXX: Temporary just to test speed
+  ;; (setq remote-file-name-inhibit-auto-save t)
+
+  ;; (setq tramp-copy-size-limit 100)
+
+  ;; Jam tramp method.
+  (setq tjp/jam--tramp-method
+		`("jam"
+		  (tramp-login-program ,tramp-podman-method)
+		  (tramp-login-args (("exec")
+							 ("-it")
+							 ("-e" "TERM=dumb") ; JORDAN: Patch until response regarding this email chain: https://lists.gnu.org/archive/html/tramp-devel/2025-01/msg00020.html
+							 ("-u" "jammy") ; default user `jammy'
+							 ("--workdir" "/home/jammy/project")
+							 ;; ("jam-%h") ; add `jam-' prefix to container name %h ;; XXX: hostname mismatches 'cos its templated... K.I.S.S.
+							 ("%h")
+							 ("%l")))
+		  ;; (tramp-direct-async (,tramp-default-remote-shell "-c"))
+          ;; (tramp-remote-shell ,tramp-default-remote-shell)
+		  ;; (tramp-direct-async ("/bin/sh" "-c"))
+		  ;; (tramp-direct-async ("/bin/bash" "-c"))
+		  (tramp-direct-async ("/bin/sh" "--noediting" "--norc" "--noprofile" "-c"))
+		  ;; (tramp-direct-async ("/bin/bash" "-c"))
+		  ;; (tramp-direct-async ("/bin/sh" "-noediting" "-norc" "-noprofile" "-c"))
+		  ;; (tramp-direct-async ("/bin/sh" "-c" "exec" "-c"))
+          ;; (tramp-remote-shell "/bin/bash")
+		  (tramp-remote-shell "/bin/bash")
+		  ;; (tramp-remote-shell "/bin/bash")
+          (tramp-remote-shell-login ("-l"))
+          (tramp-remote-shell-args ("-i" "-c"))
+		  ;; (tramp-remote-shell-args ("-l" "-i" "-c"))
+		  (tramp-copy-program ,tramp-podman-method)
+		  (tramp-copy-args (("cp")))
+		  (tramp-copy-file-name (("%h" ":") ("%f")))
+          (tramp-copy-recursive t)))
+
+
+  ;; Jam tramp completion.
+  (defun tjp/jam--tramp-completion-function (method)
+	(tramp-skeleton-completion-function method
+	  (when-let* ((raw-list
+				   (shell-command-to-string
+					(concat program " ps -a --filter 'label=sh.jammy.box' --format '{{.ID}}\t{{.Names}}'")))
+				  (lines (split-string raw-list "\n" 'omit))
+				  (names
+				   (tramp-compat-seq-keep
+					(lambda (line)
+					  (when (string-match
+							 (rx bol (group (1+ nonl))
+								 ;; Could remove prefix if Tramp connection login args add it back e.g. jam-%h. Maybe Emacs completion backend has annotated values which could do this also but the jam prefix is intended to be a very "hardcoded" value and not fluid. Jam containers are dev environments.
+								 ;; "\t" (? "jam-") (? (group (1+ nonl))) eol)
+								 "\t" (? (group (1+ nonl))) eol)
+							 line)
+						(or (match-string 2 line) (match-string 1 line))))
+					lines)))
+		(mapcar (lambda (name) (list nil name)) names))))
+
+  (tramp-set-completion-function "jam" '((tjp/jam--tramp-completion-function "jam")))
+
+  ;; Add jam to tramp.
+  (add-to-list 'tramp-methods tjp/jam--tramp-method)
+
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+
+  ;; Define connection-local-variables defaults for jam.
+  (defconst tjp/jam--connection-local-default-variables
+	;; /bin/sh is a symlink to bash on fedora which is what jam uses
+	;; '((shell-file-name . "/bin/bash")
+	;;   (explicit-shell-file-name . "/bin/bash")
+	'(
+	  (tramp-direct-async-process . t)
+	  ;; Does this stop extended SELinux attribute shite?
+	  (tramp-use-file-attributes . nil)))
+
+  ;; Profiles are names which associate variables to the connection they are applied to.
+  (connection-local-set-profile-variables
+   'tjp/jam--connection-local-defualt-profile
+   tjp/jam--connection-local-default-variables)
+
+  ;; How the jam connection type is identified (by connection-local).
+  (connection-local-set-profiles
+   `(:application tramp :protocol "jam")
+   'tjp/jam--connection-local-defualt-profile))
+
+
+;; (setopt shell-file-name "/bin/bash")
+;; (setopt explicit-shell-file-name "/bin/bash")
+;; END TRAMP DEV CONTAINER CUSTOMISATIONS
+
+;; TODO: Set trash-directory to macOS trash bin
+
+
+;; EAT notes (TODO: Put somewhere more appropriate)
+
+;; If you invoke M-x eat while in a tramp buffer eat -> eat--1 -> eat-default-shell will result in tramp connecting to the host first before eat gets a shell (good). However, this eat buffer name will be *eat* (unless you launch specifically via M-x eat-project) and if you kill that eat shell but do not kill the *eat* buffer, any further attempt to launch M-x eat will continue to use the settings at the prior time (in this example: it will attempt to re-open the tramp connection) which may NOT be what you expect. Basically, *eat* buffers cache how they spawn the shell AT THE TIME OF THEIR CREATION at not if recycled, so ensure proper naming or C-x k the buffers to prevent surprises.
+;; TODO: eat-project appears to name with the project name, have eat also include an @hostname if executed to prevent that behaviour above.
+
+;; shell-file-name is a full path /opt/local/bin/bash (for me) but eat appears to invoke /usr/bin/env anyway so...?
+
+;; TODO: customise eat-term-name   eat-term-get-suitable-term-name
+;; eat-term-send-string    something something send string directly
+;; eat-line-send-default      or this one instead?
+;; eat-previous-shell-prompt
+;; eat-next-shell-prompt
+;; eat-narrow-to-shell-prompt
+;; eat-yank
+;; eat-line-next-input
+;; eat-line-previous-matching-input
+;; eat-enable-shell-prompt-annotation
+
+;; eat-kill-process     should use signal-process and not delete-process
+;; eat-exec             ditto
+;; XXX: Confirmed eat-kill-process leaves hanging ssh with default podman methods.
+;; advise eat-exec ?
+;; is eat-make a possibility?
+;; what hooks does it have?
+
+;; (advice-add #'eshell-gather-process-output :around
+;;             #'eat--eshell-adjust-make-process-args)
+
+;; eat-trace-mode
+
+;; project-root
+;; project-prefixed-buffer-name
+
+
+
+;; (defun tjp/eat--integrate (eat-proc)
+;;   (let ((shell-setup-cmd
+;; 		 (when-let* (((file-remote-p default-directory))
+;; 					 (remote-temp-dir (file-name-as-directory (tramp-handle-temporary-file-directory)))
+;; 					 ;; Remote eat integration locations.
+;; 					 (remote-eat-script (concat remote-temp-dir tjp/eat--script-name))
+;; 					 (remote-eat-terminfo (concat remote-temp-dir (file-name-as-directory tjp/eat--terminfo-dir)))
+;; 					 ;; Get remote digests.
+;; 					 (digests (tjp/eat--get-digests remote-eat-script remote-eat-terminfo "sha1sum")))
+;; 		   ;; (message "[tjp/eat] DEBUG: remote digests %s" digests) ; poor man's debug
+;; 		   ;; (message "eat terminal %s" eat--t-term)
+
+;; 		   ;; Check integration script digests match.
+;; 		   (unless (string-equal (nth 0 digests) (nth 0 tjp/eat--master-digests))
+;; 			 (message "[tjp]: eat integration script digest mismatch want (%s) got (%s)" (nth 0 tjp/eat--master-digests) (nth 0 digests))
+;; 			 ;; Copy integration script to remote.
+;; 			 (copy-file tjp/eat--source-script remote-eat-script t))
+
+;; 		   ;; Check terminfo script digests match.
+;; 		   (unless (string-equal (nth 1 digests) (nth 1 tjp/eat--master-digests))
+;; 			 (message "[tjp]: eat terminfo digest mismatch want (%s) got (%s)" (nth 1 tjp/eat--master-digests) (nth 1 digests))
+;; 			 ;; copy-directory doesn't have an overwrite flag so we will delete the remote directory (without following symlinks) before copying to prevent errors in this function.
+;; 			 ;; TODO / BUG: Tramp cannot delete the remote directory, im guessing something to do with the shell its setting up to run the command perhaps? Investigate later.
+;; 			 (delete-directory remote-eat-terminfo t t)
+;; 			 ;; Never create DIRECTORY (see `copy-directory') as a symlink on the remote.
+;; 			 (let ((copy-directory-create-symlink nil))
+;; 			   (copy-directory
+;; 				(concat (file-name-as-directory eat-term-terminfo-directory) tjp/eat--terminfo-dir-c)
+;; 				(concat (file-name-as-directory remote-eat-terminfo) tjp/eat--terminfo-dir-c))))
+
+;; 		   ;; List of extra shell commands specific to a remote host.
+;; 		   (list
+;; 			(format "export TERMINFO=%s" (tramp-file-local-name remote-eat-terminfo))
+;; 			(format "source %s" (tramp-file-local-name remote-eat-script))))))
+
+;; 	;; XXX: Calling eat-reset or variants like eat--t-reset doesn't work since it looks like we send these strings so fast eat hasn't "set up" yet (for lack of a better word) but these strings (commands) are actually being enacted. Weird to explain basically: don't try "optimise" this.
+
+;; 	(message "[tjp/eat] DEBUG: shell command remote base: %s" shell-setup-cmd) ; poor man's debug
+
+;; 	;; TODO: Perhaps this final command construction logic could be better, or maybe this is idiomatic elisp idk. Already spent WAYYYYYYYY too much time doing this and it works correctly as-is.
+
+;; 	;; No remote setup cmd, add sourcing of local eat integration script.
+;; 	(unless shell-setup-cmd
+;; 	  (push (format "source %s" tjp/eat--source-script) shell-setup-cmd))
+
+;; 	(push "unset EAT_SHELL_INTEGRATION_DIR" shell-setup-cmd)
+;; 	(push "clear\n" shell-setup-cmd)
+
+;; 	(setq shell-setup-cmd (mapconcat #'identity (nreverse shell-setup-cmd) " && "))
+
+;; 	(message "[tjp/eat] DEBUG: shell command final: %s" shell-setup-cmd) ; poor man's debug
+
+;; 	;; XXX: Functions `tramp-send-command-and-read', `tramp-send-command-and-check', or the various internal eat functions that send a string directly to the eat process don't work here; only `eat--send-string'. Also `eat--send-string' hardcoded but should be replaced by getting the input method of the current `eat-terminal' if this is ever NOT the input method. If you log `eat-proc' you'll see `input-fn' (as far as I can tell always `eat--send-string') hence the hardcoding.
+
+;; 	;; Interactively (from shell's perspective) execute commands to integrate eat into established shell session.
+;; 	(eat--send-string
+;; 	 eat-proc
+;; 	 shell-setup-cmd)))
+
+;; (add-hook 'eat-exec-hook 'tjp/eat--integrate)
+
+
+;; TODO: And major mode too
+(defun tjp/describe-mode-list (&optional buffer)
+  "Like `describe-mode' but a simple list of names"
+  (interactive)
+  (unless buffer
+	(setq buffer (current-buffer)))
+  (let ((buffer-major (buffer-local-value 'major-mode buffer))
+		(buffer-local-minors (buffer-local-value 'local-minor-modes buffer)))
+  (with-output-to-temp-buffer "*tjp/describe-mode-list*"
+	;; (princ "Major mode:\n    %s\n" buffer-major)
+	(princ "Local minor modes:\n")
+	(dolist (lmm buffer-local-minors) (princ (format "    %s\n" lmm)))
+	(princ "Global minor modes:\n")
+	(dolist (gmm global-minor-modes) (princ (format "    %s\n" gmm))))))
+
+(defun tjp/debug--minimal ()
+  "Disable some stuff that usually spams tramp; restart Emacs later if you want to undo this its meant to be quick and dirty."
+  (diff-hl-mode -1)
+  (diff-hl-flydiff-mode -1)
+  (setq auto-revert-debug t))
+
+;; about 0.33 seconds to save
+;; auto-revert-buffer
+;; vc-after-save
+;; verify-visited-file-modtime
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(send-mail-function 'smtpmail-send-it)
+ ;; '(smtpmail-debug-info t)
+ ;; '(smtpmail-debug-verb t)
+ '(smtpmail-smtp-server "smtp.migadu.com")
+ '(smtpmail-smtp-service 465)
+ '(smtpmail-stream-type 'ssl))
+
+(setq user-mail-address "jc@wz.ht")
+
+
+
+;; TODO: The repeat-mode stuff from Prot's config?
+
+;; TODO: Move this big one to the bottom of init.el
+;; TODO: Shorten my acronym to `tjp` since tsujp is a little too long (only within the context of M-x typing commands lol).
+;; TODO: Probably better to just inspect the output of emacs-report-bug or whatever that command is as that generates a whole lot of diagnostic data.
+(defun tsujp/emacs-builinfo ()
+  (interactive)
+  "Show compilation information for this Emacs"
+  (message "-> CONFIGURATION OPTIONS:\n%s" system-configuration-options)
+  (message "-> CONFIGURATION FEATURES:\n%s" system-configuration-features)
+  (message "-> VERSION:\n%s" emacs-version)
+  (message "-> TREESITTER?: %s" (treesit-available-p)))
+;; TODO: Call the parts of emacs-build-description myself since it doesn't play nice when called as below.
+;; (message "-> BUILD DESCRIPTION: %s\n" (emacs-build-description)))
+
+(setq vc-make-backup-files t) ;; TODO: Put this elsewhere.
+
+;; make sure gpg-agent.conf contains line `allow-loopback-pinentry'.
+;; make sure gpg.conf contains line `pinentry-mode loopback` (not sure if this one is required, test later TODO).
+;; TODO: Emacs won't read the XDG location I've specified i.e. ~/.config/gnupg and instead defaults to ~/.gnupg (or gpg is creating this trash folder, also ignoring my XDG config). In either case Emacs reads said trash folder which has no keys and fails to sign. Deleting said folder and adding a manual symlink to the correct one: `ln -s ~/.config/gnupg .gnupg` fixes the issue. That sucks, who is at fault here?
+;; TODO: Put this elsewhere as appropriate.
+(setq-default epg-pinentry-mode 'loopback)

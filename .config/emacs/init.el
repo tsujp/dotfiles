@@ -1073,7 +1073,7 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
   (add-to-list 'eat-tramp-shells '("jam" . "/bin/bash")))
 
 ;;;; Projects
-										;(tsujp/req 'projects)
+
 ;; Project management and associated tasks (e.g. task running).
 
 ;;;;; Task running
@@ -1132,9 +1132,6 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 ;; (tabspaces-mode))
 
 ;; TODO: When minibuffer is completing directory/file-paths have backtick ` substituted to tilde ~ so I don't have to press shift-` to type ~ all the time.
-
-
-;; TODO: Single-file config init.el
 
 ;;;; Consult
 
@@ -1202,31 +1199,8 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
   :ensure
   :defer t)
 
-;;; ------ Experimental stuff.
-;; (defun some-handler ()
-;;   (interactive)
-;;   (message "unread events: %s" (this-command-keys)))
-;; (discard-input)
-;; (funcall-interactively 'event-apply-hyper-modifier "s"))
-;; (message "got key: %s" (read-key t)))
-;; (funcall-interactively 'event-apply-hyper-modifier "s"))
-;; (message "event is: %S" last-input-event)) ;
-;; (message "last inpu tevent %S" last-input-event))
-;; (vector (event-apply-modifier (read-event) 'hyper 24 "H-")))
-;; (keymap-set global-map "H-g" muh-map)
-;; (keymap-set input-decode-map "<f16>" [16777319])
-;; (keymap-set input-decode-map "<f16>" 'some-handler)
-;; (keymap-set special-event-map "<f6>" 'some-handler)
-;; (event-convert-list '(hyper ?g))
-;; (key-description [27])
-;; Interesting, now double pressing f16 invokes f16 DEL
-;; (keymap-set local-function-key-map "<f16>" 'some-handler)
-;; (keymap-global-set "<f16> w" 'save-buffer)
-;; ------------- end experimental stuff
-
 ;; TODO: Disable custom.el shit?
 
-										;(message (emacs-init-time))
 ;; (custom-set-variables
 ;;  ;; custom-set-variables was added by Custom.
 ;;  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1518,9 +1492,6 @@ test file."
   (popper-mode +1)
   (popper-echo-mode +1))
 
-;; (use-package vterm
-;;   :ensure
-;;   :defer 1)
 
 ;; Until the bug with polluting nonsense symbols in completion is fixed used te older function definition
 ;; (defun help-definition-prefixes ()
@@ -1652,7 +1623,6 @@ relative to the project root that contains it (if any)."
 
 ;; TODO: Tramp in it's own little area.
 ;; TODO: Place elsewhere
-;; (tramp-enable-method "toolbox")
 
 ;; TODO: Place elsewhere.
 ;; TODO: Fork this package and stop it using `reformatter' for formatting.
@@ -1664,76 +1634,6 @@ relative to the project root that contains it (if any)."
   :defer 1)
 
 ;; TODO: Custom TRAMP dev box connection method thing ------------------------
-;; ;; Look at the rsync method for inspiration of a custom method thing, it uses a lot of TRAMPs cli options.
-;; (setq jam--devbox
-;; 	  '("jam"
-;; 		(tramp-login-program "podman")
-;; 		;; The machine ssh -- toolbox enter thing.
-;; 		(tramp-login-args (("machine")
-;; 						   ("ssh")
-;; 						   ;; TODO: How to have podman-machine-default as default name here unless otherwise specified?
-;; 						   ("podman-machine-default")
-;; 						   ;; ))
-;; 						   ("-t")
-;; 						   ("--")
-;; 						   ("toolbox")
-;; 						   ("enter")
-;; 						   ("%h")
-;; 						   ))
-;; 		(tramp-direct-async ("/bin/sh" "-c"))
-;; 		;; (tramp-remote-shell ("toolbox" "enter" "%h"))
-;; 		(tramp-remote-shell "/bin/bash")
-;; 		(tramp-remote-shell-login ("-l"))
-;; 		(tramp-remote-shell-args ("-i" "-c"))))
-;; ;; (tramp-remote-shell-args ("-i" "-c"))))
-
-;; (add-to-list 'eat-tramp-shells '("jam" . "/bin/bash"))
-;; (add-to-list 'vterm-tramp-shells '("jam" "/bin/bash"))
-;; (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-
-;; TODO: Add marginalia annotator to show the container image, associated project, and other information.
-;; (defun jam--completion-function (method)
-;;   (tramp-skeleton-completion-function method
-;; 	(when-let* ((raw-list
-;; 				 (shell-command-to-string
-;; 				  (concat program " ps -a --filter 'label=com.github.containers.toolbox' --format '{{.ID}}\t{{.Names}}'")))
-;; 				(lines (split-string raw-list "\n" 'omit))
-;; 				(names
-;; 				 (tramp-compat-seq-keep
-;; 				  (lambda (line)
-;; 					(when (string-match
-;; 						   (rx bol (group (1+ nonl))
-;; 							   "\t" (? (group (1+ nonl))) eol)
-;; 						   line)
-;; 					  (or (match-string 2 line) (match-string 1 line))))
-;; 				  lines)))
-;; 	  (mapcar (lambda (name) (list nil name)) names))))
-
-;; (tramp-set-completion-function "jam" `((jam--completion-function "jam")))
-
-;; (defun zzz--update-jam-tramp-method ()
-;;   (interactive)
-;;   (if (string-equal (caar tramp-methods) "jam")
-;; 	  ;; Redefine
-;; 	  (setq tramp-methods (cons jam--devbox (cdr tramp-methods)))
-;; 	;; Not in list, add.
-;; 	(add-to-list 'tramp-methods jam--devbox)))
-
-;; (add-to-list 'tramp-methods jam--devbox)
-
-;; (defun tramp-get-debug-file-name (vec)
-;;   "Get the debug file name for VEC."
-;;   (declare (tramp-suppress-trace t))
-;;   ;; (shell-quote-argument
-;;   (expand-file-name
-;;    (concat (string-replace " " "-" (string-replace "*" "" (string-replace "/" " " (tramp-debug-buffer-name vec)))) ".txt")
-;;    tramp-compat-temporary-file-directory))
-
-;; For TRAMP debugging.
-;; (setopt tramp-verbose 6)
-;; ;; (setopt tramp-debug-command-messages t)
-;; (setopt tramp-debug-to-file t)
-
 
 ;; START TEMP REDEFINITION UNTIL UPSTREAM TRAMP IS PATCHED.
 (defun tramp-cleanup-all-connections ()
@@ -1791,9 +1691,6 @@ This includes password cache, file cache, connection cache, buffers."
 ;; - what about remote host config with a forwarded agent, and does git read my config too?
 ;; - gpg-agent for both
 
-;; Temporarily set extremely low to force TRAMP to use external methods.
-;; (setq tramp-copy-size-limit 100)
-
 ;; TODO: Perhaps do the same on project-prompter? i.e. `project-prompt-project-dir'
 ;; TODO: Message emacs devel and/or tramp, it looks like this code path skips non-essential which has been considered in other parts of project.el so it's strange this thing doesn't have logic for that resulting in me needing this hacky fix.
 (defun project-forget-project (project-root)
@@ -1845,95 +1742,8 @@ the project list."
 ;; TODO: Put this somewhere better.
 ;; TRAMP DEV CONTAINER CUSTOMISATIONS -------------------------
 
-;; TODO: Have container names SUFFIXED with jam instead of prefixed.
-;; TODO: Do the custom completion function.
 ;; TODO: Pass the workdir by overriding.
-;; TODO: Override will be based on a method with the regexp "/podmancp:jammy@" since that's my replacement.
-
-;; (defun tjp/abbrev-no-expand-char ()
-;; (setq-local tramp-completion-use-cache nil)
-;; (setq-local tramp-)
-;; (tramp-set-completion-function "podmancp" '((tjp/jam--tramp-completion-function "podmancp")))
-;; (setq-local tramp-get-completion-function (lambda (method)
-;; 											  (message ">>> %s" (tramp-get-completion-methods "podmancp"))
-;; 											  (message "IVE BEEN CALLED %s" method)
-;; 											  (list tjp/jam--tramp-completion-function)))
-;; (defun tjp/abbrev-no-expand-char () t)
-;; (put 'tjp/abbrev-no-expand-char 'no-self-insert t)
-
-;; ;; TODO: Rename this table tjp/jam--tramp-abbrev-table
-;; (define-abbrev-table 'my-tramp-abbrev-table
-;;   '(("jam" "/podmancp:jammy@" tjp/abbrev-no-expand-char)))
-
-;; (add-hook
-;;  'minibuffer-setup-hook
-;;  (lambda ()
-;;    (abbrev-mode 1)
-;;    (setq local-abbrev-table my-tramp-abbrev-table)))
-
-;; (advice-add 'minibuffer-complete
-;; 			:before 'expand-abbrev)
-
-;; tramp-use-auth-sources
-;; (defun tjp/jam--tramp-completion-function (method)
-;;   (tramp-skeleton-completion-function method
-;; 	(when-let* ((raw-list
-;; 				 (shell-command-to-string
-;; 				  (concat program " ps -a --filter 'label=sh.jammy.box' --format '{{.ID}}\t{{.Names}}'")))
-;; 				(lines (split-string raw-list "\n" 'omit))
-;; 				(names
-;; 				 (tramp-compat-seq-keep
-;; 				  (lambda (line)
-;; 					(when (string-match
-;; 						   (rx bol (group (1+ nonl))
-;; 							   ;; Could remove prefix if Tramp connection login args add it back e.g. jam-%h. Maybe Emacs completion backend has annotated values which could do this also but the jam prefix is intended to be a very "hardcoded" value and not fluid. Jam containers are dev environments.
-;; 							   "\t" (? "jam-") (? (group (1+ nonl))) eol)
-;; 						   ;; "\t" (? (group (1+ nonl))) eol)
-;; 						   line)
-;; 					  (or (match-string 2 line) (match-string 1 line))))
-;; 				  lines)))
-;; 	  (mapcar (lambda (name) (list nil name)) names))))
-
-;; (tramp-set-completion-function "podmancp" '((tjp/jam--tramp-completion-function "podmancp")))
-
-;; (defconst bingbong ((tramp-set-completion-function "podmancp" '((tjp/jam--tramp-completion-function "podmancp")))))
-;; (defconst bingbong (list '(tramp-completion-use-auth-sources nil) '(tramp-completion-use-cache t)))
-;; (defconst bingbong (list '(tramp-completion-use-auth-sources t) '(tramp-completion-use-cache nil)))
-
-;; (setq tramp-completion-use-cache t)
-;; (setq tramp-completion-use-auth-sources t)
-
-;; (connection-local-set-profile-variables
-;;  'bingbong-prof
-;;  bingbong)
-
-;; (connection-local-set-profiles
-;;  `(:application tramp :protocol "podmancp" :user "jammy")
-;;  'bingbong-prof)
-
-;; TRAMP CONFIG (TODO: place somewhere better)
-
-;; (defun tjp/jam--tramp-method ()
-;; 	  `("jam"
-;; 		(tramp-login-program tramp-podman-method) ; tramp-podman-method
-;;         (tramp-login-args (("exec")
-;;                            ("-it")
-;;                            ("-u" "jammy") ; default user `jammy'
-;; 						   ("--workdir" "/home/jammy/project")
-;;                            ("jam-%h") ; add `jam-' prefix to container name %h
-;; 						   ("%l")))
-;; 		(tramp-direct-async (,tramp-default-remote-shell "-c"))
-;;         (tramp-remote-shell ,tramp-default-remote-shell)
-;;         (tramp-remote-shell-login ("-l"))
-;;         (tramp-remote-shell-args ("-i" "-c"))
-;; 		(tramp-copy-program ,tramp-podman-method)
-;; 		(tramp-copy-args (("cp")))
-;; 		(tramp-copy-file-name (("%h" ":") ("%f")))
-;;         (tramp-copy-recursive t)))
-
-;; (tramp-set-completion-function "jam" `((tjp/jam--tramp-completion-function "jam")))
-
-;; (add-to-list 'tramp-methods jam--devbox)
+;; TODO: Add marginalia annotator to show the container image, associated project, and other information.
 
 (use-package ansi-color
   :ensure nil
@@ -1943,11 +1753,13 @@ the project list."
 (use-package tramp
   :ensure nil
   :config
-  ;; Debug
   (setq tramp-verbose 0)
 
   ;; If debugging stuff.
+  ;; (setopt tramp-debug-to-file t)
   ;; (setq tramp-verbose 6)
+  ;; (setq tramp-completion-use-cache t)
+  ;; (setq tramp-completion-use-auth-sources t)
   ;; (trace-function 'compilation-filter)
   ;; (trace-function 'compilation-sentinel)
   ;; (trace-function 'compilation-handle-exit)
@@ -1959,6 +1771,7 @@ the project list."
   ;; XXX: Temporary just to test speed
   ;; (setq remote-file-name-inhibit-auto-save t)
 
+  ;; Lower than this size (in bytes?) Tramp will use external methods for connection (if any).
   ;; (setq tramp-copy-size-limit 100)
 
   ;; Jam tramp method.
@@ -2047,103 +1860,8 @@ the project list."
 
 ;; TODO: Set trash-directory to macOS trash bin
 
-
-;; EAT notes (TODO: Put somewhere more appropriate)
-
-;; If you invoke M-x eat while in a tramp buffer eat -> eat--1 -> eat-default-shell will result in tramp connecting to the host first before eat gets a shell (good). However, this eat buffer name will be *eat* (unless you launch specifically via M-x eat-project) and if you kill that eat shell but do not kill the *eat* buffer, any further attempt to launch M-x eat will continue to use the settings at the prior time (in this example: it will attempt to re-open the tramp connection) which may NOT be what you expect. Basically, *eat* buffers cache how they spawn the shell AT THE TIME OF THEIR CREATION at not if recycled, so ensure proper naming or C-x k the buffers to prevent surprises.
-;; TODO: eat-project appears to name with the project name, have eat also include an @hostname if executed to prevent that behaviour above.
-
-;; shell-file-name is a full path /opt/local/bin/bash (for me) but eat appears to invoke /usr/bin/env anyway so...?
-
-;; TODO: customise eat-term-name   eat-term-get-suitable-term-name
-;; eat-term-send-string    something something send string directly
-;; eat-line-send-default      or this one instead?
-;; eat-previous-shell-prompt
-;; eat-next-shell-prompt
-;; eat-narrow-to-shell-prompt
-;; eat-yank
-;; eat-line-next-input
-;; eat-line-previous-matching-input
-;; eat-enable-shell-prompt-annotation
-
-;; eat-kill-process     should use signal-process and not delete-process
-;; eat-exec             ditto
-;; XXX: Confirmed eat-kill-process leaves hanging ssh with default podman methods.
-;; advise eat-exec ?
-;; is eat-make a possibility?
-;; what hooks does it have?
-
-;; (advice-add #'eshell-gather-process-output :around
-;;             #'eat--eshell-adjust-make-process-args)
-
-;; eat-trace-mode
-
 ;; project-root
 ;; project-prefixed-buffer-name
-
-
-
-;; (defun tjp/eat--integrate (eat-proc)
-;;   (let ((shell-setup-cmd
-;; 		 (when-let* (((file-remote-p default-directory))
-;; 					 (remote-temp-dir (file-name-as-directory (tramp-handle-temporary-file-directory)))
-;; 					 ;; Remote eat integration locations.
-;; 					 (remote-eat-script (concat remote-temp-dir tjp/eat--script-name))
-;; 					 (remote-eat-terminfo (concat remote-temp-dir (file-name-as-directory tjp/eat--terminfo-dir)))
-;; 					 ;; Get remote digests.
-;; 					 (digests (tjp/eat--get-digests remote-eat-script remote-eat-terminfo "sha1sum")))
-;; 		   ;; (message "[tjp/eat] DEBUG: remote digests %s" digests) ; poor man's debug
-;; 		   ;; (message "eat terminal %s" eat--t-term)
-
-;; 		   ;; Check integration script digests match.
-;; 		   (unless (string-equal (nth 0 digests) (nth 0 tjp/eat--master-digests))
-;; 			 (message "[tjp]: eat integration script digest mismatch want (%s) got (%s)" (nth 0 tjp/eat--master-digests) (nth 0 digests))
-;; 			 ;; Copy integration script to remote.
-;; 			 (copy-file tjp/eat--source-script remote-eat-script t))
-
-;; 		   ;; Check terminfo script digests match.
-;; 		   (unless (string-equal (nth 1 digests) (nth 1 tjp/eat--master-digests))
-;; 			 (message "[tjp]: eat terminfo digest mismatch want (%s) got (%s)" (nth 1 tjp/eat--master-digests) (nth 1 digests))
-;; 			 ;; copy-directory doesn't have an overwrite flag so we will delete the remote directory (without following symlinks) before copying to prevent errors in this function.
-;; 			 ;; TODO / BUG: Tramp cannot delete the remote directory, im guessing something to do with the shell its setting up to run the command perhaps? Investigate later.
-;; 			 (delete-directory remote-eat-terminfo t t)
-;; 			 ;; Never create DIRECTORY (see `copy-directory') as a symlink on the remote.
-;; 			 (let ((copy-directory-create-symlink nil))
-;; 			   (copy-directory
-;; 				(concat (file-name-as-directory eat-term-terminfo-directory) tjp/eat--terminfo-dir-c)
-;; 				(concat (file-name-as-directory remote-eat-terminfo) tjp/eat--terminfo-dir-c))))
-
-;; 		   ;; List of extra shell commands specific to a remote host.
-;; 		   (list
-;; 			(format "export TERMINFO=%s" (tramp-file-local-name remote-eat-terminfo))
-;; 			(format "source %s" (tramp-file-local-name remote-eat-script))))))
-
-;; 	;; XXX: Calling eat-reset or variants like eat--t-reset doesn't work since it looks like we send these strings so fast eat hasn't "set up" yet (for lack of a better word) but these strings (commands) are actually being enacted. Weird to explain basically: don't try "optimise" this.
-
-;; 	(message "[tjp/eat] DEBUG: shell command remote base: %s" shell-setup-cmd) ; poor man's debug
-
-;; 	;; TODO: Perhaps this final command construction logic could be better, or maybe this is idiomatic elisp idk. Already spent WAYYYYYYYY too much time doing this and it works correctly as-is.
-
-;; 	;; No remote setup cmd, add sourcing of local eat integration script.
-;; 	(unless shell-setup-cmd
-;; 	  (push (format "source %s" tjp/eat--source-script) shell-setup-cmd))
-
-;; 	(push "unset EAT_SHELL_INTEGRATION_DIR" shell-setup-cmd)
-;; 	(push "clear\n" shell-setup-cmd)
-
-;; 	(setq shell-setup-cmd (mapconcat #'identity (nreverse shell-setup-cmd) " && "))
-
-;; 	(message "[tjp/eat] DEBUG: shell command final: %s" shell-setup-cmd) ; poor man's debug
-
-;; 	;; XXX: Functions `tramp-send-command-and-read', `tramp-send-command-and-check', or the various internal eat functions that send a string directly to the eat process don't work here; only `eat--send-string'. Also `eat--send-string' hardcoded but should be replaced by getting the input method of the current `eat-terminal' if this is ever NOT the input method. If you log `eat-proc' you'll see `input-fn' (as far as I can tell always `eat--send-string') hence the hardcoding.
-
-;; 	;; Interactively (from shell's perspective) execute commands to integrate eat into established shell session.
-;; 	(eat--send-string
-;; 	 eat-proc
-;; 	 shell-setup-cmd)))
-
-;; (add-hook 'eat-exec-hook 'tjp/eat--integrate)
-
 
 ;; TODO: And major mode too
 (defun tjp/describe-mode-list (&optional buffer)

@@ -22,9 +22,9 @@
 (add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file tsujp/modules-dir))))
 (add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file tjp/sitelisp-dir))))
 
-;;;; General (built-in)
+;;;; Built-ins
 
-;;;;; Emacs
+;;;;; General baseline
 
 ;; Baseline configuration, anything more specific goes into it's own area even if it also uses
 ;; the emacs package because that way adding :disabled can be used to easily selectively
@@ -33,9 +33,20 @@
 (use-package emacs
   :ensure nil
   :demand t
+  :hook ((prog-mode . display-fill-column-indicator-mode)
+         ((prog-mode text-mode) . display-line-numbers-mode)
+         ((prog-mode text-mode) . visual-line-mode))
+
   :custom
   ;; No second case-insensitive pass over `auto-mode-alist'.
   (auto-mode-case-fold nil)
+
+  ;; Remove case sensitivity from general completions.
+  (completion-ignore-case t)
+  (read-buffer-completion-ignore-case t)
+  (case-fold-search t)
+  (read-file-name-completion-ignore-case t)
+
   :config
   (setq-default
    ;; Subprocesses -------------------------------------------------------------
@@ -107,6 +118,9 @@
    echo-keystrokes 0.1 					; immediately echo unfinished commands (feedback)
    ring-bell-function #'ignore			; no beeping
 
+   vc-handled-backends '(Git)
+   ;; TODO: Maybe `vc-git-log-edit-summary-max-len` and `vc-git-log-edit-summary-target-len`.
+
    ;; hide commands in M-x not applicable to current mode
    read-extended-command-predicate #'command-completion-default-include-p
    ) ; setq-default closed here.
@@ -158,21 +172,15 @@
   ;; Be normal and delete selected text when inserting further characters
   (delete-selection-mode)
 
+  ;; Disable "fancy" (frame-based) tooltips
+  (tooltip-mode -1)
+
   ;; (global-visual-line-mode)                ; visual-line-mode everywhere (TODO: This and below only
   ;; in prog and text?)
   ;; (global-display-line-numbers-mode)       ; enable display of line numbers at margin
   ;; (winner-mode)                         ; window layout tracking (incase we need to undo)
   ;; TODO: Reenable later after bug report #75730 is resolved.
   )
-
-;; TODO: Place somewhere more appropriate, idk.
-(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-(add-hook 'text-mode-hook #'display-line-numbers-mode)
-(add-hook 'prog-mode-hook #'visual-line-mode)
-(add-hook 'text-mode-hook #'visual-line-mode)
-
-;;;;; Parenthesis / Delimitiers
 
 ;;;;; Whitespace
 
@@ -181,9 +189,7 @@
 
 (use-package emacs
   :ensure nil
-  :hook
-  (prog-mode . whitespace-mode)
-  (text-mode . whitespace-mode)
+  :hook ((prog-mode text-mode) . whitespace-mode)
   :custom
   (whitespace-style '(face empty trailing missing-newline-at-eof))
   (whitespace-action '(cleanup auto-cleanup))
@@ -199,24 +205,16 @@
 
 (when tsujp/is-gui
   (set-face-attribute 'default nil
-					  ;; :family "Iosevka Term SS01"
 					  :family "tsujp"
 					  :weight 'medium
 					  ;; :height 140 ; On that 1080p samsung display.
-					  :height 160 ; 150 or 160 on mac display.
-					  ;; :family "Zed Mono"
-					  ;; :family "Zed Mono"
-					  ;; :height 140
-					  ;; :weight 'medium
-					  ;; :font "fontset-zm"
-					  ))
+					  :height 160))     ; 150 or 160 on mac display.
 
 ;;;;; Mouse
 
 (use-package mouse
   :ensure nil
-  :hook
-  (after-init . mouse-wheel-mode)
+  :hook (after-init . mouse-wheel-mode)
   :config
   (setq-default
    scroll-conservatively 101    ; scroll just enough to bring point back into view
@@ -245,8 +243,7 @@
 (use-package autorevert
   :ensure nil
   ;; JORDAN TODO: It seems enabling global-auto-revert-mode has a race condition with tramp.
-  :hook
-  (after-init . global-auto-revert-mode)
+  :hook (after-init . global-auto-revert-mode)
   :custom
   (auto-revert-check-vc-info t)
   (auto-revert-remote-files t)
@@ -271,7 +268,7 @@
   (uniquify-strip-common-suffix t)
   (uniquify-buffer-name-style 'forward))
 
-;;;; Spelling
+;;;;; Spelling
 
 (use-package ispell
   :ensure nil
@@ -279,7 +276,7 @@
   :custom
   (ispell-dictionary "en_GB"))
 
-;;;; Search
+;;;;; Search
 
 (use-package isearch
   :ensure nil
@@ -289,7 +286,50 @@
   ;; TODO: `lazy-count-prefix-format'.
   )
 
-;;;; Operating system
+;;;;; Autosaves and backups
+
+;; Autosaved files are surrounded by pounds (#) by default, whereas backup files are suffixed with tilde (~).
+
+(use-package emacs
+  :ensure nil
+  ;; :after xdg
+  :after (:all exec-path-from-shell xdg)
+  :custom
+  (auto-save-interval 300)         ; keystroke-count between autosaves
+  (auto-save-timeout 60)           ; seconds of idle time between autosaves
+  (backup-by-copying t)            ; don't clobber symlinks
+  (make-backup-files t)            ; backup file the first time it is saved
+  (version-control t)              ; use version numbers on backups
+  (delete-old-versions t)          ; silently (without confirmation prompt) delete old versions
+  (kept-new-versions 10)           ; count of newest versions to keep
+  (kept-old-versions 0) ; count of oldest versions to keep (keeping old versions clobbers new versions), see bottom of: https://www.emacswiki.org/emacs/ForceBackups
+  (backup-directory-alist
+   `(("." . ,(concat (xdg-cache-home) "/emacs/backups"))))
+  ;; TODO: Auto saves still polluting, read docs for auto-save-file-name-transforms and test this config out to get this stuff to stop polluting. Perhaps use the hash thing too for long dirs and what not, in which ase a nice mapping file additionally?
+  (auto-save-file-name-transforms `((".*" ,(concat (xdg-cache-home) "/emacs/autosaves") t))))
+
+;;;;; Minibuffer
+
+(use-package minibuffer
+  :ensure nil
+  :demand t
+  :config
+  (setq minibuffer-visible-completions t ; nil is default, I used to use t
+		completion-styles '(orderless basic)
+		;; Ensures above completion-styles are always respected by other packages.
+		completion-category-defaults nil
+		;; TODO: Since Vertico update is `basic' here of any value? It's not needed for the workaround anymore so if it isn't then nuke it.
+		completion-category-overrides '((file (styles . (basic partial-completion orderless))))))
+
+;;;;; Which-key
+
+;; Display keybindings for the currently (incomplete) command.
+
+(use-package which-key
+  :ensure nil
+  :hook (after-init . which-key-mode))
+
+;;;;; Operating system
 
 ;; TODO: Worth it to check in Emacs init that keys are laid out as I expect them to?
 
@@ -312,7 +352,7 @@
       ;; TODO: Double check that is what this does
       (set-frame-parameter nil 'fullscreen 'fullboth))))
 
-;;;;; Packaging
+;;;; Package management
 
 ;; Elpaca package manager configuration as well as package repositories.
 
@@ -362,14 +402,13 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
-;;;;;; Enable use-package support
+;;;;;; Configure
 
-;; use-package is amazing for configuring packages, this makes sure Elpaca has integration.
+;; Enable use-package support
 (elpaca elpaca-use-package              ; install package `elpaca-use-package`
   (elpaca-use-package-mode))            ; enable support for use-package's `:ensure`
 
-;;;;;; Wait for Elpaca to bootstrap (if appropriate)
-
+;; Wait for Elpaca to bootstrap (if appropriate)
 (elpaca-wait)
 
 ;;;; Env vars
@@ -379,6 +418,7 @@
 ;; Make Emacs use $PATH from users' shell.
 (use-package exec-path-from-shell
   :ensure
+  :demand t
   :init
   ;; (setq exec-path-from-shell-debug t) ; When debugging uncomment.
   (setq exec-path-from-shell-arguments '("-l"))
@@ -388,49 +428,25 @@
 	(add-to-list 'exec-path-from-shell-variables var))
   (exec-path-from-shell-initialize))
 
-;;;; Autosaves and backups
-
-;; Autosaved files are surrounded by pounds (#) by default, whereas backup files are suffixed with tilde (~).
-
-(use-package emacs
-  :ensure nil
-  :after xdg
-  :custom
-  (auto-save-interval 300)         ; keystroke-count between autosaves
-  (auto-save-timeout 60)           ; seconds of idle time between autosaves
-  (backup-by-copying t)            ; don't clobber symlinks
-  (make-backup-files t)            ; backup file the first time it is saved
-  (version-control t)              ; use version numbers on backups
-  (delete-old-versions t)          ; silently (without confirmation prompt) delete old versions
-  (kept-new-versions 10)           ; count of newest versions to keep
-  (kept-old-versions 0) ; count of oldest versions to keep (keeping old versions clobbers new versions), see bottom of: https://www.emacswiki.org/emacs/ForceBackups
-  (backup-directory-alist
-   `(("." . ,(concat (xdg-cache-home) "/emacs/backups"))))
-  ;; TODO: Auto saves still polluting, read docs for auto-save-file-name-transforms and test this config out to get this stuff to stop polluting. Perhaps use the hash thing too for long dirs and what not, in which ase a nice mapping file additionally?
-  (auto-save-file-name-transforms `((".*" ,(concat (xdg-cache-home) "/emacs/autosaves") t))))
-
 ;;;; Theme
 
-;;;;; Modus theme
+;;;;; Modus
 
 ;; Using the non-bundled modus-theme so we can get new updates outside of Emacs release cycle (if we were to use the bundled version).
 (use-package modus-themes
   :ensure
   :custom
-  (modus-themes-bold-constructs t)
-  (modus-themes-italic-constructs t)
+  (modus-themes-bold-constructs t)      ; enable use of bold
+  (modus-themes-italic-constructs t)    ; enable use of italic
+  (modus-themes-prompts '(bold))        ; style for minibuffer and repl prompts
   (modus-themes-common-palette-overrides
-   ;; '((border-mode-line-active bg-mode-line-active)
-   ;;   (border-mode-line-inactive bg-mode-line-inactive)
-   '(
-     (border-mode-line-active unspecified)
+   '((border-mode-line-active unspecified)
      (border-mode-line-inactive unspecified)
-     ;; (bg-prose-block-contents bg-blue-nuanced)
-     ;; (bg-prose-block-delimiter bg-dim)
-     ;; (fg-prose-block-delimiter fg-dim)
 	 (fringe unspecified)
-	 ;; (string green)
-	 ;; (bg-paren-match bg-magenta-intense)
+     (bg-tab-bar bg-cyan-nuanced)
+     (bg-tab-current bg-cyan-intense)
+     (bg-tab-other bg-cyan-subtle)
+     ;; TODO: Make the matched paren bold? Integrate my old paren faces thing.
 	 (underline-paren-match fg-main)))
   :custom-face
   (region ((t :extend nil)))
@@ -445,30 +461,7 @@
     (custom-set-faces
      `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-dim :background unspecified)))))))
 
-;; TODO: Save this little proof of concept somewhere.
-
-;; Creates a custom special block `begin_grammar' which is hardcoded to use javascript syntax, and it works! It's not a real org src block though so nothing else like mode specific indentation works however.
-;; (defun do-it-kid (limit)
-;;   "Try to apply custom grammar block fontification."
-;;   (message "I HAVE BEEN CALLED! %s" limit)
-;;   (let ((case-fold-search t))
-;; 	(while (re-search-forward "^\s*#\\+begin_grammar\\(?:.*\n\\)\\(\\(?:.*\n\\)*?\\)\s*#\\+end_grammar" limit)
-;; 	  (let ((beg (match-beginning 1))
-;; 			(end (match-end 1)))
-;; 		(message "================================================================================> MATCHES ARE: %s %s" beg end)
-;; 		(if org-src-fontify-natively
-;; 			(save-match-data (org-src-font-lock-fontify-block "js" beg end)))))
-;; 	t))
-
-;; (font-lock-add-keywords
-;;  'org-mode '(("\\(^\s*#\\+begin_test\\(.*\n\\)*?\s*#\\+end_test\\)" 0 'org-test-block-face t)))
-
-;; (font-lock-add-keywords
-;;  'org-mode
-;;  '((do-it-kid))
-;;  t)
-;; END: little proof of concept.
-
+;;;;; Custom faces
 
 (defun tsujp/org-test-block-face ()
   (modus-themes-with-colors
@@ -476,32 +469,17 @@
 	  `((t :background ,bg-prose-block-contents :extend t))
 	  "Face for test block in org mode.")))
 
-;; (defun my-modus-themes-custom-faces (&rest _)
-;;   (modus-themes-with-colors
-;;     (custom-set-faces
-;;      ;; Add "padding" to the mode lines
-;;      `(mode-line ((,c :box (:line-width 2 :color ,bg-mode-line-active))))
-;;      `(mode-line-inactive ((,c :box (:line-width 2 :color ,bg-mode-line-inactive)))))))
-
-;; (add-hook 'modus-themes-after-load-theme-hook #'my-modus-themes-custom-faces)
-;;;;; Scrollbar in modeline
-
-;; Scrollbars take up too much horizontal width, and especially when using macOS specifically with Emacs HEAD (i.e. Emacs' default NS integration) look terrible. If/when emacs-mac patches get merged we can think about using native scrollbars again.
+;;;;; Modeline scrollbar
 
 ;; TODO: This package useful or needed in modern emacs?: https://github.com/mrkkrp/cyphejor
 ;; TODO: Colours.
-;; TODO: `after-init` hook.
 (use-package mlscroll
   :ensure
   :hook (elpaca-after-init . mlscroll-mode))
-;; :config
-;; (mlscroll-mode))
 
-;;;; Editing
+;;;; Meow
 
 ;; Editing interface (e.g. modal editing) configuration.
-
-;;;;; Meow
 
 ;; TODO: Cursor styles based on mode, here or configured elsewhere?
 (defun tsujp/meow-cursor ()
@@ -538,26 +516,6 @@
 										;                    :background nil
 										;                    :family "Iosevka SS03"
 										;                    :weight 'heavy)
-
-;; TODO: Move avy to it's own place.
-(use-package avy
-  :ensure
-  :custom
-  (avy-timeout-seconds 0.3))
-;; :custom-face
-;; (avy-goto-char-timer-face ((t (:foreground "#FFFF00"))))
-;; (avy-lead-face ((t (:foreground "#FFFF00" :background nil :weight black))))
-;; (avy-lead-face-0 ((t (:foreground "#f78fe7" :background "#555" :weight black)))))
-
-(keymap-global-set "H-e" #'avy-goto-char-timer)
-
-;; (defun blah/blah ()
-;; (interactive)
-;; (message "the frame is: %s" (window-frame))
-;; (set-frame-parameter nil 'fullscreen nil))
-(keymap-global-set "H-`" #'toggle-frame-fullscreen)
-
-;; frame hide title bar when maximized
 
 ;; Source: https://github.com/meow-edit/meow/issues/590
 ;; Meow digit keys in normal mode act as universal argument without needing C-u prefix.
@@ -680,7 +638,6 @@
   (progn
     (tsujp/meow-ergo-keys)))
 
-
 ;; TODO: To delete secondary selection overlay: (delete-overlay secondary-mouse-overlay)
 ;; (add-hook 'meow-insert-exit-hook 'corfu-quit)
 (use-package meow
@@ -705,50 +662,32 @@
 ;; Disable meow expand _hints_ (functionality still works) by overriding the function to nothing since there doesn't look like a nicer way to do that currently. TODO: PR for such functionality?
 ;; (advice-add #'meow--maybe-highlight-num-positions :override (lambda ()))
 
+;;;; Avy
+
+(use-package avy
+  :ensure
+  :bind (("H-e" . #'avy-goto-char-timer)
+         ("H-`" . #'toggle-frame-fullscreen))
+  :custom
+  (avy-timeout-seconds 0.3))
+;; :custom-face
+;; (avy-goto-char-timer-face ((t (:foreground "#FFFF00"))))
+;; (avy-lead-face ((t (:foreground "#FFFF00" :background nil :weight black))))
+;; (avy-lead-face-0 ((t (:foreground "#f78fe7" :background "#555" :weight black)))))
+
+;; (keymap-global-set "H-e" #'avy-goto-char-timer)
+;; (keymap-global-set "H-`" #'toggle-frame-fullscreen)
+
 ;;;; Completion
-										;(tsujp/req 'completion)
-;; Completion facilities, frameworks, and interfaces.
 
 ;; The Emacs completion system uses a completion frontend which provides a completion UI for the user, said frontend calls a completion backend which provides completions based on a configurable completion style.
-
-;;;;; Minibuffer
-
-;; Default minibuffer settings.
-
-;; TODO: Extra minibuffer config?
-(use-package minibuffer
-  :ensure nil
-  :demand t
-  :config
-  (setq minibuffer-visible-completions t ; nil is default, I used to use t
-		;; completion-styles '(hotfuzz orderless basic)
-        ;; completion-styles '(hotfuzz orderless)
-		completion-styles '(orderless basic)
-        ;; completion-styles '(hotfuzz)
-		;; Ensures above completion-styles are always respected by other packages.
-		completion-category-defaults nil
-		;; completion-category-overrides '((file (styles . (basic partial-completion hotfuzz orderless))))))
-		;; TODO: Since Vertico update is `basic' here of any value? It's not needed for the workaround anymore so if it isn't then nuke it.
-		completion-category-overrides '((file (styles . (basic partial-completion orderless))))))
-;; completion-category-overrides '((file (styles . (basic partial-completion orderless))))))
-;; completion-category-overrides '((file (styles . (hotfuzz))))))
-
-;; OLD minibuffer config
-;; (use-package minibuffer
-;;   :ensure nil
-;;   :demand t
-;;   :config
-;;   (setq minibuffer-visible-completions t
-;;         completion-styles '(basic substring initials flex orderless)))
 
 ;;;;; Orderless
 
 ;; Provides a completion style with configurable components to match literally, by regexp, by word prefixes and more. Most notably to complete things out of order and in shorthand.
 
-;; TODO: Extra orderless config?
 (use-package orderless
   :ensure
-  ;; :demand t
   :after minibuffer
   :bind
   ;; SPC should never complete, now it activates orderless.
@@ -763,7 +702,6 @@
   ;; Flex completion styles add so much fucking noise I can barely even read the completion candidate list my god. I can see it being useful in more nicer cases but on-by-default (as I had previously set) is... not a good idea I now see.
   ;; (orderless-matching-styles '(orderless-prefixes orderless-flex orderless-regexp)))
   (orderless-matching-styles '(orderless-prefixes orderless-regexp)))
-
 
 ;;;;; Vertico
 
@@ -788,8 +726,6 @@
   ;; Because of that have to move to `:config` form.
   :custom
   (vertico-count 6)) ; maximum number of candidates to show
-;; :config
-;; (vertico-mode))
 
 ;;;;; Corfu
 
@@ -800,7 +736,6 @@
 
 ;; TODO: Extra corfu config?
 (use-package corfu
-  ;; :defer 1
   :ensure
   :hook (elpaca-after-init . global-corfu-mode)
   :custom
@@ -814,64 +749,16 @@
   (:map corfu-map
 		;; Stop corfu stealing the RET key when completing.
 		("RET" . nil)))
-;; ESC to close completion (maybe TODO).
-;; :config
-;; (global-corfu-mode))
-;; TODO: Same as in Vertico.
-										;:hook (after-init . global-corfu-mode))
 
 ;;;;; Marginalia
 
 ;; Display annotations alongside minibuffer completion candidates.
 
-;; TODO: Extra marginalia config?
 (use-package marginalia
-  ;; :defer 1
   :ensure
   :hook (elpaca-after-init . marginalia-mode))
-;; :config
-;; (marginalia-mode))
-;; TODO: Same as in Vertico.
-;;:hook (after-init . marginalia-mode))
-
-;;;;; Which-key
-
-;; Display keybindings for the currently (incomplete) command.
-
-(use-package which-key
-  :ensure nil
-  :hook (after-init . which-key-mode))
-
-
-;;;;; Case-sensitivity
-
-;; Remove case sensitivity from general completions.
-
-(use-package emacs
-  :ensure nil
-  :custom
-  (completion-ignore-case t)
-  (read-buffer-completion-ignore-case t)
-  (case-fold-search t)
-  (read-file-name-completion-ignore-case t))
-
-
-;;;; Version Control
-
-;; Version control systems and their configuration.
-
-;;;;; Built-in
-										;(tsujp/req 'vcs)
-;; TODO: More configuration as appropriate.
-(use-package vc
-  :ensure nil
-  :config
-  (setq vc-handled-backends '(Git)))
-
-;; TODO: Maybe `vc-git-log-edit-summary-max-len` and `vc-git-log-edit-summary-target-len`.
 
 ;;;;; Magit
-										;(tsujp/req 'magit)
 
 (use-package magit
   :defer 0.5
@@ -908,7 +795,7 @@
 ;; TODO: Configure `magit-repository-directories` to include my home repo and how to tell it that the git directory is at another location?
 
 ;;;; Tree-sitter
-										;(tsujp/req 'treesitter)
+
 ;; Treesitter grammar sources and general configuration.
 
 ;;;;; Grammar sources
@@ -1057,7 +944,6 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 	  (eat--send-string
 	   eat-proc
 	   shell-setup-cmd)))
-
 
   ;; Compute master eat digests from local running Emacs' `eat' files.
   (setq tjp/eat--master-digests (tjp/eat--get-digests
@@ -1234,6 +1120,7 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 ;; TODO: diff-hl-mode is DESTROYING emacs scrolling performance in buffers... why?
 ;; TODO: So for now it's disabled.
 (use-package diff-hl
+  :disabled t
   :ensure
   :after modus-themes
   :config

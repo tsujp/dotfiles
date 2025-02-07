@@ -47,6 +47,14 @@
   (case-fold-search t)
   (read-file-name-completion-ignore-case t)
 
+  ;; TODO: Custom faces for battery status and time so its a little clearer to read. Also proper spacing instead of adding literal whitespace?
+  (display-time-default-load-average nil)     ; do not display load average
+  (display-time-format "%m-%d  %a  %I:%M %p") ; see `format-time-string'
+  (display-time-interval 20)                  ; update time every N seconds
+  (display-time-day-and-date t)
+  ;; `battery-update-functions' for more complex information.
+  (battery-mode-line-format "%b%p% %t    ")
+
   :config
   (setq-default
    ;; Subprocesses -------------------------------------------------------------
@@ -165,9 +173,9 @@
   ;; (save-place-mode)						; location of point in visited files
   ;; (recentf-mode)						; list of recently opened files
 
-  ;; TODO: Have this only in one modeline, or is there a way to have global header bar above the tab bar?
   ;; TODO: If on a laptop (currently only do this for macos variant).
   (display-battery-mode t)
+  (display-time-mode)
 
   ;; Be normal and delete selected text when inserting further characters
   (delete-selection-mode)
@@ -1001,8 +1009,12 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 
 (use-package tab-bar
   :ensure nil
+  ;; :init
+  ;; (tab-bar-mode)
   :hook (after-init . tab-bar-mode)
   :custom
+  (tab-bar-close-button-show nil)
+  (tab-bar-format '(tab-bar-format-history tab-bar-format-tabs tab-bar-format-align-right tab-bar-format-global))
   ;; By default the currently active buffer is also shown in a newly created tab, effectively bringing it into the new tabs local bufferlist. We share the default scratch buffer instead.
   ;; (tab-bar-new-tab-choice (lambda () (switch-to-buffer (generate-new-buffer-name "*local scratch*")))))
   (tab-bar-new-tab-choice "*scratch*"))

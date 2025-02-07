@@ -75,6 +75,8 @@
    ;; display-line-numbers-type 'visual     ; set line numbers to relative
    display-raw-bytes-as-hex t
    create-lockfiles nil					; here there be dragons
+   remote-file-name-inhibit-locks t     ; here there be remote dragons
+   remote-file-name-access-timeout 10   ; seconds
    help-window-keep-selected t			; re-use current help buffer if viewing more help
 
    ;; Fontification ------------------------------------------------------------
@@ -1842,10 +1844,6 @@ the project list."
 
 ;; TODO: Put this somewhere better.
 ;; TRAMP DEV CONTAINER CUSTOMISATIONS -------------------------
-(setq remote-file-name-inhibit-locks t) ; disable file locks for remote files
-
-(setq remote-file-name-access-timeout 10) ; timeout after N seconds when trying to access remote files
-
 
 ;; TODO: Have container names SUFFIXED with jam instead of prefixed.
 ;; TODO: Do the custom completion function.

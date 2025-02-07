@@ -1308,13 +1308,6 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 ;; 		   :password ""))
 ;; ---------------
 
-;; LSP-MODE
-
-;; TODO: Can this be done only for go-ts-mode rather than globally?
-(defun lsp-go-install-save-hooks ()
-  (add-hook 'before-save-hook #'lsp-format-buffer t t)
-  (add-hook 'before-save-hook #'lsp-organize-imports t t))
-
 (use-package go-ts-mode
   :ensure nil
   :custom
@@ -1324,69 +1317,6 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 ;; (use-package typescript-ts-mode
 ;;   :ensure nil
 ;;   )
-
-(use-package lsp-mode
-  :disabled t
-  :ensure
-  :defer 1
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  :hook ((typescript-ts-mode . lsp-deferred)
-		 (go-ts-mode . lsp-deferred)
-         (rust-ts-mode . lsp-deferred))
-  :commands lsp lsp-deferred
-  :custom
-  ;; (lsp-auto-configure nil) ; nah mate, we'll configure ourselves (lsp-mode has A LOT of bloat).
-
-  (lsp-log-io t) ; set to `t' to troubleshoot LSP server problems (shows communication logs).
-  (lsp-keep-workspace-alive nil) ; kill LSP server if all project buffers are killed.
-
-  ;; Core
-  (lsp-enable-xref t)
-  (lsp-eldoc-enable-hover t) ; Eldoc integration.
-  (lsp-enable-imenu t) ; imenu integration when server `textDocument/documentSymbol'.
-  (lsp-enable-symbol-highlighting nil) ; Symbol usage at point in current buffer.
-  (lsp-enable-links t) ; TODO: default is `t', is this feature useful/bloatware/expensive?
-  (lsp-enable-dap-autoconfigure t)
-  (lsp-enable-file-watchers t) ; TODO: Performance of this, perhaps `entr' as an Emacs module?
-  (lsp-enable-folding nil) ; Bloat.
-  (lsp-enable-indentation nil) ; Bloat.
-  (lsp-enable-on-type-formatting nil) ; Bloat.
-  (lsp-enable-text-document-color nil) ; Bloat.
-
-  ;; Diagnostics
-  (lsp-diagnostics-provider :flymake)
-
-  ;; Completion
-  (lsp-completion-provider :none) 	; Disable company integration.
-  (lsp-completion-enable t)
-  (lsp-completion-enable-additional-text-edit t) ; e.g. additionally insert an import statement.
-  ;; (lsp-enable-completion-at-point t) ; TODO: This is the same as `lsp-completion-enable'?
-  (lsp-enable-relative-indentation nil)
-  (lsp-enable-snippet nil) ; TODO: where do snippets come from?
-
-  ;; Clients (actually servers lol)
-  (lsp-disabled-clients '(deno-ls)) ; XXX: Appears Deno2 is dead in the water agian, artificial Deno-only limitations.
-  (lsp-clients-typescript-prefer-use-project-ts-server t)
-
-  ;; Modeline / Headerline
-  (lsp-signature-doc-lines 1) ; Don't raise the Echo area height.
-  ;; (lsp-ui-doc-use-childframe t) ; TODO: Needed?
-  ;; (lsp-eldoc-render-all nil) ; TODO: I need this? Is this the thing making the echo area HUGE?
-  (lsp-modeline-workspace-status-enable t)
-  (lsp-modeline-diagnostics-enable nil) ; Already showing them via Flymake.
-  (lsp-modeline-code-actions-enable nil) ; Too noisy.
-  (lsp-headerline-breadcrumb-enable nil) ; Bloatware.
-
-  ;; (lsp-inlay-hint-enable t)
-
-  ;; Fucking Microsoft, why is this bullshit a part of the LSP spec?
-  ;; (lsp-enable-on-type-formatting nil)
-  ;; (lsp-enable-indentation nil)
-  (lsp-trim-final-newlines nil)
-  (lsp-semantic-tokens-enable nil))
-
-;; END LSP-MODE
 
 
 ;; TODO: Configure programming languages.
@@ -1442,7 +1372,6 @@ test file."
   (load-file (expand-file-name "ox-ngd.el"))
   ;; TODO: Only want this for the noir submodule directory and downwards however.
   ;; TODO: Are project-local variables a thing?
-  (setq-local lsp-enable-file-watchers nil)
   ;; TODO: Only add this hook in test.org file. See and re-read docs for dir-locals-set-directory-class and dir-locals-set-class-variables both.
   (add-hook 'after-save-hook #'tst-export-current))
 
@@ -1468,10 +1397,6 @@ test file."
 ;;               (shut-up (apply orig args))))
 
 ;; (require 'org-inlinetask)
-
-(use-package dap-mode
-  :ensure
-  :defer 1)
 
 (setq org-indent-indentation-per-level 1)
 

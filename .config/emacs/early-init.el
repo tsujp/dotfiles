@@ -77,7 +77,7 @@
 
 ;; bug#13208 https://lists.gnu.org/archive/html/bug-gnu-emacs/2012-12/msg00954.html
 (put 'inhibit-startup-echo-area-message 'saved-value t)
-(setq inhibit-startup-echo-area-message (user-login-name)) ;; Above line fixes it.
+(setq inhibit-startup-echo-area-message (user-login-name))
 
 ;; TODO: Change 'native-comp-eln-load-path to XDG_CACHE location (eln-cache).
 

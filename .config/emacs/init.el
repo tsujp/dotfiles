@@ -170,8 +170,8 @@
 
   ;; History
   (savehist-mode) 						; minibuffer command history
-  ;; (save-place-mode)						; location of point in visited files
-  ;; (recentf-mode)						; list of recently opened files
+  (save-place-mode)						; location of point in visited files
+  (recentf-mode)						; list of recently opened files
 
   ;; TODO: If on a laptop (currently only do this for macos variant).
   (display-battery-mode t)

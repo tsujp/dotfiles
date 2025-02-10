@@ -150,8 +150,9 @@
   (set-default-coding-systems 'utf-8)			  ; utf8
   (prefer-coding-system 'utf-8)					  ; utf8
 
-  ;; Show matching parentheses and pairs
+  ;; Show matching parentheses and pairs, auto insert matching pairs
   (show-paren-mode)
+  (electric-pair-mode)
 
   ;; Highlight current line in buffer
   (global-hl-line-mode)
@@ -1014,20 +1015,18 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
   :hook (after-init . tab-bar-mode)
   :custom
   (tab-bar-close-button-show nil)
+  ;; TODO: Why is there still a separator on the tab bar? Can default tab size be made smaller?
   (tab-bar-format '(tab-bar-format-history tab-bar-format-tabs tab-bar-format-align-right tab-bar-format-global))
   ;; By default the currently active buffer is also shown in a newly created tab, effectively bringing it into the new tabs local bufferlist. We share the default scratch buffer instead.
   ;; (tab-bar-new-tab-choice (lambda () (switch-to-buffer (generate-new-buffer-name "*local scratch*")))))
   (tab-bar-new-tab-choice "*scratch*"))
 
-;; TODO: after-init hook when fixed.
 (use-package tabspaces
   :ensure
   :hook (elpaca-after-init . tabspaces-mode)
   :custom
   (tabspaces-keymap-prefix "H-p")
   (tabspaces-default-tab "Default"))
-;; :config
-;; (tabspaces-mode))
 
 ;; TODO: When minibuffer is completing directory/file-paths have backtick ` substituted to tilde ~ so I don't have to press shift-` to type ~ all the time.
 
@@ -1164,15 +1163,6 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 
 ;; END TODO.
 
-;; TODO: Place alongside orderless (completion style relavence)
-;; TODO: Use the C module for MOAR SPEED?
-;; TODO: Autocompile that C module if not already done.
-;; https://github.com/axelf4/hotfuzz
-;; (use-package hotfuzz
-;;   :ensure)
-;; (require 'hotfuzz-module)
-;; :defer 1)
-
 (use-package keycast
   :ensure
   :defer 1)
@@ -1188,12 +1178,6 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 ;;   (dotimes (_ 2)
 ;;     (funcall-interactively #'toggle-frame-fullscreen))
 ;;   (corfu-quit))
-
-;; TODO: Why is fontification at the end of the buffer weird as I type? White and then fontified after? Regex problem?
-
-;; TODO: Pseudo-global mode line
-;; (setq tab-bar-format
-;; TODO: -----------------------
 
 ;; TODO IRC Config
 ;; (setq erc-modules '(sasl services-regain autojoin button completion fill imenu irccontrols list
@@ -1298,9 +1282,6 @@ test file."
 ;; (require 'org-inlinetask)
 
 (setq org-indent-indentation-per-level 1)
-
-;; TODO: Move as appropriate.
-(electric-pair-mode 1)
 
 (use-package popper
   :ensure

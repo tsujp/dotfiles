@@ -48,9 +48,9 @@
   (read-file-name-completion-ignore-case t)
 
   ;; TODO: Custom faces for battery status and time so its a little clearer to read. Also proper spacing instead of adding literal whitespace?
-  (display-time-default-load-average nil)     ; do not display load average
-  (display-time-format "%m-%d  %a  %I:%M %p") ; see `format-time-string'
-  (display-time-interval 20)                  ; update time every N seconds
+  (display-time-default-load-average 1)          ; 5-minute load average
+  (display-time-format "%m-%d  %a  %I:%M %p   ") ; see `format-time-string'
+  (display-time-interval 15)                     ; update time every N seconds
   (display-time-day-and-date t)
   ;; `battery-update-functions' for more complex information.
   (battery-mode-line-format "%b%p% %t    ")
@@ -452,23 +452,29 @@
    '((border-mode-line-active unspecified)
      (border-mode-line-inactive unspecified)
 	 (fringe unspecified)
-     (bg-tab-bar bg-cyan-nuanced)
-     (bg-tab-current bg-cyan-intense)
-     (bg-tab-other bg-cyan-subtle)
+     (bg-tab-bar bg-main)
+     (bg-tab-current bg-main)
+     (bg-tab-other bg-dim)
      ;; TODO: Make the matched paren bold? Integrate my old paren faces thing.
 	 (underline-paren-match fg-main)))
   :custom-face
+  ;; Do not extend `region' background past end of line.
   (region ((t :extend nil)))
   :config
   (load-theme 'modus-vivendi :no-confirm)
   (tsujp/modus-fill-column-face-style)
   (tsujp/org-test-block-face))
 
+;; TODO: Rename this function appropriately and move other face customisations from lingering old stuff into this one.
 ;; TODO: Rework into hook within use-package for modus above.
+;; XXX: Doesn't seem to work when used within custom-face of use-package.. I for whatever reason.
 (defun tsujp/modus-fill-column-face-style ()
   (modus-themes-with-colors
     (custom-set-faces
-     `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-dim :background unspecified)))))))
+     `(fill-column-indicator ((,c (:height 1.0 :foreground ,bg-dim :background unspecified))))
+     ;; XXX: If font in-use looks terrible try oblique as (by custom) italic is specifically designed to be skewed whereas oblique is simply the normal font automatically (by tooling) angled to some extent.
+     ;; `(tab-bar-tab ((,c (:foreground ,yellow-intense :weight black :slant italic)))))))
+     `(tab-bar-tab ((,c (:foreground ,fg-main :weight bold :slant italic)))))))
 
 ;;;;; Custom faces
 
@@ -1010,13 +1016,64 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 
 (use-package tab-bar
   :ensure nil
-  ;; :init
-  ;; (tab-bar-mode)
   :hook (after-init . tab-bar-mode)
+  ;; XXX: use-package :custom-face expands to applying over #'face-spec-set which states it also defines the face name if not already done so we can do this instead of :config and calling defface.
+  :custom-face
+  ;; TODO: #efef00 is yellow-intense from modus themes
+  ;; TODO: #d0bc00 is yellow from modus themes
+  ;; TODO: #ff66ff is magenta intense from modus themes
+  ;; TODO: #d2b580 is yellow-faint from modus themes
+  (tab-bar-hint ((t :foreground "#efef00" :inherit tab-bar-tab)))
+  (tab-bar-hint-inactive ((t :foreground "#d2b580" :slant italic :inherit tab-bar-tab-inactive)))
+  :config
+  (setq tjp/tab-bar-name-format-faces '((tab-bar-tab tab-bar-tab-inactive)
+                                        (tab-bar-hint tab-bar-hint-inactive)))
+
+  (defun tjp/tab-bar-name-format-all (name tab i)
+    "Given a string NAME, tab TAB, and integer index I return a string to
+display as the tab name. The string can be propertised."
+    (let* ((tab-active (if (eq (car tab) 'current-tab) 0 1))
+           (hint (if (= tab-active 0) " *" (format " %d" i))))
+
+      ;; Add extra spaces around name and parentheses before adding properties so our additions are propertised.
+      (if (= tab-active 0)
+          (progn
+            (setq name (concat "(" name ") "))
+            (add-face-text-property 0 1 (nth 0 (nth 1 tjp/tab-bar-name-format-faces)) t name)
+            (add-face-text-property (- (length name) 2) (length name) (nth 0 (nth 1 tjp/tab-bar-name-format-faces)) t name))
+        (setq name (concat " " name "  ")))
+
+      ;; Apply tab-bar-tab faces.
+      (add-face-text-property 0 (length name) (nth tab-active (nth 0 tjp/tab-bar-name-format-faces)) t name)
+
+      ;; Tab hint (index) and it's face.
+      (when-let* ((tab-bar-tab-hints)
+                  (hint-length (length hint)))
+        (setq name (concat hint name))
+        (add-face-text-property 0 hint-length (nth tab-active (nth 1 tjp/tab-bar-name-format-faces)) t name))
+
+      name))
+
+  ;; XXX: Crudely done to match config width of line number display column.
+  (defun tjp/tab-bar-pad ()
+    "Padding to apply to extreme edges of tab bar"
+    "       ")
+
   :custom
   (tab-bar-close-button-show nil)
-  ;; TODO: Why is there still a separator on the tab bar? Can default tab size be made smaller?
-  (tab-bar-format '(tab-bar-format-history tab-bar-format-tabs tab-bar-format-align-right tab-bar-format-global))
+  ;; (tab-bar-auto-width-min '((25) 2))
+  ;; (tab-bar-auto-width-max '((100) 20))
+  (tab-bar-auto-width nil)
+  (tab-bar-tab-hints t)
+  (tab-bar-separator "")
+  ;; XXX: If you want the close button back need to add the format function for it to this list.
+  (tab-bar-tab-name-format-functions '(tab-bar-tab-name-format-truncated
+                                       tjp/tab-bar-name-format-all))
+  ;; TODO: What is the purpose of tab-bar-history-mode vs. something like winner-mode?
+  (tab-bar-format '(tjp/tab-bar-pad
+                    tab-bar-format-tabs
+                    tab-bar-format-align-right
+                    tab-bar-format-global))
   ;; By default the currently active buffer is also shown in a newly created tab, effectively bringing it into the new tabs local bufferlist. We share the default scratch buffer instead.
   ;; (tab-bar-new-tab-choice (lambda () (switch-to-buffer (generate-new-buffer-name "*local scratch*")))))
   (tab-bar-new-tab-choice "*scratch*"))
@@ -1125,7 +1182,7 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
   (modus-themes-with-colors
 	(custom-set-faces
 	 `(diff-hl-insert ((,c (:foreground ,green :background unspecified))))
-	 `(diff-hl-change ((,c (:foreground ,yellow-intense :background unspecified))))
+	 ;; `(diff-hl-change ((,c (:foreground ,yellow-intense :background unspecified))))
 	 `(diff-hl-delete ((,c (:foreground ,red-intense :background unspecified)))))))
 
 ;; TODO: diff-hl-mode is DESTROYING emacs scrolling performance in buffers... why?

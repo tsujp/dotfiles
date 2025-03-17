@@ -12,7 +12,7 @@
 
 ;; Compute these once instead of over-and-over at each callsite.
 (defconst tsujp/modules-dir "modules")
-(defconst tjp/sitelisp-dir "site_lisp")
+(defconst tjp/sitelisp-dir "site-lisp")
 (defconst tsujp/is-gui (display-graphic-p))
 (defconst tsujp/is-mac (eq system-type 'darwin))
 
@@ -22,6 +22,20 @@
 (add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file tsujp/modules-dir))))
 (add-to-list 'load-path (directory-file-name (expand-file-name (locate-user-emacs-file tjp/sitelisp-dir))))
 
+;;;; Env Vars / XDG directories
+
+;; Set environment variables in Emacs by sourcing them from a proper shell session.
+
+;; Added exec-path-from-shell package to site-lisp, then require and execute it here to ensure XDG variables are set before Emacs uses those variables for various packages later. Was getting multiple values for (e.g.) cache directories depending on when a subsequent package was loaded. This appears to resolve that.
+;; XXX: This (might) not affect any "pre-loaded" packages Emacs has already "set up" before here; if that's ever a problem look at it then since that gets complicated and might involve custom temacs stuff.
+(require 'exec-path-from-shell)
+;; (setq exec-path-from-shell-debug t) ; When debugging uncomment.
+(setq exec-path-from-shell-arguments '("-l"))
+;; Only take the following environment variables into Emacs.
+(dolist (var '("SSH_AUTH_SOCK" "LANG" "LC_CTYPE" "GNUPGHOME" "XDG_DATA_HOME" "XDG_CONFIG_HOME" "XDG_VIDEOS_DIR" "XDG_PICTURES_DIR" "XDG_DOWNLOAD_DIR" "XDG_MUSIC_DIR" "XDG_CACHE_HOME" "XDG_DESKTOP_DIR" "XDG_DOCUMENTS_DIR"))
+  (add-to-list 'exec-path-from-shell-variables var))
+(exec-path-from-shell-initialize)
+
 ;;;; Built-ins
 
 ;;;;; General baseline
@@ -30,13 +44,19 @@
 ;; the emacs package because that way adding :disabled can be used to easily selectively
 ;; disable areas of configuration.
 
+;; XXX: It looks like `startup--load-user-init-file' loads this init file within the scope of it's let-binding for `inhibit-null-byte-detection' therefore any change we make to inhibit-null-byte-detection will be undone (once the let-binding scope ends) and inhibit-null-byte-detection will revert back to it's default value of nil. This function being added to `emacs-startup-hook' will then execute outside of the let-binding scope from `startup--load-user-init-file' and result in configuration values persisting.
+;; XXX: You can verify this by adding `(debug-on-variable-change 'inhibit-null-byte-detection)' to this init file just above (making sure to comment out where this function is added to the emacs-startup-hook below) and noting that when startup--load-user-init-file triggers the debugger (you can C-h v the value) the value is t, once the trigger for the end of the let binding scope is stepped over the value is nil (the default).
+(defun tjp/ignore-null-byte ()
+  (setq-default inhibit-null-byte-detection t))
+
 (use-package emacs
   :ensure nil
   :demand t
   :hook ((prog-mode . display-fill-column-indicator-mode)
          ((prog-mode text-mode) . display-line-numbers-mode)
          ((prog-mode text-mode) . visual-line-mode))
-
+  :init
+  (add-hook 'emacs-startup-hook #'tjp/ignore-null-byte)
   :custom
   ;; No second case-insensitive pass over `auto-mode-alist'.
   (auto-mode-case-fold nil)
@@ -146,9 +166,12 @@
 
   ;; Coding system -------------------------------------------------------------
   (setq-default  buffer-file-coding-system 'utf-8 ; utf8
-				 locale-coding-system 'utf-8)	  ; utf8
+    			 locale-coding-system 'utf-8)	  ; utf8
+                 ;; inhibit-null-byte-detection t)   ; XXX: See function tjp/ignore-null-byte
   (set-default-coding-systems 'utf-8)			  ; utf8
   (prefer-coding-system 'utf-8)					  ; utf8
+  (set-coding-system-priority 'utf-8)             ; utf8
+  (set-language-environment "UTF-8")              ; utf8
 
   ;; Show matching parentheses and pairs, auto insert matching pairs
   (show-paren-mode)
@@ -190,6 +213,7 @@
   ;; (winner-mode)                         ; window layout tracking (incase we need to undo)
   ;; TODO: Reenable later after bug report #75730 is resolved.
   )
+
 
 ;;;;; Whitespace
 
@@ -419,23 +443,6 @@
 
 ;; Wait for Elpaca to bootstrap (if appropriate)
 (elpaca-wait)
-
-;;;; Env vars
-
-;; Set environment variables in Emacs by sourcing them from a proper shell session.
-
-;; Make Emacs use $PATH from users' shell.
-(use-package exec-path-from-shell
-  :ensure
-  :demand t
-  :init
-  ;; (setq exec-path-from-shell-debug t) ; When debugging uncomment.
-  (setq exec-path-from-shell-arguments '("-l"))
-  :config
-  ;; Only take the following environment variables into Emacs.
-  (dolist (var '("SSH_AUTH_SOCK" "LANG" "LC_CTYPE" "GNUPGHOME" "XDG_DATA_HOME" "XDG_CONFIG_HOME" "XDG_VIDEOS_DIR" "XDG_PICTURES_DIR" "XDG_DOWNLOAD_DIR" "XDG_MUSIC_DIR" "XDG_CACHE_HOME" "XDG_DESKTOP_DIR" "XDG_DOCUMENTS_DIR"))
-	(add-to-list 'exec-path-from-shell-variables var))
-  (exec-path-from-shell-initialize))
 
 ;;;; Theme
 
@@ -778,6 +785,8 @@
 (use-package magit
   :defer 0.5
   :ensure
+  :custom
+  (magit-no-message '("Turning on magit-auto-revert-mode"))
   :config
   ;; prepare the arguments
   (setq dotfiles-git-dir (concat "--git-dir=" (expand-file-name "~/.dotfiles.git")))
@@ -1033,7 +1042,7 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
     "Given a string NAME, tab TAB, and integer index I return a string to
 display as the tab name. The string can be propertised."
     (let* ((tab-active (if (eq (car tab) 'current-tab) 0 1))
-           (hint (if (= tab-active 0) " *" (format " %d" i))))
+           (hint (if (= tab-active 0) " @" (format " %d" i))))
 
       ;; Add extra spaces around name and parentheses before adding properties so our additions are propertised.
       (if (= tab-active 0)
@@ -1371,38 +1380,40 @@ test file."
 
 
 ;; TODO: Put elsewhere.
-(require 'org-id)
+;; (require 'org-id)
+(use-package org-id
+  :ensure nil
+  :defer 1
+  :config
+  (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
 
-;; Original idea:
-;; <https://writequit.org/articles/emacs-org-mode-generate-ids.html>.
-(defun prot-org--id-get ()
-  "Get the CUSTOM_ID of the current entry.
+  ;; Original idea: https://writequit.org/articles/emacs-org-mode-generate-ids.html
+  (defun prot-org--id-get ()
+    "Get the CUSTOM_ID of the current entry.
 If the entry already has a CUSTOM_ID, return it as-is, else
 create a new one."
-  (let* ((pos (point))
-         (id (org-entry-get pos "CUSTOM_ID")))
-    (if (and id (stringp id) (string-match-p "\\S-" id))
-        id
-	  (setq id (org-id-new "h"))
-	  (org-entry-put pos "CUSTOM_ID" id)
-	  id)))
+    (let* ((pos (point))
+           (id (org-entry-get pos "CUSTOM_ID")))
+      (if (and id (stringp id) (string-match-p "\\S-" id))
+          id
+	    (setq id (org-id-new "h"))
+	    (org-entry-put pos "CUSTOM_ID" id)
+	    id)))
 
-(declare-function org-map-entries "org")
+  (declare-function org-map-entries "org")
 
-;;;###autoload
-(defun prot-org-id-headlines ()
-  "Add missing CUSTOM_ID to all headlines in current file."
-  (interactive)
-  (org-map-entries
-   (lambda () (prot-org--id-get))))
+  (defun prot-org-id-headlines ()
+    "Add missing CUSTOM_ID to all headlines in current file."
+    (interactive)
+    (org-map-entries
+     (lambda () (prot-org--id-get))))
 
-;;;###autoload
-(defun prot-org-id-headline ()
-  "Add missing CUSTOM_ID to headline at point."
-  (interactive)
-  (prot-org--id-get))
+  (defun prot-org-id-headline ()
+    "Add missing CUSTOM_ID to headline at point."
+    (interactive)
+    (prot-org--id-get)))
 
-(setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+;; (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
 
 ;; TODO: Per 4533 in consult.el set recentf-filename-handlers to nil?
 
@@ -1443,15 +1454,18 @@ relative to the project root that contains it (if any)."
 ;; (message "got: %s" (tsujp/region-to-transclusion (buffer-file-name) t))))))
 
 ;; No initial indentation in org source blocks.
-(setq org-edit-src-content-indentation 0)
-(add-to-list 'org-src-lang-modes '("js" . js-ts))
-(add-to-list 'org-src-lang-modes '("rust" . rust-ts))
+(use-package org-src
+  :ensure nil
+  :defer 1
+  :config
+  (setq org-edit-src-content-indentation 0)
+  (add-to-list 'org-src-lang-modes '("js" . js-ts))
+  (add-to-list 'org-src-lang-modes '("rust" . rust-ts)))
 
 ;; TODO: Organise blah blah.
 (use-package embark
   :ensure
   :defer 1
-
   :bind
   (("C-." . embark-act)))
 
@@ -1611,6 +1625,7 @@ the project list."
   :ensure nil
   :hook (compilation-filter . ansi-color-compilation-filter))
 ;;  (setq compilation-environment '("TERM=dumb")) ;; Seems to be ignored, but if xterm-256color seems to be respected so patched at podmancp level.
+
 
 (use-package tramp
   :ensure nil
@@ -1788,3 +1803,24 @@ the project list."
 ;; TODO: Emacs won't read the XDG location I've specified i.e. ~/.config/gnupg and instead defaults to ~/.gnupg (or gpg is creating this trash folder, also ignoring my XDG config). In either case Emacs reads said trash folder which has no keys and fails to sign. Deleting said folder and adding a manual symlink to the correct one: `ln -s ~/.config/gnupg .gnupg` fixes the issue. That sucks, who is at fault here?
 ;; TODO: Put this elsewhere as appropriate.
 (setq-default epg-pinentry-mode 'loopback)
+
+;; TODO: Temp remote formatting experiment.
+(defun mah-format ()
+  (interactive)
+  (let ((proc (make-process
+               :name "format-zig"
+               :buffer (current-buffer)
+               :command '("zig" "fmt" "--stdin")
+               :connection-type 'pipe
+               :sentinel #'ignore
+               :file-handler t)))
+    (unless proc (error "failed to create process"))
+    (process-send-string proc (buffer-substring-no-properties (point-min) (point-max)))
+    (process-send-eof proc)
+    (while (accept-process-output proc))
+    ;; (process-send-eof proc)
+    (message "done formatting")))
+;; END temp remote formatting experiment.
+
+;; If instrumenting Emacs startup behaviour.
+;;(kill-emacs)

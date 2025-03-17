@@ -31,7 +31,6 @@
 (setq package-enable-at-startup nil)
 ;; (setq use-package-compute-statistics t)
 
-
 ;;; Garbage collection
 
 ;; Increase the amount of consing before garbage collection runs; this should result in the
@@ -98,7 +97,7 @@
 
 ;; ---------------------------------- yoinked from minimal-emacs, let's see
 ;; TODO: Not sure why I'd need to set this versus using the coding system stuff I already have.
-(set-language-environment "UTF-8")
+;; (set-language-environment "UTF-8")
 
 ;; Set-language-environment sets default-input-method, which is unwanted.
 (setq default-input-method nil)
@@ -107,18 +106,18 @@
 ;; icon fonts on Windows. This will increase memory usage.
 (setq inhibit-compacting-font-caches t)
 
-;; TODO: I don't know if that's true, (trace-function 'display-startup-screen) at the top of early-init.el without this shows nothing still.. so this feels unneeded.
-;; Suppress the vanilla startup screen completely. We've disabled it with
-;; `inhibit-startup-screen', but it would still initialize anyway.
-;; (advice-add #'display-startup-screen :override #'ignore)
+;; ;; TODO: I don't know if that's true, (trace-function 'display-startup-screen) at the top of early-init.el without this shows nothing still.. so this feels unneeded.
+;; ;; Suppress the vanilla startup screen completely. We've disabled it with
+;; ;; `inhibit-startup-screen', but it would still initialize anyway.
+;; ;; (advice-add #'display-startup-screen :override #'ignore)
 
-(defun minimal-emacs--reset-inhibited-vars-h ()
-        ;; (setq-default inhibit-redisplay nil) ; Can cause artifacts
-        (setq-default inhibit-message nil)
-        (remove-hook 'post-command-hook #'minimal-emacs--reset-inhibited-vars-h))
+;; (defun minimal-emacs--reset-inhibited-vars-h ()
+;;         ;; (setq-default inhibit-redisplay nil) ; Can cause artifacts
+;;         (setq-default inhibit-message nil)
+;;         (remove-hook 'post-command-hook #'minimal-emacs--reset-inhibited-vars-h))
 
-(add-hook 'post-command-hook
-          #'minimal-emacs--reset-inhibited-vars-h -100)
+;; (add-hook 'post-command-hook
+;;           #'minimal-emacs--reset-inhibited-vars-h -100)
 ;; -------------------------------- end yoink
 
 

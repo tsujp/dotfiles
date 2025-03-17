@@ -222,10 +222,16 @@ for (( i = 0; i < ${SHLVL:-1}; i++ )); do
   shell_depth+="$shell_prompt_decoration"
 done
 
-PROMPT_COMMAND="__git_prompt;"
+# Disable for now (2025/02/24: messing around with sparse-checkout worktrees and __git_prompt logic is messing with that)
+# PROMPT_COMMAND="__git_prompt;"
+PROMPT_COMMAND="__temp_git_replace;"
 PS1_PREFIX=" $(__uc CYAN)\W$(__uc RESET) "
 PS1_SUFFIX="$(__uc YELLOW)$shell_depth$(__uc RESET)"
 
+__temp_git_replace ()
+{
+    printf -v PS1 -- '%s' "$PS1_PREFIX $PS1_SUFFIX"
+}
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

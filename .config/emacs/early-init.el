@@ -62,6 +62,8 @@
 (push '(width . 162) default-frame-alist)
 (push '(height . 60) default-frame-alist)
 (push '(internal-border-width . 5) default-frame-alist)
+(push '(inhibit-double-buffering . t) default-frame-alist)
+;; (push '(background-color . "#000000") default-frame-alist)
 
 ;; TODO: I can't remember why I needed to set this.
 (setq-default left-margin-width 1)
@@ -90,8 +92,8 @@
 ;;; Startup messaging and buffer display
 
 (setq inhibit-startup-message t ; Alias for inhibit-startup-screen / inhibit-splash-screen
-	  initial-buffer-choice nil
-	  initial-startup-buffer-menu t)
+      initial-buffer-choice nil
+      initial-startup-buffer-menu t)
 
 
 
@@ -121,6 +123,39 @@
 ;; -------------------------------- end yoink
 
 
+;; Wrapped toggle-frame-fullscreen to re-position Emacs' frame when fullscreened.
+;; This is here so it can be used immediately in init.el
+
+(defun tjp/display-top-offset ()
+  "Return top offset (in pixels) required for fullscreen Emacs position
+on known displays. If a display isn't known 0 is returned, which
+results in no offset being applied."
+  ;; TODO: The .workarea is compared as the default when toggle-frame-fullscreen is set, so on 16" mbp non-fullscreen its 0 38 1728 1079 but with default toggle-frame-fullscreen it is 0 32 1728 1085.
+  (let ((disp (car (display-monitor-attributes-list))))
+    (or
+     (let-alist disp
+       (cond
+        ((string= .source "NS")
+         ;; 16" macbook display with notch, offset from top is 8.
+         (when (and (equal .workarea '(0 32 1728 1085)))
+           8))))
+     ;; Default is 0, no offset.
+     0)))
+
+(defun tjp/toggle-frame-fullscreen ()
+  "Wrapper around `#'toggle-frame-fullscreen' which positions Emacs
+appropriately on displays that need it (e.g. Macbook with a display
+notch at the top)."
+  (interactive)
+  (let ((frame (selected-frame)))
+    (toggle-frame-fullscreen frame)
+    (sleep-for 0.01) ; Any non-zero value is okay, fixes some terrible race condition Emacs has with modifying frame parameters. TODO: File this race condition as a bug report.
+    (if (eq (frame-parameter frame 'fullscreen) 'fullboth)
+        (let ((offset (tjp/display-top-offset))
+              (initial-height (frame-inner-height)))
+          (modify-frame-parameters frame
+                                   `((top . ,offset)
+                                     (height . (text-pixels . ,(- initial-height offset)))))))))
 
 ;;; ispell completions
 
@@ -137,3 +172,26 @@
   (message "init done: %s (gc time: %s)" (emacs-init-time) gc-elapsed))
 
 (add-hook 'after-init-hook #'tjp/startup-time-printout)
+
+;; Local Variables:
+;; no-byte-compile: t
+;; no-native-compile: t
+;; no-update-autoloads: t
+;; End:
+
+
+
+;; Crude benchmarks show this reduces startup from about 0.5s to 0.43 to 0.44 so.. keep for now I guess?
+
+(defun minimal-emacs--reset-inhibit-redisplay ()
+  "Reset inhibit redisplay."
+  (setq-default inhibit-redisplay nil)
+  (remove-hook 'post-command-hook #'minimal-emacs--reset-inhibit-redisplay))
+
+(when (and t
+           (not (daemonp))
+           (not noninteractive))
+  ;; Suppress redisplay and redraw during startup to avoid delays and
+  ;; prevent flashing an unstyled Emacs frame.
+  (setq-default inhibit-redisplay t)
+  (add-hook 'post-command-hook #'minimal-emacs--reset-inhibit-redisplay -100))

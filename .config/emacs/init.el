@@ -1048,7 +1048,12 @@
           (json . ("https://github.com/tree-sitter/tree-sitter-json"))
           (zig . ("https://github.com/tree-sitter-grammars/tree-sitter-zig" "v1.1.2"))
           (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
-          (go . ("https://github.com/tree-sitter/tree-sitter-go")))))
+          (go . ("https://github.com/tree-sitter/tree-sitter-go"))))
+  :config
+  ;; Emacs should always invoke js-ts-mode whenever js-mode is requested.
+  (add-to-list 'major-mode-remap-alist '(javascript-mode . js-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(json-mode . json-ts-mode))
+  )
   ;; :init
   ;; Compile language grammars; we cannot do this in `:config` because treesit may have loaded
   ;; in-built grammars by then and reloading them is currently (as of Emacs 30) not possible

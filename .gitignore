@@ -79,8 +79,11 @@
 !.config/git/gitignore_global
 
 # * * * * * * * * * * * * * * * * * * * * * * * * Repo meta
+!/.github/
 !/LICENSE
+!/LICENCE
 !/README.md
+!/README.org
 
 # * * * * * * * * * * * * * * * * * * * * * * * * Misc
 # Old plans to add nice create-repo CLI, using Magit instead now.

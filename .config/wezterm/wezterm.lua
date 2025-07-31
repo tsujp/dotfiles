@@ -39,14 +39,16 @@ config.font_rules = {
     intensity = 'Bold',
     italic = false,
     font = wezterm.font {
-      family = 'Zed Mono Extrabold Extended',
+      -- family = 'Zed Mono Extrabold Extended',
+      family = 'tsujp Extrabold',
     },
   },
   {
     intensity = 'Normal',
     italic = true,
     font = wezterm.font {
-      family = 'Zed Mono Medium Extended',
+      -- family = 'Zed Mono Medium Extended',
+      family = 'tsujp Medium',
       italic = true,
     },
   },
@@ -54,7 +56,8 @@ config.font_rules = {
     intensity = 'Bold',
     italic = true,
     font = wezterm.font {
-      family = 'Zed Mono Extrabold Extended',
+      -- family = 'Zed Mono Extrabold Extended',
+      family = 'tsujp Extrabold',
       italic = true,
     },
   },
@@ -70,8 +73,8 @@ config.font_rules = {
 -- }
 
 config.inactive_pane_hsb = {
-  saturation = 1.1,
-  brightness = 0.85,
+  saturation = 1.1, -- 1.1
+  brightness = 0.7, -- 0.85
 }
 
 config.tab_bar_at_bottom = true
@@ -89,7 +92,7 @@ config.underline_position = -2
 
 -- Cursor shape.
 config.default_cursor_style = 'SteadyBlock'
-config.cursor_thickness = 1
+config.cursor_thickness = 2
 
 config.colors = {
   -- (active) cell background colour where cursor is iff cursor is block.
@@ -116,8 +119,8 @@ config.colors = {
 config.use_fancy_tab_bar = false
 
 config.window_padding = {
-  left = 0, -- 10
-  right = 0, -- 3
+  left = 5, -- 10
+  right = 5, -- 3
   top = 5,
   bottom = 0,
 }
@@ -125,7 +128,7 @@ config.window_padding = {
 -- config.window_decorations = 'RESIZE'
 
 config.window_frame = {
-  border_left_width = 0,
+  border_left_width = 5,
   border_right_width = 0,
   border_bottom_height = 0,
   border_top_height = 0,
@@ -135,7 +138,7 @@ config.window_frame = {
   -- active_titlebar_border_bottom = 'cyan',
 }
 
-config.tab_max_width = 24
+config.tab_max_width = 48
 config.show_new_tab_button_in_tab_bar = false
 
 wezterm.on('update-status', function(window, pane)

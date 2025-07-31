@@ -97,15 +97,6 @@
       initial-startup-buffer-menu t)
 
 
-;; TODO: Temp native Emacs Carbon stuff
-;; (setq mac-drawing-use-gcd nil)
-;; (setq-default ns-use-mwheel-momentum t)
-;; (setq-default mac-ignore-momentum-wheel-events t)
-;; (setq mac-mouse-wheel-smooth-scroll nil)
-;; can check `mac-initialized' as a quick hack for now to determine if it's emacs-mac versus the mainline NS version.
-;; ---/
-
-
 ;; ---------------------------------- yoinked from minimal-emacs, let's see
 ;; TODO: Not sure why I'd need to set this versus using the coding system stuff I already have.
 ;; (set-language-environment "UTF-8")

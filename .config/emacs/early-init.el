@@ -62,7 +62,8 @@
 (push '(width . 162) default-frame-alist)
 (push '(height . 60) default-frame-alist)
 (push '(internal-border-width . 5) default-frame-alist)
-(push '(inhibit-double-buffering . t) default-frame-alist)
+;; (push '(inhibit-double-buffering . t) default-frame-alist)
+
 ;; (push '(background-color . "#000000") default-frame-alist)
 
 ;; TODO: I can't remember why I needed to set this.
@@ -95,6 +96,14 @@
       initial-buffer-choice nil
       initial-startup-buffer-menu t)
 
+
+;; TODO: Temp native Emacs Carbon stuff
+;; (setq mac-drawing-use-gcd nil)
+;; (setq-default ns-use-mwheel-momentum t)
+;; (setq-default mac-ignore-momentum-wheel-events t)
+;; (setq mac-mouse-wheel-smooth-scroll nil)
+;; can check `mac-initialized' as a quick hack for now to determine if it's emacs-mac versus the mainline NS version.
+;; ---/
 
 
 ;; ---------------------------------- yoinked from minimal-emacs, let's see

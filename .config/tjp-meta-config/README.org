@@ -1,10 +1,15 @@
-# Dotfiles
+#+TITLE: Dotfiles
 
-```sh
+My personal dotfiles and configurations.
+
+#+caption: To bootstrap
+#+begin_src sh
 cd "$HOME" && git clone --bare https://github.com/tsujp/dotfiles.git "$HOME"/.dotfiles.git
 git --git-dir="$HOME"/.dotfiles.git/ --work-tree="$HOME" checkout
 git --git-dir="$HOME"/.dotfiles.git/ --work-tree="$HOME" remote set-url origin git@github.com:tsujp/dotfiles.git
-```
+#+end_src
+
+* TODO Dungeon stuff to remove/edit/update
 
 ## TODO: Dungeon stuff below to update docs for.
 

@@ -94,6 +94,7 @@ alias gb='git branch'
 alias g='git'
 
 alias dots='git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git'
+alias dots-all='dots status --ignored=matching'
 
 #alias gpg='gpg2'
 alias gpg-restart='gpg-connect-agent reloadagent /bye'

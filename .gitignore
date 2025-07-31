@@ -79,6 +79,7 @@
 !.config/git/gitignore_global
 
 # * * * * * * * * * * * * * * * * * * * * * * * * Repo meta
+!/.config/tjp-meta-config/
 !/.github/
 !/LICENSE
 !/LICENCE

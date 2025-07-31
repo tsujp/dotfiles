@@ -1767,7 +1767,7 @@ relative to the project root that contains it (if any)."
         ;; (let ((proj-root (car (last (project-current nil f)))))
         (when-let* ((proj-root (locate-dominating-file (buffer-file-name) ".dir-locals.el")))
           ;; TODO: Way to place cursor so foobar can be named more nicely, or integrate into org-capture somehow for that logic.
-          (format "#+transclude: [[file:%s][foobar]] :lines %s-%s :src foo"
+          (format "#+transclude: [[file:%s][foobar]] :lines %s-%s :src fundamental"
                   ;; `project-current' calls down to `project-try-vc' which (looks like) it will only return a single list of 3 items, the last being the project root directory.
                   (if (and project-base proj-root)
                       (file-relative-name f proj-root)

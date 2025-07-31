@@ -15,6 +15,7 @@ export XDG_DOWNLOAD_DIR="$HOME/downloads";
 export XDG_MUSIC_DIR="$HOME/music";
 export XDG_PICTURES_DIR="$HOME/pictures";
 export XDG_VIDEOS_DIR="$HOME/videos";
+# TODO: XDG_RUNTIME_DIR ?
 
 # TODO: Find out which one is used for keyboard layout and set others
 #       to sane English i.e. en_GB. American spelling is S T U P I D.
@@ -45,8 +46,9 @@ export WGETRC="$XDG_CONFIG_HOME/wgetrc"
 # History.
 export HISTFILE="$XDG_DATA_HOME/history"
 export LESSHISTFILE='-'
-export HISTCONTROL=ignoredups:erasedups
-export HISTSIZE=65536
+export HISTCONTROL=ignoredups:erasedups:ignorespace
+export HISTSIZE=-1
+export HISTFILESIZE=-1
 
 # Save vanilla path to prevent endless appends when reloading the shell config.
 [ -z "$__tsujp_first_path" ] && export __tsujp_first_path="$PATH"

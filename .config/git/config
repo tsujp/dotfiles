@@ -16,15 +16,21 @@
 	# editor = vim
 	excludesFile = ~/.config/git/gitignore_global
 
+	# See section UNTRACKED FILES AND PERFORMANCE at the bottom of
+	#   `git status --help` for a description of these two. TL;DR cache and
+	#   therefore speedup.
+	untrackedCache = true
+	# TODO: Somehow enable fsmonitor, right now it appears to hang for a LONG time. Maybe the initial index build is really really slow..?
+	# fsmonitor = true
+
 [include]
 	path = ~/.config/git/secret
 	path = ~/.config/git/variable
 
 [init]
-
 	defaultBranch = master
-[pull]
 
+[pull]
 	rebase = true
 
 [alias]

@@ -992,6 +992,8 @@
   :defer 0.5
   :ensure
   :custom
+  ;; TODO: Have this set from executable-find, or maybe even https://www.gnu.org/software/emacs/manual/html_node/use-package/use_002dpackage_002densure_002dsystem_002dpackage.html
+  (magit-git-executable "/opt/local/bin/git")
   (magit-no-message '("Turning on magit-auto-revert-mode"))
   :config
   ;; prepare the arguments

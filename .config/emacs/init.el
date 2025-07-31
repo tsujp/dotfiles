@@ -2248,3 +2248,147 @@ those required by the latter)."
 (use-package dape
   :ensure
   :defer 1)
+
+
+;; format with: C-M-a C-M-q    ?
+
+;; Eglot booster (TODO: Place elsewhere).
+(use-package eglot-booster
+  :ensure (:host github :repo "jdtsmith/eglot-booster")
+  :after eglot
+  :config
+  (setq eglot-booster-io-only t)
+  (eglot-booster-mode))
+
+(use-package urgrep
+  :ensure
+  :defer 1
+  :custom
+  (urgrep-preferred-tools '(rg)))
+
+
+;; TODO: Place as appropriate.
+;; Modeline
+(use-package emacs
+  :ensure nil
+  :custom
+  (mode-line-collapse-minor-modes '(which-key-mode)))
+
+;; TODO: Place as appropriate.
+;; So I can undo borked window layout changes if they hapen.
+(use-package winner
+  :ensure nil
+  :hook (after-init . winner-mode))
+
+(use-package recentf
+  :ensure nil
+  :custom
+  (recentf-show-messages nil))
+
+(use-package speedbar
+  :ensure nil
+  :custom
+  (speedbar-prefer-window t))
+
+(use-package erc
+  :disabled t
+  :ensure nil
+  :defer 1
+  :custom
+  (erc-modules '(sasl services-regain autojoin button completion fill imenu irccontrols list
+                      match menu move-to-prompt netsplit networks readonly ring stamp track))
+  :config
+  (erc-tls :server "chat.sr.ht"
+           :port 6697
+           :nick "tsujp"
+           :user "tsujp/irc.libera.chat"
+           :password ""))
+;; (defun run-erc ()
+;;   (interactive)
+;;   (erc-tls :server "chat.sr.ht"
+;;         :port 6697
+;;         :nick "tsujp"
+;;         :user "tsujp/irc.libera.chat"
+;;         :password ""))
+
+
+;; TODO: Organise org-caldav calendar sync stuff. Probably ties in with any personal information agenda management and so on.
+;; (use-package org-caldav
+;;   :ensure
+;;   :defer 1)
+
+(use-package ultra-scroll
+  :ensure (:host github :repo "jdtsmith/ultra-scroll")
+  ;; TODO: Calling it from a hook isn't working?
+  ;; :hook (after-init . ultra-scroll-mode)
+  :custom
+  (ultra-scroll-hide-cursor 0.05)
+  (ns-use-mwheel-momentum t)
+  (scroll-margin 0)
+  :config
+  ;; Clear hl-line-mode from default hooks. I use global-hl-line-mode anyway.
+  (remove-hook 'ultra-scroll-hide-functions 'hl-line-mode)
+  (ultra-scroll-mode 1))
+
+
+;; TODO: Get this up and running, probably just use skhdrc for the key combo grabber unless karabiner elements can do something for us?
+;; FROM: https://web.archive.org/web/20240930115023/https://protesilaos.com/codelog/2024-09-19-emacs-command-popup-frame-emacsclient/
+;; FORM: https://protesilaos.com/codelog/2024-09-19-emacs-command-popup-frame-emacsclient/
+;; ALSO: https://web.archive.org/web/20241001010711/https://localauthor.github.io/posts/popup-frames.html
+
+(defun prot-window-delete-popup-frame (&rest _)
+  "Kill selected selected frame if it has parameter `prot-window-popup-frame'.
+Use this function via a hook."
+  (when (frame-parameter nil 'prot-window-popup-frame)
+    (delete-frame)))
+
+(defmacro prot-window-define-with-popup-frame (command)
+  "Define interactive function which calls COMMAND in a new frame.
+Make the new frame have the `prot-window-popup-frame' parameter."
+  `(defun ,(intern (format "prot-window-popup-%s" command)) ()
+     ,(format "Run `%s' in a popup frame with `prot-window-popup-frame' parameter.
+Also see `prot-window-delete-popup-frame'." command)
+     (interactive)
+     (let ((frame (make-frame '((prot-window-popup-frame . t)))))
+       (select-frame frame)
+       (switch-to-buffer " prot-window-hidden-buffer-for-popup-frame")
+       (condition-case nil
+           (call-interactively ',command)
+         ((quit error user-error)
+          (delete-frame frame))))))
+
+(declare-function consult-buffer "consult")
+;; (defvar org-capture-after-finalize-hook)
+
+;;;###autoload (autoload 'prot-window-popup-org-capture "prot-window")
+(prot-window-define-with-popup-frame consult-buffer)
+
+;; (add-hook 'org-capture-after-finalize-hook #'prot-window-delete-popup-frame)
+
+;; emacsclient -e '(prot-window-popup-consult-buffer)'
+
+(use-package server
+  :disabled
+  :ensure nil
+  :defer 1
+  :config
+  (unless (server-running-p)
+    (server-start)))
+
+
+(use-package rsync-mode
+  :ensure
+  :defer 1)
+
+(defun tjp/print-path ()
+  (interactive)
+  (message "PATH")
+  (dolist (path-item (split-string (getenv "PATH") ":"))
+    (princ path-item)
+    (princ "\n")))
+
+(defun tjp/refresh-env ()
+  (interactive)
+  ;; TODO: This needs to replace the existing PATH stuff, as it is it appears to append meaning lots of cruft.
+  ;; Assumes I configured exec-path-from-shell beforehand (currently true).
+  (exec-path-from-shell-initialize))

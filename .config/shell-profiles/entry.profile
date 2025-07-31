@@ -21,4 +21,3 @@
 [ "$(uname -s)" = "Darwin" ] && {
   . "$HOME/.config/shell-profiles/entry.bashrc"
 }
-# . "$HOME/.cargo/env"

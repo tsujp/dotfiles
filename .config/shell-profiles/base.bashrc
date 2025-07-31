@@ -118,6 +118,7 @@ alias chk-gpg=_check_gnupg_working
 ## - - - - - - - - - - - - - - - - - -
 ## FUNCTION ALIASES  - - - - - - - - -
 
+# TODO: Replace tput with escape codes.
 man ()
 {
   # TODO: replace tput with escape codes for colour
@@ -137,6 +138,7 @@ man ()
 		man "$@"
 }
 
+# TODO: Shell alias to list these helpers.
 bundle_init ()
 {
   # Want local Gem installation
@@ -210,11 +212,12 @@ export LS_COLORS="rs=0:fi=0:di=1;34:ln=95:mh=30;46:pi=40;38;5;11:so=95:do=95:bd=
 # * * * * * * * * * PROMPT CONSTRUCTION
 # TODO: Custom prompt in Zig with some cool logic stuff.
 # INPUTRC COMMANDS WE'RE SETTING FROM BASHRC FOR CONVENIENCE
-bind 'set editing-mode vi'
-bind 'set show-mode-in-prompt on'
-bind 'set keyseq-timeout 50'
-bind 'set vi-ins-mode-string "\1\e[0m\2(i)"'
-bind 'set vi-cmd-mode-string "\1\e[32m\2(c)\1\e[0m\2"'
+# bind 'set editing-mode vi'
+# https://www.gnu.org/software/bash/manual/bash.html#Readline-Init-File-Syntax
+# bind 'set show-mode-in-prompt on'
+# bind 'set keyseq-timeout 50'
+# bind 'set vi-ins-mode-string "\1\e[0m\2(i)"'
+# bind 'set vi-cmd-mode-string "\1\e[32m\2(c)\1\e[0m\2"'
 
 shell_prompt_decoration="# "
 shell_depth=""
@@ -311,11 +314,6 @@ __git_prompt ()
     printf -v PS1 -- "$printf_format" "$PS1_PREFIX$gitstring $PS1_SUFFIX"
   fi
 }
-
-# TODO: Put this elsewhere, lang specific or something.
-. "$HOME/.cargo/env"
-
-export PATH="$PATH":/BLAHBLAHBLAH
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## NOTES - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

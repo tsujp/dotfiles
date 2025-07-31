@@ -2238,7 +2238,7 @@ those required by the latter)."
 ;; TODO: Prevent cursor from going into minibuffer prompt area (which is invalid and annoying).
 
 (use-package eglot
-  :ensure
+  :ensure nil
   :defer 1
   )
 

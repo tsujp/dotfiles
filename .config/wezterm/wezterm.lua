@@ -73,8 +73,8 @@ config.font_rules = {
 -- }
 
 config.inactive_pane_hsb = {
-  saturation = 1.1, -- 1.1
-  brightness = 0.7, -- 0.85
+  saturation = 1, -- 1.1
+  brightness = 0.65, -- 0.85
 }
 
 config.tab_bar_at_bottom = true

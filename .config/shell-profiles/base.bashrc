@@ -96,6 +96,8 @@ alias g='git'
 alias dots='git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git'
 alias dots-all='dots status --ignored=matching'
 
+alias purge-dsstore="find . -name .DS_Store -type f -delete -print"
+
 #alias gpg='gpg2'
 alias gpg-restart='gpg-connect-agent reloadagent /bye'
 alias rsync='rsync -I --info=progress2'

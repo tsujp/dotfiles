@@ -2136,13 +2136,17 @@ the project list."
 ;; TODO: Move this big one to the bottom of init.el
 ;; TODO: Shorten my acronym to `tjp` since tsujp is a little too long (only within the context of M-x typing commands lol).
 ;; TODO: Probably better to just inspect the output of emacs-report-bug or whatever that command is as that generates a whole lot of diagnostic data.
-(defun tsujp/emacs-builinfo ()
+(defun tjp/emacs-build-info ()
   (interactive)
   "Show compilation information for this Emacs"
+  (message "-> REPO COMMIT: %s" emacs-repository-version)
+  ;; (message "-> REPO BRANCH: %s" emacs-repository-branch)
   (message "-> CONFIGURATION OPTIONS:\n%s" system-configuration-options)
   (message "-> CONFIGURATION FEATURES:\n%s" system-configuration-features)
-  (message "-> VERSION:\n%s" emacs-version)
-  (message "-> TREESITTER?: %s" (treesit-available-p)))
+  (message "-> VERSION: %s" emacs-version)
+  (message "-> TREESITTER?: %s" (treesit-available-p))
+  (message "-> JSON?: %s" (json-available-p))
+  (message "-> NATIVE COMP?: %s" (native-comp-available-p)))
 ;; TODO: Call the parts of emacs-build-description myself since it doesn't play nice when called as below.
 ;; (message "-> BUILD DESCRIPTION: %s\n" (emacs-build-description)))
 

@@ -1347,15 +1347,33 @@ display as the tab name. The string can be propertised."
 (keymap-global-set "H-j" #'scroll-up-line)
 (keymap-global-set "H-k" #'scroll-down-line)
 ;; (keymap-global-set "H-t" #'tramp-cleanup-connection)
-(keymap-global-set "H-t" #'toggle-frame-fullscreen)
+;; (keymap-global-set "H-t" #'toggle-frame-fullscreen)
 ;; (keymap-global-set "H-`" #'toggle-frame-maximized)
 
 ;; TODO: That thing to non-native fullscreen it and also put it into the correct position.
 ;; TODO: (frame-parameter nil 'display) returns the name of the current display for the current frame, will this actually differ when emacs is displayed on an external monitor and not the built-in display of the laptop though? It appears to be the same as the hostname (cli command).
 ;; TODO: Which hook for after the creation of the initial frame?
 
+;; TODO: Or put this under H-p under binding m (for magit) so its part of project stuff..?
+(keymap-global-set "H-[" #'magit)
+
 (keymap-global-set "H-`" #'tjp/toggle-frame-fullscreen)
 
+(keymap-global-set "M-o" #'other-window)
+
+
+;; XXX KEYBINDINGS
+(defvar-keymap tjp/tab-bar-keymap
+  :doc "TODO: tab bar goodies keymap"
+  "H-f" #'tab-next ;; So H-d H-f becomes an inward roll which is easy to press.
+  "H-c" #'tab-previous)
+(keymap-global-set "H-d" tjp/tab-bar-keymap)
+
+(defvar-keymap tjp/org-keymap
+  :doc "TODO: org mode goodies keymap"
+  "H-2" #'org-store-link
+  "H-1" #'consult-org-heading)
+(keymap-global-set "H-2" tjp/org-keymap)
 
 
 ;; Shortcuts to profiler start/stop/report
@@ -1686,7 +1704,7 @@ test file."
 (use-package popper
   :ensure
   :defer 1
-  :bind (("H-r" . popper-toggle))
+  :bind (("M-p" . popper-toggle))
   :init
   (setq popper-reference-buffers
         '("\\*Messages\\*"

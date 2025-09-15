@@ -153,6 +153,19 @@ BUNDLE_PATH: 'vendor/bundle'
 EOF
 }
 
+# TODO: Should remove global_ignore_base prefixed entries from dots_untracked_list and display the result.
+# dotties ()
+# {
+#     pushd "$(pwd)"
+#     cd "$HOME"
+#     local -r global_ignore_base="$(dots check-ignore *)"
+#     local -r dots_untracked_list="$(dots-all | sed '1,/Ignored files/d')"
+
+#     awk -v abc="$global_ignore_base" '
+#         { print $abc; }
+#     '
+# }
+
 
 ## - - - - - - - - - - - - - - - - - -
 ## FUNCTION HELPERS  - - - - - - - - -

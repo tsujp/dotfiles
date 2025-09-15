@@ -1759,22 +1759,6 @@ test file."
   (popper-mode +1)
   (popper-echo-mode +1))
 
-
-;; Until the bug with polluting nonsense symbols in completion is fixed used te older function definition
-;; (defun help-definition-prefixes ()
-;;   "Return the up-to-date radix-tree form of `definition-prefixes'."
-;;   (when (> (hash-table-count definition-prefixes) 0)
-;;     (maphash (lambda (prefix files)
-;;                (let ((old (radix-tree-lookup help-definition-prefixes prefix)))
-;;                  (setq help-definition-prefixes
-;;                        (radix-tree-insert help-definition-prefixes
-;;                                           prefix (append old files)))))
-;;              definition-prefixes)
-;;     (clrhash definition-prefixes))
-;;   help-definition-prefixes)
-;; (help-definition-prefixes)
-
-
 ;; TODO: Put elsewhere.
 ;; (require 'org-id)
 (use-package org-id

@@ -5,10 +5,6 @@
 ;; (profiler-cpu-start profiler-sampling-interval)
 ;; (trace-function 'display-startup-echo-area-message)
 
-;; XXX: 2025/09/15 as of c934a4188b53e63324ef66c39dd6474728ae10d6 this isn't required anymore??
-;; (push "tramp-loaddefs.el.gz" native-comp-jit-compilation-deny-list)
-;; (push "cl-loaddefs.el.gz" native-comp-jit-compilation-deny-list)
-
 ;; (message "initial options: %s" command-line-ns-option-alist)
 (setq command-line-ns-option-alist nil)
 (setq use-package-expand-minimally t)

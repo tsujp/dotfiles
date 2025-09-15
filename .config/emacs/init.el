@@ -61,6 +61,12 @@
 (defun tjp/ignore-null-byte ()
   (setq-default inhibit-null-byte-detection t))
 
+(use-package comp-run
+  :ensure nil
+  :config
+  (push "tramp-loaddefs.el.gz" native-comp-jit-compilation-deny-list)
+  (push "cl-loaddefs.el.gz" native-comp-jit-compilation-deny-list))
+
 (use-package emacs
   :ensure nil
   :demand t

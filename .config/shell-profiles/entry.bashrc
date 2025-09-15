@@ -17,6 +17,10 @@
 # export PATH="$PNPM_HOME:$PATH"
 # pnpm end
 
+# TODO: Note this elsewhere.
+# On macOS /etc/profile has a call to /usr/libexec/path_helper which is a binary. See `man path_helper` which then states
+#   it reads in paths from /etc/paths.d. Then `ls /etc/paths.d` and see various folders of things being added to PATH.
+
 # TODO: Nargo please respect XDG.
 export NARGO_HOME="/Users/tsujp/.nargo"
 

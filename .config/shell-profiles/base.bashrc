@@ -3,28 +3,35 @@
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## SET UP SHOPT  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+[[ "$-" != *i* ]] && { return ; }  # if not interactive shell abort
+
+# TODO: If Bash 5.2 then allow the shopt stuff.
 # https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
 set -b                 # Report terminated background job exit code immediately.
 shopt -s cdspell       # Autocorrect close cd typos.
 shopt -s checkwinsize  # Uupdate LINES and COLUMNS after commands to current size.
 shopt -s histappend    # Append to history; don't overwrite.
+shopt -s checkhash
+shopt -s checkjobs
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## GUARDS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #[[ "$-" = *i* ]] || return     # if interactive shell, exit
-[[ "$-" != *i* ]] && { return ; }  # if not interactive shell abort
+# [[ "$-" != *i* ]] && { return ; }  # if not interactive shell abort
 #[[ "$TERM" = dumb ]] && return # in emacs TRAMP, exit
 
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## START 'JOBS'  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+# TODO: For these startup 'jobs' add a timeout so if they take more than.. 1 second I get an error. As it currently is will see stdout/err.
+
 # fix potential GNUPG permissions
 if command -v find &> /dev/null; then
-  find "$XDG_CONFIG_HOME"/gnupg -type f -exec chmod 600 {} \;
-  find "$XDG_CONFIG_HOME"/gnupg -type d -exec chmod 700 {} \;
+    (find "$XDG_CONFIG_HOME"/gnupg -type f -exec chmod 600 {} \; &)
+    (find "$XDG_CONFIG_HOME"/gnupg -type d -exec chmod 700 {} \; &)
 fi
 
 # Git limits environment variables in git config so this is done here.
@@ -41,7 +48,7 @@ fi
 
 # 2. Check path represents an executable binary (that we also have permission to execute too).
 if [[ -x "${gpg2_executable}" ]]; then
-  git config --file "$XDG_CONFIG_HOME/git/variable"  gpg.program "$gpg2_executable"
+  (git config --file "$XDG_CONFIG_HOME/git/variable" gpg.program "$gpg2_executable" &)
 else
   printf '(dotfiles) LACK OF PERMISSION OR `gpg2` AT PATH %s IS NOT EXECUTABLE\n' "$gpg2_executable"
 fi
@@ -69,10 +76,10 @@ alias r=_reload_shell
 alias k=kubectl
 
 alias e_bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/base.bashrc"
-alias e_my_bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).bashrc"
+alias e_my_bc="$EDITOR $XDG_CONFIG_HOME/shell-profiles/${HOSTNAME}-${USER}.bashrc"
 
 alias e_bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/base.profile"
-alias e_my_bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/$(hostname)-$(whoami).profile"
+alias e_my_bp="$EDITOR $XDG_CONFIG_HOME/shell-profiles/${HOSTNAME}-${USER}.profile"
 
 alias e_foot="$EDITOR $XDG_CONFIG_HOME/foot/foot.ini"
 alias e_ssh="$EDITOR ~/.ssh/config"
@@ -126,14 +133,14 @@ man ()
 {
   # TODO: replace tput with escape codes for colour
 	env \
-	LESS_TERMCAP_mb=$(tput bold; tput setaf 6) \
-	LESS_TERMCAP_md=$(tput bold; tput setaf 6) \
+	LESS_TERMCAP_mb=$'\033[1;36m' \
+	LESS_TERMCAP_md=$'\033[1;36m' \
 	LESS_TERMCAP_me=$(tput sgr0) \
 	LESS_TERMCAP_se=$(tput rmso; tput sgr0) \
 	LESS_TERMCAP_ue=$(tput rmul; tput sgr0) \
-	LESS_TERMCAP_us=$(tput smul; tput bold; tput setaf 4) \
-	LESS_TERMCAP_mr=$(tput rev) \
-	LESS_TERMCAP_mh=$(tput dim) \
+	LESS_TERMCAP_us=$'\033[1;4;34m' \
+	LESS_TERMCAP_mr=$'\033[7m' \
+	LESS_TERMCAP_mh=$'\033[2m' \
 	LESS_TERMCAP_ZN=$(tput ssubm) \
 	LESS_TERMCAP_ZV=$(tput rsubm) \
 	LESS_TERMCAP_ZO=$(tput ssupm) \
@@ -184,38 +191,6 @@ _check_gnupg_working ()
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * COLOURS
-declare -A __c=([BOLD]="$(tput bold)" [RESET]="$(tput sgr0)")
-
-# TODO: This without `tput`, use the raw escape codes instead. No subshell each time.
-# CONSTRUCT COLOURS
-if [ "$(tput colors)" -ge 8 ]; then
-  __c+=(
-    [RED]="$(tput setaf 1)"     [BOLD_RED]=${__c[BOLD]}${__c[RED]}
-    [GREEN]="$(tput setaf 2)"   [BOLD_GREEN]=${__c[BOLD]}${__c[GREEN]}
-    [YELLOW]="$(tput setaf 3)"  [BOLD_YELLOW]=${__c[BOLD]}${__c[YELLOW]}
-    [BLUE]="$(tput setaf 4)"    [BOLD_BLUE]=${__c[BOLD]}${__c[BLUE]}
-    [MAGENTA]="$(tput setaf 5)" [BOLD_MAGENTA]=${__c[BOLD]}${__c[MAGENTA]}
-    [CYAN]="$(tput setaf 6)"    [BOLD__cYAN]=${__c[BOLD]}${__c[CYAN]}
-    [WHITE]="$(tput setaf 7)"   [BOLD_WHITE]=${__c[BOLD]}${__c[WHITE]}
-  )
-fi
-
-# HELPER FUNCTION
-__uc ()
-{
-  local return_colour
-
-  case "$#" in
-    1)  return_colour="\[${__c[$1]}\]"
-    ;;
-    *)  echo "incorrect argument count passed to __uc"
-    ;;
-  esac
-
-  # TODO confirm that a valid colour was selected
-
-  echo "$return_colour"
-}
 
 # FILES AND DIRECTORIES
 # TODO: customise this further?
@@ -228,108 +203,28 @@ export LS_COLORS="rs=0:fi=0:di=1;34:ln=95:mh=30;46:pi=40;38;5;11:so=95:do=95:bd=
 # * * * * * * * * * PROMPT CONSTRUCTION
 # TODO: Custom prompt in Zig with some cool logic stuff.
 # INPUTRC COMMANDS WE'RE SETTING FROM BASHRC FOR CONVENIENCE
-# bind 'set editing-mode vi'
 # https://www.gnu.org/software/bash/manual/bash.html#Readline-Init-File-Syntax
-# bind 'set show-mode-in-prompt on'
-# bind 'set keyseq-timeout 50'
-# bind 'set vi-ins-mode-string "\1\e[0m\2(i)"'
-# bind 'set vi-cmd-mode-string "\1\e[32m\2(c)\1\e[0m\2"'
 
-shell_prompt_decoration="# "
 shell_depth=""
-for (( i = 0; i < ${SHLVL:-1}; i++ )); do
-  shell_depth+="$shell_prompt_decoration"
-done
+if [[ $SHLVL -gt 1 ]]; then
+   shell_depth="($SHLVL) "
+fi
 
 # Disable for now (2025/02/24: messing around with sparse-checkout worktrees and __git_prompt logic is messing with that)
 # PROMPT_COMMAND="__git_prompt;"
 PROMPT_COMMAND="__temp_git_replace;"
-PS1_PREFIX=" $(__uc CYAN)\W$(__uc RESET) "
-PS1_SUFFIX="$(__uc YELLOW)$shell_depth$(__uc RESET)"
+PS1_PREFIX="\[\033[36m\]\w\[\033[m\] "
+PS1_SUFFIX="\[\033[33m\]\$\[\033[m\] "
 
 __temp_git_replace ()
 {
-    printf -v PS1 -- '%s' "$PS1_PREFIX $PS1_SUFFIX"
+    printf -v PS1 -- '%s' "$shell_depth$PS1_PREFIX$PS1_SUFFIX"
 }
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # * * * * * * * * * GIT PROMPT INTERNAL AND HELPER FUNCTION
 # TODO: From zig using git api instead (faster).
-__git_prompt ()
-{
-  local inside_worktree="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
-
-  local bad_colour="$(__uc RED)"
-  local ok_colour="$(__uc GREEN)"
-  local c_clear="$(__uc RESET)"
-
-  local w="" # unstaged dirty files
-  local i="" # staged dirty files
-  local s="" # any stashed files
-  local u=""
-  local c=""
-  local p=""
-  local b="" # branch name
-
-  local printf_format="%s" # overall output format
-  local gitstring
-
-  if [ "true" = "$inside_worktree" ]; then
-    # force set true
-    git config --bool bash.showDirtyState true
-
-    # find staged files (dirty)
-    git diff --no-ext-diff --quiet || w="*"
-    git diff --no-ext-diff --cached --quiet || i="+"
-
-    # find stash
-    if git rev-parse --verify --quiet refs/stash >/dev/null; then
-      s="$"
-    fi
-
-    # find git branch, based on http://stackoverflow.com/a/13003854/170413
-    if b="$(git rev-parse --abbrev-ref HEAD 2> /dev/null)"; then
-      if [ "$b" = "HEAD" ]; then
-        b='detached*'
-      else
-        # hides branch name; remove if you want it shown
-        b=''
-      fi
-    fi
-
-    # set colours
-    if [ "$w" = "*" ]; then
-      w="$bad_colour$w"
-    fi
-    if [ -n "$i" ]; then
-      i="$ok_colour$i"
-    fi
-    if [ -n "$s" ]; then
-      s="$flags_colour$s"
-    fi
-    if [ -n "$u" ]; then
-      u="$bad_colour$u"
-    fi
-
-    local file_info="$w$i$s$u"
-    local branch_info="$c_clear$b"
-
-    if [ -z "$b" ]; then
-      gitstring="$file_info"
-    else
-      gitstring="$branch_info $file_info"
-    fi
-
-    gitstring="($gitstring$c_clear)"
-  fi
-
-  if [ -z "$gitstring" ]; then
-    printf -v PS1 -- "$printf_format" "$PS1_PREFIX $PS1_SUFFIX"
-  else
-    printf -v PS1 -- "$printf_format" "$PS1_PREFIX$gitstring $PS1_SUFFIX"
-  fi
-}
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## NOTES - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

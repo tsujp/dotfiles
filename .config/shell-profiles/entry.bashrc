@@ -4,11 +4,11 @@
 #   `bashrc` if it exists.
 
 # Base.
-. "$HOME/.config/shell-profiles/base.bashrc"
+. "${HOME}/.config/shell-profiles/base.bashrc"
 
 # host-user combination `bashrc` if it exists.
-[ -f "$HOME/.config/shell-profiles/$(uname -n)-$(id -un).bashrc" ] && {
-  . "$HOME/.config/shell-profiles/$(uname -n)-$(id -un).bashrc"
+[ -f "${HOME}/.config/shell-profiles/${HOSTNAME}-${USER}.bashrc" ] && {
+  . "${HOME}/.config/shell-profiles/${HOSTNAME}-${USER}.bashrc"
 }
 
 # TODO: Remove this and put it elsewhere.

@@ -6,15 +6,15 @@
 #   the path here) since it's _so_ common.
 
 # Base.
-export XDG_CONFIG_HOME="$HOME/.config";
-export XDG_DATA_HOME="$HOME/.local/share";
-export XDG_CACHE_HOME="$HOME/.local/cache";
-export XDG_DESKTOP_DIR="$HOME/desktop";
-export XDG_DOCUMENTS_DIR="$HOME/documents";
-export XDG_DOWNLOAD_DIR="$HOME/downloads";
-export XDG_MUSIC_DIR="$HOME/music";
-export XDG_PICTURES_DIR="$HOME/pictures";
-export XDG_VIDEOS_DIR="$HOME/videos";
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.local/cache"
+export XDG_DESKTOP_DIR="$HOME/desktop"
+export XDG_DOCUMENTS_DIR="$HOME/documents"
+export XDG_DOWNLOAD_DIR="$HOME/downloads"
+export XDG_MUSIC_DIR="$HOME/music"
+export XDG_PICTURES_DIR="$HOME/pictures"
+export XDG_VIDEOS_DIR="$HOME/videos"
 # TODO: XDG_RUNTIME_DIR ?
 
 # TODO: Find out which one is used for keyboard layout and set others
@@ -38,6 +38,8 @@ export MANPAGER="$PAGER"
 # GnuPG.
 export GNUPGHOME="$XDG_CONFIG_HOME/gnupg"
 export PINEENTRY_USER_DATA='USE_CURSES=1'
+# Interestingly, per Bash expansion this will also print tty name, but this
+#   file must be POSIX friendly so cannot use: FOO='\l'; echo ${FOO@P}
 export GPG_TTY="$(tty)"
 
 # WGet.
@@ -51,20 +53,20 @@ export HISTSIZE=-1
 export HISTFILESIZE=-1
 
 # Save vanilla path to prevent endless appends when reloading the shell config.
-[ -z "$__tsujp_first_path" ] && export __tsujp_first_path="$PATH"
-[ "$__tsujp_first_path" != "$PATH" ] && export PATH="$__tsujp_first_path"
+[ -z "$__tsujp_first_path" ] && export __tsujp_first_path="${PATH}"
+[ "$__tsujp_first_path" != "${PATH}" ] && export PATH="$__tsujp_first_path"
 
 # Set PATH.
 
 # Two special cases, (1) for local precedence, (2) for macOS.
-[ -d "$HOME"/.local/bin ] && PATH="$HOME/.local/bin:$PATH"
-[ -d /opt/local/bin ] && PATH="/opt/local/bin:$PATH"
+[ -d "$HOME"/.local/bin ] && PATH="${HOME}/.local/bin:${PATH}"
+[ -d /opt/local/bin ] && PATH="/opt/local/bin:${PATH}"
 
 # Regular pattern.
 export PATH="\
-$HOME/bin:\
-$HOME/bin/$(hostname):\
-$HOME/bin/$(hostname)/$(whoami):\
-$HOME/bin/$(hostname)/$(whoami)/$(uname -m):\
-$PATH\
+${HOME}/bin:\
+${HOME}/bin/${HOSTNAME}:\
+${HOME}/bin/${HOSTNAME}/${USER}:\
+${HOME}/bin/${HOSTNAME}/${USER}/$(uname -m):\
+${PATH}\
 "

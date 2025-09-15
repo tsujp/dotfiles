@@ -167,13 +167,14 @@ wezterm.on('update-status', function(window, pane)
   --   end
   -- end
 
-  local date = wezterm.strftime '%H:%M %a %-d %b'
-  table.insert(cells, date)
+  -- local date = wezterm.strftime '%H:%M %a %-d %b'
+  -- table.insert(cells, date)
 
+  -- XXX: WezTerm's battery reporting is wrong, maybe it's reading something that doesn't take into account battery degradation? It reports about 5% lower than what macOS (and Emacs) report.
   -- Battery %.
-  for _, b in ipairs(wezterm.battery_info()) do
-    table.insert(cells, string.format('%.0f', b.state_of_charge * 100))
-  end
+  -- for _, b in ipairs(wezterm.battery_info()) do
+  --   table.insert(cells, string.format('%.0f', b.state_of_charge * 100))
+  -- end
 
   -- Final to-be-rendered elements.
   local tab_bar_elements = {}

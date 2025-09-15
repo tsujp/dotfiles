@@ -2239,54 +2239,6 @@ the project list."
     (message "done formatting")))
 ;; END temp remote formatting experiment.
 
-;; TODO: Temp, place elsewhere format blah blah.
-;; (use-package taxy
-;;   :ensure
-;;   :defer 1)
-
-;; (use-package taxy-magit-section
-;;   :ensure
-;;   :defer 1
-;;   :config
-
-;;   ;; Until https://github.com/alphapapa/taxy.el/pull/15 and so is fixed upstream these are required.
-  
-;;   (defun tjp/taxy-mapc (fn taxy)
-;;     "Given a function FN and a `taxy' or `taxy-magit-section' cl-struct TAXY,
-;; recursively apply FN to all descendant taxys. TAXY's descendants are
-;; destructively mutated if FN does so. If the root taxy of TAXY must be
-;; mutated this must be done outside of this defun."
-;;     (cl-loop for sub-taxy in-ref (taxy-taxys taxy)
-;;              do
-;;              (setf sub-taxy (funcall fn sub-taxy))
-;;              (tjp/taxy-mapc fn sub-taxy)))
-
-;;   (defun tjp/to-taxy-magit-section (taxy)
-;;     "Given a cl-struct TAXY convert it's root taxy and all descendant taxys
-;; from `taxy' objects to `taxy-magit-section' objects."
-;;     ;; Initial root taxy must be converted outside of the recursive loop, not possible (that I know of) to also do this within tjp/taxy-mapc as one (thereby removing the need for the entire defun this comment is in).
-;;     (let ((new-taxy (tjp/cast-taxy-to-taxy-magit-section taxy)))
-;;       (tjp/taxy-mapc (lambda (tx) (tjp/cast-taxy-to-taxy-magit-section tx)) new-taxy)
-;;       new-taxy))
-
-;;   (defun tjp/cast-taxy-to-taxy-magit-section (taxy)
-;;     "Given a single `taxy' cl-struct TAXY create and return a single
-;; `taxy-magit-section' cl-struct with the same slot values (and additionally
-;; those required by the latter)."
-;;     (if-let* (((and (taxy-p taxy) (not (taxy-magit-section-p taxy))))
-;;               (new-taxy (make-taxy-magit-section)))
-;;         ;; Convert taxy -> taxy-magit-section.
-;;         (progn
-;;           (dolist (slot (mapcar #'car (cdr (cl-struct-slot-info 'taxy))))
-;;             (setf (cl-struct-slot-value 'taxy slot new-taxy)
-;;                   (cl-struct-slot-value 'taxy slot taxy)))
-;;           ;; Override :make slot post-conversion to the correct function.
-;;           (setf (slot-value new-taxy 'make) #'make-taxy-magit-section)
-;;           new-taxy)
-;;       ;; Nothing to do, already a taxy-magit-section.
-;;       taxy))
-;; )
-  
 
 ;; (use-package org-ql
 ;;   :ensure

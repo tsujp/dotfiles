@@ -5,6 +5,9 @@
 	name = Jordan Ellis Coppard
 	email = jc+git@wz.ht
 
+[github]
+	user = tsujp
+
 [commit]
 	gpgsign = true
 
@@ -37,6 +40,7 @@
 	p = push
 	pu = push -u origin HEAD
 	c = commit
+	cs = commit --signoff
 	cm = commit -m
 	ca = commit -a
 	b = branch

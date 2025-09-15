@@ -1,5 +1,12 @@
 ;;; init.el -*- lexical-binding: t -*-
 
+;; (setopt use-package-compute-statistics t)
+;; (profiler-start 'cpu)
+;; (trace-function 'emacs-repository-version-git)
+;; (trace-function 'emacs-repository-branch-git)
+;; (debug-on-entry 'emacs-repository-branch-git)
+;; (debug-on-entry 'emacs-repository-version-git)
+
 ;;; Commentary
 
 ;; This is the main initialisation point for Emacs; default packages are available now so any
@@ -78,6 +85,7 @@
   :custom
   ;; No second case-insensitive pass over `auto-mode-alist'.
   (auto-mode-case-fold nil)
+    (recentf-show-messages nil)
 
   ;; Remove case sensitivity from general completions.
   (completion-ignore-case t)
@@ -464,12 +472,14 @@
 
 (use-package autorevert
   :ensure nil
-  ;; JORDAN TODO: It seems enabling global-auto-revert-mode has a race condition with tramp.
-  :hook (after-init . global-auto-revert-mode)
   :custom
   (auto-revert-check-vc-info t)
   (auto-revert-remote-files t)
-  (auto-revert-avoid-polling t))
+  (auto-revert-avoid-polling t)
+  :config
+  ;; TODO: global-auto-revert-mode might have a race condition with Tramp?
+  ;; Required here as after-init with Elpaca and Magit leads to Magit not seeing global-auto-revert-mode as enabled.
+  (global-auto-revert-mode))
   ;; :config
   ;; (setq-default
   ;;  ;; TODO: Maybe want to set `global-auto-revert-non-file-buffers' to `t' but maybe not. Could lead to a lot of revert spamming, look into that later.
@@ -643,6 +653,33 @@
 
 ;; Wait for Elpaca to bootstrap (if appropriate)
 (elpaca-wait)
+
+;; (use-package compile-angel
+;;   :ensure t
+;;   :demand t
+;;   :config
+;;   ;; Set `compile-angel-verbose' to nil to disable compile-angel messages.
+;;   ;; (When set to nil, compile-angel won't show which file is being compiled.)
+;;   (setq compile-angel-verbose t)
+
+;;   ;; Uncomment the line below to compile automatically when an Elisp file is saved
+;;   ;; (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
+
+;;   ;; The following directive prevents compile-angel from compiling your init
+;;   ;; files. If you choose to remove this push to `compile-angel-excluded-files'
+;;   ;; and compile your pre/post-init files, ensure you understand the
+;;   ;; implications and thoroughly test your code. For example, if you're using
+;;   ;; the `use-package' macro, you'll need to explicitly add:
+;;   ;; (eval-when-compile (require 'use-package))
+;;   ;; at the top of your init file.
+;;   (push "/init.el" compile-angel-excluded-files)
+;;   (push "/early-init.el" compile-angel-excluded-files)
+
+;;   ;; A global mode that compiles .el files before they are loaded
+;;   ;; using `load' or `require'.
+;;   (compile-angel-on-load-mode 1))
+
+
 
 ;;;; Theme
 
@@ -874,6 +911,8 @@
   ;; :custom
   ;; TODO: How to disable these, or perhaps only show them while a key combo is being pressed (i.e. not toggle, but while holding).
   ;; (meow-expand-hint-counts '((word . 3) (line . 3) (block . 3) (find . 3) (till . 3)))
+  :custom
+  (meow-use-clipboard t)          ; Keep in-sync with select-enable-clipboard until #543 fixed.
   :config
   (meow-setup)
   (setq meow-use-enhanced-selection-effect t)
@@ -956,7 +995,7 @@
   ;; Although one would have to wait for vertico to be loaded, here use-package does that for us.
   (:map vertico-map
         ("C-<backspace>" . #'vertico-directory-delete-word))
-  ;; TODO: Here and for other packages `:hook (after-init . vertico-mode)` isn't executing? The fuck? Why?
+  ;; TODO: Here and for other packages `:hook (elpaca-after-init . vertico-mode)` isn't executing? The fuck? Why?
   ;; Because of that have to move to `:config` form.
   :custom
   (vertico-count 6)) ; maximum number of candidates to show
@@ -997,10 +1036,14 @@
 (use-package magit
   :defer 0.5
   :ensure
+  :after autorevert
   :custom
   ;; TODO: Have this set from executable-find, or maybe even https://www.gnu.org/software/emacs/manual/html_node/use-package/use_002dpackage_002densure_002dsystem_002dpackage.html
   (magit-git-executable "/opt/local/bin/git")
-  (magit-no-message '("Turning on magit-auto-revert-mode"))
+
+  ;; See configuration for autorevert, now magit-auto-revert-mode is properly disabled.
+  ;; (magit-auto-revert-mode nil)
+  ;; (magit-no-message '("Turning on magit-auto-revert-mode"))
   :config
   ;; prepare the arguments
   (setq dotfiles-git-dir (concat "--git-dir=" (expand-file-name "~/.dotfiles.git")))
@@ -1249,7 +1292,7 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 
 (use-package tab-bar
   :ensure nil
-  :hook (after-init . tab-bar-mode)
+  :hook (elpaca-after-init . tab-bar-mode)
   ;; XXX: use-package :custom-face expands to applying over #'face-spec-set which states it also defines the face name if not already done so we can do this instead of :config and calling defface.
   :custom-face
   ;; TODO: #efef00 is yellow-intense from modus themes
@@ -1627,13 +1670,6 @@ under the heading LINK resolves to."
 ;; TODO: Yes but not always visible, would like a way to toggle display this.
 ;; (setq flymake-show-diagnostics-at-end-of-line t)
 
-;; TEMPORARY install transient from github head until 0.7.5 is in main emacs
-(use-package transient
-  :ensure
-  :defer 1)
-;; END TEMPORARY
-
-
 ;; TODO: Move elsewhere as appropriate.
 (use-package flymake
   :ensure nil
@@ -1645,12 +1681,14 @@ under the heading LINK resolves to."
 
 (use-package org
   :ensure
-  ;; :ensure nil
   :defer 1
   :custom
   ;; Show the options in the minibuffer and not a seperate window.
   (org-use-fast-todo-selection 'expert)
-  (org-log-done t))
+  (org-log-done t)
+  (org-clock-persist 'history)
+  :config
+  (org-clock-persistence-insinuate))
 ;; (org-log-into-drawer “LOGBOOK”))
 
 ;; (aset glyphless-char-display #xea87 "X")
@@ -1705,7 +1743,7 @@ test file."
 
 ;; (require 'org-inlinetask)
 
-(setq org-indent-indentation-per-level 1)
+;; (setq org-indent-indentation-per-level 1)
 
 (use-package popper
   :ensure
@@ -2003,6 +2041,7 @@ the project list."
 
 (use-package tramp
   :ensure nil
+  :defer 1
   :config
   (setq tramp-verbose 0)
 
@@ -2201,57 +2240,57 @@ the project list."
 ;; END temp remote formatting experiment.
 
 ;; TODO: Temp, place elsewhere format blah blah.
-(use-package taxy
-  :ensure
-  :defer 1)
+;; (use-package taxy
+;;   :ensure
+;;   :defer 1)
 
-(use-package taxy-magit-section
-  :ensure
-  :defer 1
-  :config
+;; (use-package taxy-magit-section
+;;   :ensure
+;;   :defer 1
+;;   :config
 
-  ;; Until https://github.com/alphapapa/taxy.el/pull/15 and so is fixed upstream these are required.
+;;   ;; Until https://github.com/alphapapa/taxy.el/pull/15 and so is fixed upstream these are required.
   
-  (defun tjp/taxy-mapc (fn taxy)
-    "Given a function FN and a `taxy' or `taxy-magit-section' cl-struct TAXY,
-recursively apply FN to all descendant taxys. TAXY's descendants are
-destructively mutated if FN does so. If the root taxy of TAXY must be
-mutated this must be done outside of this defun."
-    (cl-loop for sub-taxy in-ref (taxy-taxys taxy)
-             do
-             (setf sub-taxy (funcall fn sub-taxy))
-             (tjp/taxy-mapc fn sub-taxy)))
+;;   (defun tjp/taxy-mapc (fn taxy)
+;;     "Given a function FN and a `taxy' or `taxy-magit-section' cl-struct TAXY,
+;; recursively apply FN to all descendant taxys. TAXY's descendants are
+;; destructively mutated if FN does so. If the root taxy of TAXY must be
+;; mutated this must be done outside of this defun."
+;;     (cl-loop for sub-taxy in-ref (taxy-taxys taxy)
+;;              do
+;;              (setf sub-taxy (funcall fn sub-taxy))
+;;              (tjp/taxy-mapc fn sub-taxy)))
 
-  (defun tjp/to-taxy-magit-section (taxy)
-    "Given a cl-struct TAXY convert it's root taxy and all descendant taxys
-from `taxy' objects to `taxy-magit-section' objects."
-    ;; Initial root taxy must be converted outside of the recursive loop, not possible (that I know of) to also do this within tjp/taxy-mapc as one (thereby removing the need for the entire defun this comment is in).
-    (let ((new-taxy (tjp/cast-taxy-to-taxy-magit-section taxy)))
-      (tjp/taxy-mapc (lambda (tx) (tjp/cast-taxy-to-taxy-magit-section tx)) new-taxy)
-      new-taxy))
+;;   (defun tjp/to-taxy-magit-section (taxy)
+;;     "Given a cl-struct TAXY convert it's root taxy and all descendant taxys
+;; from `taxy' objects to `taxy-magit-section' objects."
+;;     ;; Initial root taxy must be converted outside of the recursive loop, not possible (that I know of) to also do this within tjp/taxy-mapc as one (thereby removing the need for the entire defun this comment is in).
+;;     (let ((new-taxy (tjp/cast-taxy-to-taxy-magit-section taxy)))
+;;       (tjp/taxy-mapc (lambda (tx) (tjp/cast-taxy-to-taxy-magit-section tx)) new-taxy)
+;;       new-taxy))
 
-  (defun tjp/cast-taxy-to-taxy-magit-section (taxy)
-    "Given a single `taxy' cl-struct TAXY create and return a single
-`taxy-magit-section' cl-struct with the same slot values (and additionally
-those required by the latter)."
-    (if-let* (((and (taxy-p taxy) (not (taxy-magit-section-p taxy))))
-              (new-taxy (make-taxy-magit-section)))
-        ;; Convert taxy -> taxy-magit-section.
-        (progn
-          (dolist (slot (mapcar #'car (cdr (cl-struct-slot-info 'taxy))))
-            (setf (cl-struct-slot-value 'taxy slot new-taxy)
-                  (cl-struct-slot-value 'taxy slot taxy)))
-          ;; Override :make slot post-conversion to the correct function.
-          (setf (slot-value new-taxy 'make) #'make-taxy-magit-section)
-          new-taxy)
-      ;; Nothing to do, already a taxy-magit-section.
-      taxy))
-)
+;;   (defun tjp/cast-taxy-to-taxy-magit-section (taxy)
+;;     "Given a single `taxy' cl-struct TAXY create and return a single
+;; `taxy-magit-section' cl-struct with the same slot values (and additionally
+;; those required by the latter)."
+;;     (if-let* (((and (taxy-p taxy) (not (taxy-magit-section-p taxy))))
+;;               (new-taxy (make-taxy-magit-section)))
+;;         ;; Convert taxy -> taxy-magit-section.
+;;         (progn
+;;           (dolist (slot (mapcar #'car (cdr (cl-struct-slot-info 'taxy))))
+;;             (setf (cl-struct-slot-value 'taxy slot new-taxy)
+;;                   (cl-struct-slot-value 'taxy slot taxy)))
+;;           ;; Override :make slot post-conversion to the correct function.
+;;           (setf (slot-value new-taxy 'make) #'make-taxy-magit-section)
+;;           new-taxy)
+;;       ;; Nothing to do, already a taxy-magit-section.
+;;       taxy))
+;; )
   
 
-(use-package org-ql
-  :ensure
-  :defer 1)
+;; (use-package org-ql
+;;   :ensure
+;;   :defer 1)
 ;; END: temp
 
 ;; If instrumenting Emacs startup behaviour.
@@ -2263,8 +2302,7 @@ those required by the latter)."
 
 (use-package eglot
   :ensure nil
-  :defer 1
-  )
+  :defer 1)
 
 ;; Needed so Eglot finds the correct project root where I have that noir submodule within the tree_sitter_noir project, otherwise Eglot thinks the tree_sitter_noir folder (containing a .git folder) is the root for the purpose of LSP.
 (setopt project-vc-extra-root-markers '("Cargo.toml"))
@@ -2302,7 +2340,7 @@ those required by the latter)."
 ;; So I can undo borked window layout changes if they hapen.
 (use-package winner
   :ensure nil
-  :hook (after-init . winner-mode))
+  :hook (elpaca-after-init . winner-mode))
 
 (use-package recentf
   :ensure nil
@@ -2343,8 +2381,9 @@ those required by the latter)."
 
 (use-package ultra-scroll
   :ensure (:host github :repo "jdtsmith/ultra-scroll")
+  :defer 0.5
   ;; TODO: Calling it from a hook isn't working?
-  ;; :hook (after-init . ultra-scroll-mode)
+  ;; :hook (elpaca-after-init . ultra-scroll-mode)
   :custom
   (ultra-scroll-hide-cursor 0.05)
   (ns-use-mwheel-momentum t)
@@ -2391,18 +2430,18 @@ Also see `prot-window-delete-popup-frame'." command)
 
 ;; emacsclient -e '(prot-window-popup-consult-buffer)'
 
-(use-package server
-  :disabled
-  :ensure nil
-  :defer 1
-  :config
-  (unless (server-running-p)
-    (server-start)))
+;; (use-package server
+;;   :disabled
+;;   :ensure nil
+;;   :defer 1
+;;   :config
+;;   (unless (server-running-p)
+;;     (server-start)))
 
 
-(use-package rsync-mode
-  :ensure
-  :defer 1)
+;; (use-package rsync-mode
+;;   :ensure
+;;   :defer 1)
 
 (defun tjp/print-path ()
   (interactive)
@@ -2411,23 +2450,23 @@ Also see `prot-window-delete-popup-frame'." command)
     (princ path-item)
     (princ "\n")))
 
-(defun tjp/refresh-env ()
-  (interactive)
-  ;; TODO: This needs to replace the existing PATH stuff, as it is it appears to append meaning lots of cruft.
-  ;; Assumes I configured exec-path-from-shell beforehand (currently true).
-  (exec-path-from-shell-initialize))
+;; (defun tjp/refresh-env ()
+;;   (interactive)
+;;   ;; TODO: This needs to replace the existing PATH stuff, as it is it appears to append meaning lots of cruft.
+;;   ;; Assumes I configured exec-path-from-shell beforehand (currently true).
+;;   (exec-path-from-shell-initialize))
 
 
 ;; TODO RSS feed stuff (probably more blogs to find and add too)
 ;;; RSS feed reading
--
--;; TODO: Tiny Tiny RSS: https://codingquark.com/emacs/2020/04/19/elfeed-protocol-ttrss.html
--;; TODO: Autotagging.
--;; TODO: Elfeed feed defintion using Org Mode since that has auto tagging and looks
--;;       to be nicer to maintain? See what Tiny Riny RSS provides first.
--;;       Source: https://lucidmanager.org/productivity/read-rss-feeds-with-emacs-and-elfeed/
--
--;;; Blog feed list
+
+;; TODO: Tiny Tiny RSS: https://codingquark.com/emacs/2020/04/19/elfeed-protocol-ttrss.html
+;; TODO: Autotagging.
+;; TODO: Elfeed feed defintion using Org Mode since that has auto tagging and looks
+;;       to be nicer to maintain? See what Tiny Riny RSS provides first.
+;;       Source: https://lucidmanager.org/productivity/read-rss-feeds-with-emacs-and-elfeed/
+
+;;; Blog feed list
 ;; -(setq blog-rss-feeds
 ;; -      (list
 ;; -       ;; People / Companies.
@@ -2468,3 +2507,42 @@ Also see `prot-window-delete-popup-frame'." command)
 ;; -  :config
 ;; -  (global-set-key (kbd "C-x w") 'elfeed)
 ;; -  (setq elfeed-feeds blog-rss-feeds))
+
+
+;; TOOD: Document this elsewhere. Poor man's easier debug-init
+ ;; ~  # open -n /Applications/MacPorts/Emacs.app --args --debug-init
+ ;; ~  # open -n /Applications/MacPorts/Emacs.app/Contents/MacOS/Emacs --args --debug-init
+
+;; (use-package forge
+;;   :ensure
+;;   :defer 1
+;;   :after magit)
+
+;; TODO: Elpaca lockfiles
+;; https://github.com/progfolio/elpaca/issues/447
+;; https://github.com/progfolio/elpaca/issues/24#issuecomment-2629569714
+;; https://github.com/progfolio/elpaca/issues/151#issuecomment-2629560507
+;; https://github.com/progfolio/elpaca/issues/151#issuecomment-2745909374
+
+;; TODO: Temp organise, clock thing from https://orgmode.org/manual/Clocking-Work-Time.html
+;; (setq org-clock-persist 'history)
+;; (org-clock-persistence-insinuate)
+
+;; TODO: Somewhere between 1bc86b17768231afcf14e9df08629088dbded428 (17) and (18) there appears to be an insane bombardment of inotify handlers being set which effectively DoS my machine.
+;; TODO: Set file-notify-debug to non-nil to see events?
+(defun tjp/auto-revert-cpu-load ()
+  (interactive)
+  (message "================== FILE NOTIFY / AUTO REVERT INFO")
+  (message "Commit: %s" emacs-repository-version)
+  (message "File notify library: %s" file-notify--library)
+  (message "Descriptor size: %s" (hash-table-size file-notify-descriptors))
+  (message "Descriptor contents: %s" file-notify-descriptors)
+  (message "Global auto revert mode on: %s" global-auto-revert-mode)
+  (message "Magit auto revert mode: %s" magit-auto-revert-mode)
+  (message "Magit version: %s" (magit-version))
+  )
+
+;; Look at magit-auto-revert-mode, is it conflicting somehow?
+;; Does calling file-notify--rm-descriptor or file-notify-rm-watch with a descriptor on 18 allow us to manually fix this?
+;; (setq elpaca-after-init-time (or elpaca-after-init-time (current-time)))
+;; (elpaca-wait)

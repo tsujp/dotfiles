@@ -5,6 +5,14 @@
 ;; (profiler-cpu-start profiler-sampling-interval)
 ;; (trace-function 'display-startup-echo-area-message)
 
+;; XXX: 2025/09/15 as of c934a4188b53e63324ef66c39dd6474728ae10d6 this isn't required anymore??
+;; (push "tramp-loaddefs.el.gz" native-comp-jit-compilation-deny-list)
+;; (push "cl-loaddefs.el.gz" native-comp-jit-compilation-deny-list)
+
+;; (message "initial options: %s" command-line-ns-option-alist)
+(setq command-line-ns-option-alist nil)
+(setq use-package-expand-minimally t)
+
 ;;; Commentary
 
 ;; The first file Emacs reads when starting up and before a frame is produced is early-init.el.
@@ -62,7 +70,7 @@
 (push '(width . 162) default-frame-alist)
 (push '(height . 60) default-frame-alist)
 (push '(internal-border-width . 5) default-frame-alist)
-;; (push '(inhibit-double-buffering . t) default-frame-alist)
+(push '(inhibit-double-buffering . t) default-frame-alist)
 
 ;; (push '(background-color . "#000000") default-frame-alist)
 
@@ -167,19 +175,31 @@ notch at the top)."
 
 ;; Avoiding inline lambdas in hooks hence a function (so hook can be removed without having to
 ;; restart emacs).
+;; (defun tjp/startup-time-printout-old ()
+;;   ;; TODO: With Elpaca do I want to somehow get a count of loaded packages after init?
+;;   (message "init done: %s (gc time: %s)" (emacs-init-time) gc-elapsed))
 (defun tjp/startup-time-printout ()
-  ;; TODO: With Elpaca do I want to somehow get a count of loaded packages after init?
-  (message "init done: %s (gc time: %s)" (emacs-init-time) gc-elapsed))
+  (let* ((init-info (if-let* ((boundp 'elpaca-after-init-time))
+                        `("elpaca" . ,elpaca-after-init-time)
+                      `("emacs" . ,after-init-time))))
+    (message "init (%s) done: %f seconds (gc time: %s)"
+             (car init-info)
+             (float-time (time-subtract (cdr init-info)
+                                        before-init-time))
+             gc-elapsed)))
 
-(add-hook 'after-init-hook #'tjp/startup-time-printout)
+(add-hook 'elpaca-after-init-hook #'tjp/startup-time-printout)
+;; (add-hook 'elpaca-after-init-hook #'kill-emacs)
+;; (add-hook 'after-init-hook #'tjp/startup-time-printout)
 
-;; Local Variables:
-;; no-byte-compile: t
-;; no-native-compile: t
-;; no-update-autoloads: t
-;; End:
+;; TODO: Get this working such that it starts CPU profiling when called? It doesn't work currently.
+(defun tjp/bingbong-a ()
+  (funcall 'profiler-cpu-start '1000000)
+  (trace-function 'require))
+;; (add-hook 'elpaca-after-init-hook #'tjp/bingbong-a)
 
-
+;; Don't ping things that look like domain names.
+(setq ffap-machine-p-known 'reject)
 
 ;; Crude benchmarks show this reduces startup from about 0.5s to 0.43 to 0.44 so.. keep for now I guess?
 
@@ -195,3 +215,9 @@ notch at the top)."
   ;; prevent flashing an unstyled Emacs frame.
   (setq-default inhibit-redisplay t)
   (add-hook 'post-command-hook #'minimal-emacs--reset-inhibit-redisplay -100))
+
+;; Local Variables:
+;; no-byte-compile: t
+;; no-native-compile: t
+;; no-update-autoloads: t
+;; End:

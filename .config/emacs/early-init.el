@@ -6,7 +6,6 @@
 ;; (trace-function 'display-startup-echo-area-message)
 
 ;; (message "initial options: %s" command-line-ns-option-alist)
-(setq command-line-ns-option-alist nil)
 (setq use-package-expand-minimally t)
 
 ;;; Commentary
@@ -189,9 +188,9 @@ notch at the top)."
 ;; (add-hook 'after-init-hook #'tjp/startup-time-printout)
 
 ;; TODO: Get this working such that it starts CPU profiling when called? It doesn't work currently.
-(defun tjp/bingbong-a ()
-  (funcall 'profiler-cpu-start '1000000)
-  (trace-function 'require))
+;; (defun tjp/bingbong-a ()
+;;   (funcall 'profiler-cpu-start '1000000)
+;;   (trace-function 'require))
 ;; (add-hook 'elpaca-after-init-hook #'tjp/bingbong-a)
 
 ;; Don't ping things that look like domain names.
@@ -212,8 +211,3 @@ notch at the top)."
   (setq-default inhibit-redisplay t)
   (add-hook 'post-command-hook #'minimal-emacs--reset-inhibit-redisplay -100))
 
-;; Local Variables:
-;; no-byte-compile: t
-;; no-native-compile: t
-;; no-update-autoloads: t
-;; End:

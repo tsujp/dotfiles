@@ -1,18 +1,33 @@
 {
-  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.0",
+  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.1",
   "schemes" : [
     {
       "if" : {
         "device" : {
-          "vendorID" : "0x2ea8",
           "category" : "mouse",
+          "productID" : "0x2203",
           "productName" : "Xtrfy M4",
-          "productID" : "0x2203"
+          "vendorID" : "0x2ea8"
         }
       },
       "pointer" : {
-        "speed" : 0.21,
-        "disableAcceleration" : false
+        "disableAcceleration" : false,
+        "speed" : 0.21
+      }
+    },
+    {
+      "if" : {
+        "device" : {
+          "category" : "trackpad",
+          "productID" : "0x265",
+          "productName" : "Magic Trackpad",
+          "serialNumber" : "CC2142601YS0YWTA3",
+          "vendorID" : "0x5ac"
+        }
+      },
+      "pointer" : {
+        "acceleration" : 0.7475,
+        "speed" : 0.069
       }
     }
   ]

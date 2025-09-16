@@ -958,6 +958,7 @@
 ;; TODO: Config from karthinks video on vertico mode, interesting stuff.
 (use-package vertico
   :ensure
+  :defer t
   :hook (elpaca-after-init . vertico-mode)
   :bind
   ;; Generally C-DEL runs `backward-kill-word`. Directories may have names not typically associated with words, e.g. `.config` in which case it only deletes back to `.`; `vertico-directory-delete-word` would delete everything while falling back to `backward-word` (not `backward-kill-word`) for similar functionality.
@@ -983,6 +984,7 @@
 ;; TODO: Extra corfu config?
 (use-package corfu
   :ensure
+  :defer t
   :hook (elpaca-after-init . global-corfu-mode)
   :custom
   ;; TODO: Maybe not automatic? See corfu-auto-prefix or something like that.
@@ -1105,6 +1107,7 @@
 ;; TODO: `eat-kill-process' redefine and use signal instead of delete-process
 (use-package eat
   :ensure
+  :defer t
   :hook (elpaca-after-init . eat-eshell-mode)
   :init
   (add-hook 'eat-mode-hook #'disable-local-global-hl-line)
@@ -1236,12 +1239,14 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 ;; Provides syntax highlighting.
 
 (use-package just-mode
-  :ensure)
+  :ensure
+  :defer t)
 
 ;; Provides an interface to driving justfiles from Emacs.
 ;; TODO: determine executable without hardcoding?
 (use-package justl
   :ensure
+  :defer t
   :after tramp)
 ;; Looks like it asks for this in-case $PATH problems, so if we set a valid $PATH we should be fine.
 ;; :custom
@@ -1265,6 +1270,7 @@ TERMINFO-DIR should include the single-character prefix as described in term(5).
 
 (use-package tab-bar
   :ensure nil
+  :defer t
   :hook (elpaca-after-init . tab-bar-mode)
   ;; XXX: use-package :custom-face expands to applying over #'face-spec-set which states it also defines the face name if not already done so we can do this instead of :config and calling defface.
   :custom-face
@@ -1329,6 +1335,7 @@ display as the tab name. The string can be propertised."
 
 (use-package tabspaces
   :ensure
+  :defer t
   :hook (elpaca-after-init . tabspaces-mode)
   :custom
   (tabspaces-keymap-prefix "H-p")
@@ -1588,13 +1595,13 @@ under the heading LINK resolves to."
 
 ;; TODO: Move elsehwere agian.
 
-(use-package inspector
-  :ensure
-  :defer 1)
+;; (use-package inspector
+;;   :ensure
+;;   :defer 1)
 
-(use-package tree-inspector
-  :ensure
-  :defer 1)
+;; (use-package tree-inspector
+;;   :ensure
+;;   :defer 1)
 
 ;; END TODO.
 
@@ -1853,7 +1860,7 @@ relative to the project root that contains it (if any)."
 
 (use-package htmlize
   :ensure
-  :defer 1)
+  :defer t)
 
 ;; XXX: Might have to ask on IRC for this one, I don't see anything in project.el or files.el
 ;; TODO: Have project.el or some .dir-locals.el logic to mark a directory (and all it's children) as read-only? Or just do this via file system attributes (i.e. outside of Emacs?). Would prefer inside since it's not really applicable to elsewhere, just want to avoid constantly being prompted in emacs when accidental edits are made. Specifically I want to mark the entire noir submodule for the treesitter project as read-only.
@@ -1868,7 +1875,7 @@ relative to the project root that contains it (if any)."
   :custom
   ;; Disable since this uses `reformatter' and results in double-format attempts as I use Apheleia instead.
   (zig-format-on-save nil)
-  :defer 1)
+  :defer t)
 
 ;; TODO: Custom TRAMP dev box connection method thing ------------------------
 

@@ -5,7 +5,7 @@
 ;; (profiler-cpu-start profiler-sampling-interval)
 ;; (trace-function 'display-startup-echo-area-message)
 
-;; (message "initial options: %s" command-line-ns-option-alist)
+
 (setq use-package-expand-minimally t)
 
 ;;; Commentary
@@ -169,23 +169,43 @@ notch at the top)."
 ;;; Startup time
 
 ;; Avoiding inline lambdas in hooks hence a function (so hook can be removed without having to
-;; restart emacs).
-;; (defun tjp/startup-time-printout-old ()
-;;   ;; TODO: With Elpaca do I want to somehow get a count of loaded packages after init?
-;;   (message "init done: %s (gc time: %s)" (emacs-init-time) gc-elapsed))
-(defun tjp/startup-time-printout ()
+;;   restart emacs).
+
+;; TODO: With Elpaca do I want to somehow get a count of loaded packages after init?
+(defvar tjp/init-gc-elapsed nil)
+(defun tjp/startup-time (&optional fmt)
+  "Return a string giving the duration of Emacs initialisation time.
+FMT is a string to format the result using `format'. If nil, the
+default format \"init (%s) done: %f seconds (gc time: %s)\" is used."
+  (interactive)
+  (unless tjp/init-gc-elapsed
+    (setq tjp/init-gc-elapsed gc-elapsed))
   (let* ((init-info (if-let* ((boundp 'elpaca-after-init-time))
                         `("elpaca" . ,elpaca-after-init-time)
-                      `("emacs" . ,after-init-time))))
-    (message "init (%s) done: %f seconds (gc time: %s)"
-             (car init-info)
-             (float-time (time-subtract (cdr init-info)
-                                        before-init-time))
-             gc-elapsed)))
+                      `("emacs" . ,after-init-time)))
+         (str (format (or fmt "init (%s) done: %f seconds (gc time: %s)")
+                      (car init-info)
+                      (float-time (time-subtract (cdr init-info)
+                                                 before-init-time))
+                      tjp/init-gc-elapsed)))
+                      ;; gc-elapsed)))
+    (if (called-interactively-p 'interactive)
+        (message "%s" str)
+      str)))
 
-(add-hook 'elpaca-after-init-hook #'tjp/startup-time-printout)
-;; (add-hook 'elpaca-after-init-hook #'kill-emacs)
-;; (add-hook 'after-init-hook #'tjp/startup-time-printout)
+;; To prevent using a lambda in a hook (which isn't a good idea).
+(defun tjp/print-startup-time ()
+  (call-interactively #'tjp/startup-time))
+
+(add-hook 'elpaca-after-init-hook #'tjp/print-startup-time)
+
+(defun tjp/set-emacs-session-uuid ()
+  ;; Trying to use org-id-uuid directly does nothing, probably some cursed load-order.
+  ;; TODO: Should I have this as a var or as part of Emacs' environment (i.e. setenv)?
+  (defconst emacs-session-uuid (downcase (org-id-new))
+    "UUID (v4) to identify Emacs' session for the purpose of logging information
+like init time, uptime etc to persistent files"))
+(add-hook 'elpaca-after-init-hook #'tjp/set-emacs-session-uuid 90)
 
 ;; TODO: Get this working such that it starts CPU profiling when called? It doesn't work currently.
 ;; (defun tjp/bingbong-a ()

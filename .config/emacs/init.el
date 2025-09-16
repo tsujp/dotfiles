@@ -1661,7 +1661,7 @@ under the heading LINK resolves to."
 
 (use-package org
   :ensure
-  :defer 1
+  :defer t
   :custom
   ;; Show the options in the minibuffer and not a seperate window.
   (org-use-fast-todo-selection 'expert)
@@ -1739,11 +1739,15 @@ test file."
   (popper-mode +1)
   (popper-echo-mode +1))
 
-;; TODO: Put elsewhere.
+;; TODO: When trying to use org-id-uuid in my after-init hook it does.. nothing. Trying to use-package org-macs appears to do.. nothing
+;;       I must invoke (org-id-new) instead (which itself calls org-id-uuid). I dunno, ugh.
+
 ;; (require 'org-id)
 (use-package org-id
+  ;; Provided as part of org.
   :ensure nil
-  :defer 1
+  :after org
+  :defer t
   :config
   (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
 
@@ -2261,6 +2265,7 @@ the project list."
 (use-package recentf
   :ensure nil
   :custom
+  (recentf-max-saved-items 200)
   (recentf-show-messages nil))
 
 (use-package speedbar
@@ -2462,3 +2467,38 @@ Also see `prot-window-delete-popup-frame'." command)
 ;; Does calling file-notify--rm-descriptor or file-notify-rm-watch with a descriptor on 18 allow us to manually fix this?
 ;; (setq elpaca-after-init-time (or elpaca-after-init-time (current-time)))
 ;; (elpaca-wait)
+
+(defun tjp/track-emacs-init-time ()
+  "Function for after-init-hook which records Emacs' init-time to a file."
+  (with-temp-buffer
+    (insert emacs-session-uuid "\t")
+    (insert (number-to-string (time-convert (current-time) 'integer)) "\t")
+    (insert (tjp/startup-time) "\n")
+    (write-region nil nil (expand-file-name "~/prog/emacs_stats/init_times.txt") t 0)))
+
+(defun tjp/track-emacs-uptime ()
+  "Function for kill-emacs-hook which records Emacs' uptime to a file."
+  (with-temp-buffer
+    (insert emacs-session-uuid "\t")
+    (insert (emacs-uptime) "\n")
+    (write-region nil nil (expand-file-name "~/prog/emacs_stats/uptimes.txt") t 0)))
+
+;; Sometimes I have things in the scratch buffer which might be important and I restart Emacs as
+;;   I have gone on to yak-shave something when using it as my.. well.. scratch buffer. So let's
+;;   save the scratch buffer when killing Emacs just in-case.
+(defun tjp/rescue-scratch-buffer ()
+  "Function for kill-emacs-hook which saves the scratch buffer to a file."
+  (when-let* ((scratch (get-buffer "*scratch*"))
+             (save-name (concat
+                         (file-name-as-directory (expand-file-name "~/prog/emacs_stats/scratch_saves/"))
+                         "scratch_"
+                         (number-to-string (time-convert (current-time) 'integer))
+                         "_"
+                         emacs-session-uuid
+                         ".txt")))
+    (with-current-buffer scratch
+      (write-region nil nil save-name))))
+
+(add-hook 'elpaca-after-init-hook #'tjp/track-emacs-init-time 90)
+(add-hook 'kill-emacs-hook #'tjp/track-emacs-uptime)
+(add-hook 'kill-emacs-hook #'tjp/rescue-scratch-buffer)
